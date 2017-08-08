@@ -1,0 +1,63 @@
+<?php
+
+return Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig::create()
+    ->setRiskyAllowed(false)
+    ->setFinder(
+        PhpCsFixer\Finder::create()
+            ->in('src')
+            ->exclude(['tests', 'Tests', 'test', 'Test'])
+    )
+    ->setRules([
+        '@Symfony' => true,
+        'blank_line_before_return' => false,
+        'blank_line_after_opening_tag' => false,
+        'cast_spaces' => false,
+        'concat_space' => ['spacing' => 'one'],
+        'no_singleline_whitespace_before_semicolons' => false,
+        'phpdoc_align' => false,
+        'phpdoc_order' => false,
+        'phpdoc_separation' => false,
+        'phpdoc_summary' => false,
+        'phpdoc_add_missing_param_annotation' => false,
+        'pre_increment' => false,
+        'no_multiline_whitespace_before_semicolons' => false,
+        'phpdoc_to_comment' => false,
+        'phpdoc_no_alias_tag' => false,
+        'phpdoc_inline_tag' => false,
+        'ordered_imports' => false,
+        'array_syntax' => ['syntax' => 'short'],
+        'general_phpdoc_annotation_remove' => ['author', 'namespace', 'date'],
+        'header_comment' => ['header' => ''],
+        'phpdoc_no_package' => true,
+        'heredoc_to_nowdoc' => true,
+        'linebreak_after_opening_tag' => true,
+        'no_useless_return' => true,
+        'phpdoc_no_useless_inheritdoc' => true,
+        'no_useless_else' => true,
+        'semicolon_after_instruction' => true,
+        'no_empty_comment' => true,
+        'ordered_class_elements' => [
+            'use_trait',
+            'constant',
+            'property_static',
+            'property',
+            'construct',
+            'destruct',
+            'magic',
+            'method_static',
+            'method',
+        ],
+        'Paysera/php_basic_code_style_chained_method_calls' => true,
+        'Paysera/php_basic_code_style_class_constructors' => true,
+        'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
+        'Paysera/php_basic_comment_comment_styles' => true,
+        'Paysera/php_basic_comment_fluid_interface' => true,
+        'Paysera/php_basic_comment_php_doc_on_methods' => true,
+        'Paysera/php_basic_feature_checking_explicitly' => true,
+        'Paysera/php_basic_feature_comparing_to_boolean' => true,
+        'Paysera/php_basic_feature_comparing_to_null' => true,
+        'Paysera/php_basic_feature_condition_results' => true,
+        'Paysera/php_basic_feature_function_count' => true,
+        'Paysera/php_basic_feature_function_is_null' => true,
+    ])
+;

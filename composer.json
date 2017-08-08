@@ -1,0 +1,32 @@
+{
+    "name": "paysera/lib-php-cs-fixer-config",
+    "description": "PHP CS Fixer config for Paysera conventions",
+    "type": "library",
+    "require": {
+        "php": "^5.5 || ^7.0",
+        "friendsofphp/php-cs-fixer": "2.2.3",
+        "doctrine/inflector": "^1.1"
+    },
+    "require-dev": {
+        "gecko-packages/gecko-php-unit": "^2.0",
+        "phpunit/phpunit": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Paysera\\PhpCsFixerConfig\\Composer\\": "composer",
+            "Paysera\\PhpCsFixerConfig\\Config\\": "config",
+            "Paysera\\PhpCsFixerConfig\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Paysera\\PhpCsFixerConfig\\Tests\\": "tests"
+        }
+    },
+    "suggest": {
+        "paysera/lib-arcanist-php-cs-extension": "Integrates PHP CS Fixer into arcanist workflow"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
