@@ -211,7 +211,6 @@ final class FullNamesFixerTest extends AbstractFixerTestCase
             ],
             [
                 '<?php
-                declare(strict_types=1);
                 
                 namespace Paysera\BlacklistBundle\Entity;
                 
