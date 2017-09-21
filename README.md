@@ -1,4 +1,4 @@
-# lib-php-cs-fixer-config ![build-info](https://travis-ci.org/paysera/lib-php-cs-fixer-config.svg?branch=master)
+# lib-php-cs-fixer-config ![](https://travis-ci.org/paysera/lib-php-cs-fixer-config.svg?branch=master)
 Library helps to fix PHP code to conform Paysera coding standards.
 
 ## Installation
