@@ -72,8 +72,8 @@ final class VisibilityPropertiesFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
-                    protected $something; // TODO: "$something" - PhpBasic convention 3.14.2: We don’t use protected properties
-                    protected $a; // TODO: "$a" - PhpBasic convention 3.14.2: We don’t use protected properties
+                    protected $something; // TODO: "$something" - PhpBasic convention 3.14.2: We prefer use private over protected properties
+                    protected $a; // TODO: "$a" - PhpBasic convention 3.14.2: We prefer use private over protected properties
                 }',
                 '<?php
                 class Sample
@@ -87,7 +87,7 @@ final class VisibilityPropertiesFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     public $something; // TODO: "$something" - PhpBasic convention 3.14.1: We don’t use public properties
-                    protected $a; // TODO: "$a" - PhpBasic convention 3.14.2: We don’t use protected properties
+                    protected $a; // TODO: "$a" - PhpBasic convention 3.14.2: We prefer use private over protected properties
                     public static $someSomething; // TODO: "$someSomething" - PhpBasic convention 3.14.1: We don’t use public properties
                 }',
                 '<?php

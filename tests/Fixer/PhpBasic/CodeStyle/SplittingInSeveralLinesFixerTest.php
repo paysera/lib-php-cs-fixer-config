@@ -23,6 +23,73 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php class Sample {
+                    public function shouldPostFieldsBeSigned()
+                    {
+                        $mapper->mapToEntity(
+                            [
+                                \'funds_sources\' => [
+                                    \'1111\' => [
+                                        \'type\' => FundsSource::TYPE_BUY,
+                                        \'details\' => \'Bought something\',
+                                    ],
+                                    \'2222\' => [
+                                        \'type\' => FundsSource::TYPE_SELL,
+                                        \'details\' => \'Sold something\',
+                                    ],
+                                ],
+                            ]
+                        );
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php class Sample {
+                    public function shouldPostFieldsBeSigned()
+                    {
+                        return $this->getEntityManager()
+                            ->createQuery(\'SELECT t FROM WebToPayApiBundle:TransactionNotification t WHERE
+                                t.transaction = :transaction
+                                AND t.event = :event\'
+                            )
+                            ->setParameter(\'transaction\', $transaction)
+                            ->setParameter(\'event\', $event)
+                            ->getOneOrNullResult()
+                        ;
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php class Sample {
+                    public function shouldPostFieldsBeSigned($request)
+                    {
+                        return $this->clientByAccountNumber->getWithCache($accountNumber, function () use ($client, $accountNumber) {
+                            return $client->getAccountOwner($accountNumber);
+                        });
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php class Sample {
+                    public function shouldPostFieldsBeSigned($request)
+                    {
+                        $this->setLogClosure(function ($message, $context = []) use ($logger) {
+                            if ($message instanceof \Evp_Soap_Exception) {
+                                if ($message->isSenderError()) {
+                                    $logger->notice((string)$message, $context);
+                                    return;
+                                }
+                            }
+                            $logger->warning((string)$message, $context);
+                        });
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php class Sample {
                     public function shouldPostFieldsBeSigned($request)
                     {
                         if (!$this->config->get(\'disable_post_params\')
@@ -31,7 +98,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                
+
                         return false;
                     }
                 }',
@@ -44,7 +111,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                
+
                         return false;
                     }
                 }',
@@ -85,7 +152,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                         ));
                         $tokens->insertAt(++$endParenthesesIndex, new Token([T_WHITESPACE, \' \']));
                         $tokens->insertAt(++$endParenthesesIndex, new Token([T_STRING, \'null\']));
-                
+
                         $tokens->clearRange($startClearIndex, $endClearIndex);
                     }
                 }',
@@ -99,11 +166,11 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                             if ($first->getNumber() === $mainAccount->getNumber()) {
                                return -1;
                             }
-                            
+
                             if ($second->getNumber() === $mainAccount->getNumber()) {
                                return 1;
                             }
-                            
+
                             return 0;
                         });
                     }
@@ -415,7 +482,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     private function sampleFunction()
                     {
                         $a = 0;
-                
+
                         if ($a) {
                             in_array(
                                 $a,
@@ -429,7 +496,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                                 $a
                             );
                         }
-                        
+
                         $this->someFunction->dispatch(
                             Sample::SOME_CONSTANT,
                             new SomeClientClass($client, $oldCountryCode)

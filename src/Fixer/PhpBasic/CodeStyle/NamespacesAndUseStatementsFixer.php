@@ -19,10 +19,21 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         'SplFileInfo',
     ];
 
+    /**
+     * @var array
+     */
+    private $docBlockAnnotations = [
+        '@throws',
+        '@return',
+        '@returns',
+        '@param',
+        '@var',
+    ];
+
     public function getDefinition()
     {
         return new FixerDefinition(
-            'If class has a namespace, we use use statements instead of providing full namespace.
+            'If class has a namespace, we use "use" statements instead of providing full namespace.
             This applies to php-doc comments, too.
             
             Does not process namespace without root. Example: Some\Entity\Operation.
@@ -78,10 +89,6 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 $namespaceIndex = $key;
             }
 
-            if ($token->isGivenKind(T_CLASS)) {
-                $this->addClassNameException($tokens[$tokens->getNextMeaningfulToken($key)]->getContent());
-            }
-
             if ($token->isGivenKind(T_USE)) {
                 $endOfUseStatement = strtolower($tokens[$tokens->getNextTokenOfKind($key, [';']) - 1]->getContent());
                 if (!in_array($endOfUseStatement, $endOfUseStatements, true)) {
@@ -95,7 +102,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                     $key,
                     $namespaceIndex,
                     $endOfUseStatements,
-                    array_map('strtolower', $this->classNameExceptions)
+                    $this->classNameExceptions
                 );
             }
 
@@ -115,10 +122,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                     $useStatementContent .= $tokens[$i]->getContent();
                 }
 
-                if (in_array(strtolower($tokens[$classNameEndIndex]->getContent()),
-                    array_map('strtolower', $this->classNameExceptions),
-                    true
-                )) {
+                if (in_array($tokens[$classNameEndIndex]->getContent(), $this->classNameExceptions, true)) {
                     continue;
                 }
 
@@ -157,14 +161,19 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         $exceptionClassNames
     ) {
         $content = $tokens[$key]->getContent();
-        preg_match_all('#\s(\\\?[A-z0-9_\\\]*\\\(\w*))\s#', $content, $matches, 2);
+        preg_match_all(
+            '#(?<='. implode('|', $this->docBlockAnnotations) . ')\s(\\\?[A-z0-9_\\\]*\\\(\w*))\s#',
+            $content,
+            $matches,
+            PREG_SET_ORDER
+        );
         if (!isset($matches)) {
             return null;
         }
 
         foreach ($matches as $match) {
             if (isset($match[1]) && isset($match[2])) {
-                if (in_array(strtolower($match[2]), $exceptionClassNames, true)
+                if (in_array($match[2], $exceptionClassNames, true)
                     || in_array(strtolower($match[2]), $endOfUseStatements, true)
                 ) {
                     continue;
@@ -224,13 +233,5 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             }
         }
         return null;
-    }
-
-    /**
-     * @param string $className
-     */
-    private function addClassNameException($className)
-    {
-        $this->classNameExceptions[] = $className;
     }
 }

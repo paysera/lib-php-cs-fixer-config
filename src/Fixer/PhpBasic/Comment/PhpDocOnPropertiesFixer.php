@@ -79,6 +79,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                 } elseif ($tokens[$tokens->getPrevNonWhitespace($index)]->isGivenKind(T_DOC_COMMENT)) {
                     $constructFunction['DocBlock'] = $tokens[$tokens->getPrevNonWhitespace($index)]->getContent();
                 }
+                $constructFunction['Assignments'] = $this->getConstructAssignments($tokens, $key);
                 break;
             }
         }
@@ -92,18 +93,24 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
                     continue;
-                } elseif ($constructFunction !== null
+                } elseif (
+                    $constructFunction !== null
                     && !$this->isPropertyDefinedInDocBlock($property, $constructFunction)
                     && !$this->isPropertyDefinedInArguments($property, $constructFunction)
+                    && !$this->isPropertyAssignedInConstructor($property, $constructFunction)
                 ) {
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
                     continue;
                 }
             // Existing DocBlock
-            } elseif ($property !== null && isset($property['DocBlockIndex'])
-                && ($this->isPropertyDefinedInDocBlock($property, $constructFunction)
-                    || $this->isPropertyDefinedInArguments($property, $constructFunction))
+            } elseif (
+                $property !== null && isset($property['DocBlockIndex'])
+                && (
+                    $this->isPropertyDefinedInDocBlock($property, $constructFunction)
+                    || $this->isPropertyDefinedInArguments($property, $constructFunction)
+                    || $this->isPropertyAssignedInConstructor($property, $constructFunction)
+                )
                 && $tokens[$property['DocBlockIndex'] - 1]->isWhitespace()
             ) {
                 $docBlockRemovals[] = $property['DocBlockIndex'];
@@ -131,12 +138,65 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
      * @param array $constructFunction
      * @return bool
      */
+    private function isPropertyAssignedInConstructor($property, $constructFunction)
+    {
+        $propertyAssignedInConstructor =
+            isset($constructFunction['Assignments'])
+            && isset($constructFunction['Assignments'][$property['Variable']])
+        ;
+
+        $propertyHasTypehint =
+            isset($constructFunction['Assignments'][$property['Variable']])
+            && in_array(
+                $constructFunction['Assignments'][$property['Variable']],
+                $constructFunction['ConstructArguments'],
+                true
+            )
+        ;
+
+        return $propertyAssignedInConstructor && $propertyHasTypehint;
+    }
+
+    /**
+     * @param array $property
+     * @param array $constructFunction
+     * @return bool
+     */
     private function isPropertyDefinedInArguments($property, $constructFunction)
     {
         return count($constructFunction['ConstructArguments']) > 0
             && isset($property['Variable'])
             && in_array($property['Variable'], $constructFunction['ConstructArguments'], true)
         ;
+    }
+
+    /**
+     * @param Tokens $tokens
+     * @param int $constructIndex
+     * @return array
+     */
+    private function getConstructAssignments(Tokens $tokens, $constructIndex)
+    {
+        $curlyBracesStartIndex = $tokens->getNextTokenOfKind($constructIndex, ['{']);
+        $curlyBracesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBracesStartIndex);
+
+        $assignments = [];
+        for ($i = $curlyBracesStartIndex; $i < $curlyBracesEndIndex; ++$i) {
+            if (
+                $tokens[$i]->isGivenKind(T_VARIABLE)
+                && $tokens[$i]->getContent() === '$this'
+                && $tokens[$i + 1]->isGivenKind(T_OBJECT_OPERATOR)
+            ) {
+                $property = $tokens[$i + 2]->getContent();
+                while ($tokens[$i]->getContent() !== ';') {
+                    $i++;
+                }
+                $value = $tokens[$tokens->getPrevMeaningfulToken($i)]->getContent();
+                $assignments['$' . $property] = $value;
+            }
+        }
+
+        return $assignments;
     }
 
     /**

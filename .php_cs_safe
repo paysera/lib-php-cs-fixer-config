@@ -53,7 +53,6 @@ return Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig::create()
         'Paysera/php_basic_comment_comment_styles' => true,
         'Paysera/php_basic_comment_fluid_interface' => true,
         'Paysera/php_basic_comment_php_doc_on_methods' => true,
-        'Paysera/php_basic_feature_checking_explicitly' => true,
         'Paysera/php_basic_feature_comparing_to_boolean' => true,
         'Paysera/php_basic_feature_comparing_to_null' => true,
         'Paysera/php_basic_feature_condition_results' => true,

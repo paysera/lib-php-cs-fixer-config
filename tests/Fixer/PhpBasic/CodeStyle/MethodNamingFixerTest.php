@@ -26,61 +26,51 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     /**
-                     * @param string $string
                      * @return bool
                      */
-                    private function validateFunctionName($string)
-                    { // TODO: "validateFunctionName" - PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions
-                        return preg_match(\'#^__[^_]#\', $string) !== 0
-                            || (!(preg_match(\'|[^a-zA-Z]|\', substr($string, 1)) > 0)
-                            && !(preg_match(\'/^[a-z]/\', $string) === 0))
-                        ;
-                    }
-                }',
-                '<?php
-                class Sample
-                {
-                    /**
-                     * @param string $string
-                     * @return bool
-                     */
-                    private function validateFunctionName($string)
+                    private function blaBla()
                     {
-                        return preg_match(\'#^__[^_]#\', $string) !== 0
-                            || (!(preg_match(\'|[^a-zA-Z]|\', substr($string, 1)) > 0)
-                            && !(preg_match(\'/^[a-z]/\', $string) === 0))
-                        ;
+                        return true;
                     }
                 }',
+                null
             ],
             [
                 '<?php
                 class Sample
                 {
-                    private function sampleFunction()
-                    { // TODO: "sampleFunction" - PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions
+                    private function canDoSomething()
+                    {
                         return true;
                     }
-                    
+
                     /**
                      * @return bool
                      */
-                    private function anotherFunction()
-                    { // TODO: "anotherFunction" - PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions
+                    private function isReady()
+                    {
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
+                     * @return SomeObject
+                     */
+                    private function areListed()
+                    { // TODO: "areListed" - PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions
                     }
                 }',
                 '<?php
                 class Sample
                 {
-                    private function sampleFunction()
-                    {
-                        return true;
-                    }
-                    
                     /**
-                     * @return bool
+                     * @return SomeObject
                      */
-                    private function anotherFunction()
+                    private function areListed()
                     {
                     }
                 }'

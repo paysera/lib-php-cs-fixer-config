@@ -39,6 +39,19 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+                    public function deactivateWallet($walletId)
+                    {
+                        $wallet = $this->deactivateWalletNoFlush($walletId);
+                        $this->entityManager->flush();
+                        return $wallet;
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     private function getSomething()
                     {
                         $c = getNone();

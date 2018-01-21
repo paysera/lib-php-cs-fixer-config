@@ -3,6 +3,8 @@
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
@@ -13,6 +15,8 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
     const USED_COUNT = 2;
     const RETURN_COUNT = 1;
     const VALID_VARIABLE_LENGTH = 8;
+
+    private $methodsToSkip = ['flush'];
 
     public function getDefinition()
     {
@@ -55,7 +59,34 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['methods_to_skip'] === true) {
+            return;
+        }
+        if (isset($this->configuration['methods_to_skip'])) {
+            $this->methodsToSkip = $this->configuration['methods_to_skip'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $options = new FixerOptionBuilder(
+            'methods_to_skip',
+            'If methods are found to be called, then fix will not be applied.'
+        );
+
+        $options = $options
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('methods_to_skip', [$options]);
+    }
+
+    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_STRING)) {
@@ -133,6 +164,7 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
      */
     private function checkForUnnecessaryVariable(Tokens $tokens, $curlyBraceStartIndex, $curlyBraceEndIndex, $variable)
     {
+        $skipFix = false;
         for ($i = $curlyBraceStartIndex; $i <= $curlyBraceEndIndex; $i++) {
             // All variable usages
             if ($tokens[$i]->isGivenKind(T_VARIABLE)
@@ -149,12 +181,19 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
                     $variable['replacementIndex'] = $return['replacementIndex'];
                 }
             }
+            if (
+                $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
+                && in_array($tokens[$i + 1]->getContent(), $this->methodsToSkip, true)
+            ) {
+                $skipFix = true;
+            }
         }
 
         if (count($variable) === self::VALID_VARIABLE_LENGTH
             && $variable['useCount'] === self::USED_COUNT
             && $variable['returnCount'] === self::RETURN_COUNT
             && strlen($variable['content']) <= self::DEFAULT_CHARACTER_LENGTH
+            && !$skipFix
         ) {
             $this->fixUnnecessaryVariable($tokens, $variable);
         }

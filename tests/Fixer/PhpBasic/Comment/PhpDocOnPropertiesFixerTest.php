@@ -25,6 +25,19 @@ final class PhpDocOnPropertiesFixerTest extends AbstractFixerTestCase
                 '<?php
 class RefreshedTokenProvider extends GrantTypeTokenProvider
 {
+    private $someProp;
+    
+    public function __construct(
+        AutoCommit $autoCommit
+    ) {
+        $this->someProp = $autoCommit;
+    }
+}'
+            ],
+            [
+                '<?php
+class RefreshedTokenProvider extends GrantTypeTokenProvider
+{
     protected $autoCommit;
     
     public function __construct(

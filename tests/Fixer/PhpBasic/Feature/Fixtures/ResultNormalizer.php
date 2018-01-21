@@ -18,4 +18,9 @@ class ResultNormalizer implements NormalizerInterface, DenormalizerInterface
     {
         return true;
     }
+
+    public function make($something)
+    {
+
+    }
 }

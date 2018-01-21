@@ -84,20 +84,12 @@ final class ClassNamingFixerTest extends AbstractFixerTestCase
             [
                 '<?php
                 namespace WebToPay\CurrencyBundle\Service;
-                
-                // TODO: "CurrencyRepository" - PhpBasic convention 2.5.2: For services suffix has to represent the job of that service
-                
+                                
                 class CurrencyRepository implements CurrencyRepositoryInterface
                 {
                 
                 }',
-                '<?php
-                namespace WebToPay\CurrencyBundle\Service;
-                
-                class CurrencyRepository implements CurrencyRepositoryInterface
-                {
-                
-                }',
+                null,
             ],
             [
                 '<?php

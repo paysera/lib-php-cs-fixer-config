@@ -4,6 +4,8 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -14,14 +16,15 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
 {
     const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
     const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
-    const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We don’t use protected properties';
+    const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
     const VISIBILITY_CONVENTION = 'PhpBasic convention 3.14: We must define as properties';
     const THIS = '$this';
+
     /**
      * @var array
      */
-    private $extendedClassExclusions = [
-        'constraint',
+    private $excludedParents = [
+        'Constraint',
     ];
 
     public function getDefinition()
@@ -90,6 +93,33 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
         return $tokens->isAnyTokenKindsFound([T_PUBLIC, T_PRIVATE, T_PROTECTED, T_VARIABLE, T_STRING]);
     }
 
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['excluded_parents'] === true) {
+            return;
+        }
+        if (isset($this->configuration['excluded_parents'])) {
+            $this->excludedParents = $this->configuration['excluded_parents'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $options = new FixerOptionBuilder(
+            'excluded_parents',
+            'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties'
+        );
+
+        $options = $options
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('excluded_parents', [$options]);
+    }
+
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         $propertyExclusion = false;
@@ -119,8 +149,8 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
                     $classNameToken = $tokens->getNextTokenOfKind($key, [[T_STRING]]);
                     if (isset($classNameToken)
                         && in_array(
-                            strtolower($tokens[$classNameToken]->getContent()),
-                            array_map('strtolower', $this->extendedClassExclusions),
+                            $tokens[$classNameToken]->getContent(),
+                            $this->excludedParents,
                             true
                         )
                         && $tokens[$classNameToken + 1]->isWhitespace()

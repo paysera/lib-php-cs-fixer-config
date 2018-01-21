@@ -3,6 +3,8 @@
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -23,6 +25,7 @@ final class ClassNamingFixer extends AbstractFixer
         'Plugin',
         'Proxy',
         'Interface',
+        'Repository',
     ];
 
     /**
@@ -73,6 +76,36 @@ final class ClassNamingFixer extends AbstractFixer
     public function isCandidate(Tokens $tokens)
     {
         return $tokens->isTokenKindFound(T_CLASS);
+    }
+
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['service_suffixes'] === true) {
+            return;
+        }
+        if (isset($this->configuration['service_suffixes']['valid'])) {
+            $this->validServiceSuffixes = $this->configuration['service_suffixes']['valid'];
+        }
+        if (isset($this->configuration['service_suffixes']['invalid'])) {
+            $this->invalidSuffixes = $this->configuration['service_suffixes']['invalid'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $suffixes = new FixerOptionBuilder(
+            'service_suffixes',
+            'Set valid and invalid suffixes for Class names.'
+        );
+
+        $suffixes = $suffixes
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('service_suffixes', [$suffixes]);
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)

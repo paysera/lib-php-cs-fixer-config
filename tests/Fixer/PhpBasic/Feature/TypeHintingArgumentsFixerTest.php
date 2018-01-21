@@ -3,7 +3,7 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingArgumentsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use PhpCsFixer\Tests\Test\AbstractFixerTestCase;
 
 final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
 {
@@ -16,6 +16,17 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
     public function testFix($expected, $input = null)
     {
         $this->doTest($expected, $input);
+    }
+
+    /**
+     * @param string $expected
+     * @param \SplFileInfo $file
+     *
+     * @dataProvider provideFileCases
+     */
+    public function testFixFiles($expected, \SplFileInfo $file)
+    {
+        $this->doTest($expected, null, $file);
     }
 
     public function provideCases()
@@ -84,7 +95,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                     /**
                      * Updates location
                      *
-                     * @param                                                                                          $locationId
+                     * @param $locationId
                      * @param ConcreteLocation $location
                      *
                      * @throws \Paysera\Bundle\RestBundle\Exception\ApiException
@@ -125,7 +136,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                     /**
                      * @param ValueClass|null $value
                      */
-                    public function setValue(ValueClass $value)
+                    public function setValue(ValueClass $value = null)
                     {
                  
                     }
@@ -157,6 +168,61 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                     public function persistRecipient(PushRecipient $recipient, array $parameters);
                 }',
                 null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
+                     * @param resource $resource
+                     */
+                    public function setResource($resource)
+                    {
+                    }
+                }',
+                null,
+            ],
+        ];
+    }
+
+    public function provideFileCases()
+    {
+        return [
+            [
+                '<?php
+                
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures;
+
+                class DummyChild extends DummyParent
+                {
+                    /**
+                     * Sets application
+                     *
+                     * @param \ArrayAccess $application
+                     */
+                    public function setApplication($application)
+                    {
+                        $this->application = $application;
+                    }
+                }',
+                new \SplFileInfo(__DIR__ . '/Fixtures/DummyChild.php')
+            ],
+            [
+                '<?php
+                
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures;
+
+                class ImplementingClass implements DenormalizerInterface
+                {
+                    /**
+                     * @param \SplFileInfo $something
+                     */
+                    public function make($something)
+                    {
+                        $something->getType();
+                    }
+                }',
+                new \SplFileInfo(__DIR__ . '/Fixtures/ImplementingClass.php')
             ],
         ];
     }

@@ -3,6 +3,8 @@
 namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
 
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -12,6 +14,16 @@ final class FileSideEffectsFixer extends AbstractFixer
 {
     const CONVENTION = '/* TODO: A file should declare new symbols (classes, functions, constants, etc.)
     and cause no other side effects, or it should execute logic with side effects, but should not do both. */';
+
+    /**
+     * @var array
+     */
+    private $forbiddenFunctions = ['print_r', 'var_dump', 'ini_set'];
+
+    /**
+     * @var array
+     */
+    private $forbiddenTokens = [T_INCLUDE, T_ECHO];
 
     public function getDefinition()
     {
@@ -62,6 +74,36 @@ final class FileSideEffectsFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['side_effects'] === true) {
+            return;
+        }
+        if (isset($this->configuration['side_effects']['functions'])) {
+            $this->forbiddenFunctions = $this->configuration['side_effects']['functions'];
+        }
+        if (isset($this->configuration['side_effects']['tokens'])) {
+            $this->forbiddenTokens = $this->configuration['side_effects']['tokens'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $sideEffects = new FixerOptionBuilder(
+            'side_effects',
+            'Set forbidden functions and tokens, e.g. `["functions" => ["print_r"], "tokens" => [T_ECHO]]`.'
+        );
+
+        $sideEffects = $sideEffects
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('side_effects', [$sideEffects]);
+    }
+
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         $sideEffects = 0;
@@ -105,10 +147,11 @@ final class FileSideEffectsFixer extends AbstractFixer
      */
     private function countSideEffects(Token $token, Token $bracketToken)
     {
-        if ($token->isGivenKind(T_STRING)
-            && in_array($token->getContent(), ['print_r', 'var_dump', 'ini_set'], true)
+        if (
+            $token->isGivenKind(T_STRING)
+            && in_array($token->getContent(), $this->forbiddenFunctions, true)
             && $bracketToken->equals('(')
-            || $token->isGivenKind([T_INCLUDE, T_ECHO])
+            || $token->isGivenKind($this->forbiddenTokens)
         ) {
             return 1;
         }
