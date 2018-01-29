@@ -74,12 +74,16 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])) {
-                if ($tokens[$key + 1]->isWhitespace() && strpos($tokens[$key + 1]->getContent(), "\n") !== false) {
+                if (
+                    $tokens[$key + 1]->isWhitespace()
+                    && strpos($tokens[$key + 1]->getContent(), "\n") !== false
+                ) {
                     $indent = $tokens[$key + 1]->getContent();
                     $tokens[$key + 1]->setContent(' ');
                 }
 
-                if (isset($indent)
+                if (
+                    isset($indent)
                     && $tokens[$key - 1]->isWhitespace()
                     && strpos($tokens[$key - 1]->getContent(), "\n") === false
                 ) {
@@ -87,7 +91,10 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
                 }
             }
 
-            if ($token->equals('(') && $tokens[$key - 1]->isGivenKind([T_STRING, T_ARRAY])) {
+            if (
+                $token->equals('(')
+                && $tokens[$tokens->getPrevNonWhitespace($key)]->isGivenKind([T_STRING, T_ARRAY])
+            ) {
                 $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key);
 
                 $whitespaceToken = $this->checkForArgumentSplits($tokens, $key, $parenthesesEndIndex);
@@ -113,7 +120,10 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     {
         for ($i = $startIndex; $i < $endIndex; ++$i) {
             // Skipping this function if argument splits belongs to another function
-            if ($tokens[$i + 1]->equals('(') && $tokens[$i]->isGivenKind([T_STRING, T_ARRAY, T_FUNCTION])) {
+            if (
+                $tokens[$tokens->getNextNonWhitespace($i)]->equals('(')
+                && $tokens[$i]->isGivenKind([T_STRING, T_ARRAY, T_FUNCTION])
+            ) {
                 return null;
             }
 
@@ -205,8 +215,11 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
                 }
             }
         }
-        // Removing additional indent which was added earlier
-        $indent = preg_replace('/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/', '', $indent, 1);
+
+        if (strpos($tokens[$startIndex]->getContent(), "\n") === 0) {
+            // Removing 4 spaces if regular open brace had no newline before it
+            $indent = preg_replace('/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/', '', $indent, 1);
+        }
 
         if ($tokens[$endIndex]->isWhitespace()) {
             $tokens[$endIndex]->setContent($indent);

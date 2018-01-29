@@ -2,7 +2,7 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures;
 
-interface DenormalizerInterface
+class DummyParent
 {
-    public function make($something);
+    protected $application;
 }

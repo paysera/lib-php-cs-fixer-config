@@ -52,6 +52,11 @@ final class CheckingExplicitlyFixer extends AbstractFixer
         return 'Paysera/php_basic_feature_checking_explicitly';
     }
 
+    public function isRisky()
+    {
+        return true;
+    }
+
     public function isCandidate(Tokens $tokens)
     {
         return $tokens->isTokenKindFound(T_STRING);

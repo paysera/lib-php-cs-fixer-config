@@ -3,6 +3,8 @@
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -14,6 +16,11 @@ final class TypeHintingFixer extends AbstractFixer
     const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
     const CONSTRUCT = '__construct';
     const THIS = '$this';
+
+    /**
+     * @var array
+     */
+    private $exceptions = ['EntityManager'];
 
     public function getDefinition()
     {
@@ -81,7 +88,34 @@ final class TypeHintingFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['exceptions'] === true) {
+            return;
+        }
+        if (isset($this->configuration['exceptions'])) {
+            $this->exceptions = $this->configuration['exceptions'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $options = new FixerOptionBuilder(
+            'exceptions',
+            'Sets the exceptions for which usage of narrowest interface could be skipped.'
+        );
+
+        $options = $options
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('exceptions', [$options]);
+    }
+
+    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         $useStatements = [];
         $constructClassProperties = [];
@@ -142,6 +176,9 @@ final class TypeHintingFixer extends AbstractFixer
 
         foreach ($useStatements as $useStatement) {
             foreach ($constructClassProperties as $key => $constructClassProperty) {
+                if (in_array($key, $this->exceptions, true)) {
+                    continue;
+                }
                 if (!preg_match('#' . $key . '$#', $useStatement)) {
                     continue;
                 }

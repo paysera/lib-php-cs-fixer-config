@@ -31,7 +31,7 @@ class Sample
      * @var AccountInfo not persisted to database
      */
     protected $accountInfo;
-    
+
     /**
      * Gets accountInfo
      *
@@ -54,7 +54,7 @@ class Sample
      * @var Wallet\AccountInfo not persisted to database
      */
     protected $accountInfo;
-    
+
     /**
      * Gets accountInfo
      *
@@ -144,7 +144,8 @@ class Sample
             return 0;
         }
     }
-}', '<?php
+}',
+                '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic;
 
 class Sample
@@ -164,6 +165,48 @@ class Sample
         }
     }
 }',
+            ],
+            [
+                '<?php
+namespace WebToPay\ApiBundle\Entity\PendingPayment;
+
+/**
+ * PasswordPendingPayment
+ *
+ * @author Vytautas Gimbutas <vytautas@gimbutas.net>
+ * @package WebToPay\ApiBundle\Entity\PendingPayment
+ */
+class PasswordPendingPayment extends PendingPayment
+{
+}',
+null
+            ],
+            [
+                '<?php
+namespace WebToPay\ApiBundle\Entity\PendingPayment;
+use WebToPay\ApiBundle\Entity\PendingPayment;
+
+class PasswordPendingPayment extends PendingPayment
+{
+    /**
+     * @param PendingPayment $a
+     */
+    public function asdasd($a)
+    {
+    }
+}',
+                '<?php
+namespace WebToPay\ApiBundle\Entity\PendingPayment;
+
+class PasswordPendingPayment extends PendingPayment
+{
+    /**
+     * @param WebToPay\ApiBundle\Entity\PendingPayment $a
+     */
+    public function asdasd($a)
+    {
+    }
+}'
             ],
         ];
     }

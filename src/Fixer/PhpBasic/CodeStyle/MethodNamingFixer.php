@@ -132,13 +132,16 @@ final class MethodNamingFixer extends AbstractFixer
                     $docBlockIndex = $tokens->getPrevNonWhitespace($index);
                 }
 
-                $valid = !preg_match('#^' . implode('|', $this->validBoolFunctionPrefixes) . '#', $functionName);
+                $shouldReturnBool = preg_match(
+                    '#^' . implode('|', $this->validBoolFunctionPrefixes) . '#',
+                    $functionName
+                );
 
-                if ($docBlockIndex !== null
-                    && preg_match('#@return\s.*(boolean|bool)#', $tokens[$docBlockIndex]->getContent())
-                    && $valid
-                ) {
-                    $this->insertComment($tokens, $curlyBraceStartIndex, $functionName, self::BOOL_FUNCTION);
+                if ($docBlockIndex !== null) {
+                    $returnsBool = preg_match('#@return\s.*(boolean|bool)#', $tokens[$docBlockIndex]->getContent());
+                    if ($shouldReturnBool && !$returnsBool) {
+                        $this->insertComment($tokens, $curlyBraceStartIndex, $functionName, self::BOOL_FUNCTION);
+                    }
                 } else {
                     $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
                     for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
@@ -147,8 +150,8 @@ final class MethodNamingFixer extends AbstractFixer
                         }
                         $nextTokenValue = strtolower($tokens[$tokens->getNextMeaningfulToken($i)]->getContent());
                         if ($tokens[$i]->isGivenKind(T_RETURN)
-                            && ($nextTokenValue === self::TRUE || $nextTokenValue === self::FALSE)
-                            && $valid
+                            && !in_array($nextTokenValue, [self::TRUE, self::FALSE], true)
+                            && $shouldReturnBool
                         ) {
                             $this->insertComment($tokens, $curlyBraceStartIndex, $functionName, self::BOOL_FUNCTION);
                             break;

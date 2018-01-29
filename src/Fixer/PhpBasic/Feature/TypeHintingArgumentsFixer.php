@@ -2,6 +2,7 @@
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
+use Paysera\PhpCsFixerConfig\Util\InheritanceHelper;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
@@ -31,6 +32,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         'int',
         'integer',
         'string',
+        'resource',
     ];
 
     public function getDefinition()
@@ -96,11 +98,50 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                     $docBlockIndex = $tokens->getPrevNonWhitespace($index);
                 }
 
-                if ($docBlockIndex !== null) {
+                if (
+                    $docBlockIndex !== null
+                    && !$this->methodCallsInheritedProperty($functionTokenIndex, $tokens)
+                    && !$this->methodImplementedFromInterface($functionTokenIndex, $tokens)
+                ) {
                     $this->validateObjectArguments($tokens, $docBlockIndex, $key + 1, $parenthesesEndIndex);
                 }
             }
         }
+    }
+
+    /**
+     * @param int $functionTokenIndex
+     * @param Tokens $tokens
+     * @return bool
+     */
+    private function methodImplementedFromInterface($functionTokenIndex, Tokens $tokens)
+    {
+        $method = $tokens[$tokens->getNextNonWhitespace($functionTokenIndex)];
+        return InheritanceHelper::isMethodFromInterface($method->getContent(), $tokens);
+    }
+
+    /**
+     * @param int $functionTokenIndex
+     * @param Tokens $tokens
+     * @return bool
+     */
+    private function methodCallsInheritedProperty($functionTokenIndex, Tokens $tokens)
+    {
+        $objectOperators = $tokens->findGivenKind(T_OBJECT_OPERATOR, $functionTokenIndex);
+        if (count($objectOperators) === null) {
+            return false;
+        }
+        foreach ($objectOperators as $key => $objectOperator) {
+            $varIndex = $tokens->getPrevNonWhitespace($key);
+            if ($varIndex !== null && $tokens[$varIndex]->getContent() === '$this') {
+                $property = $tokens[$tokens->getNextNonWhitespace($varIndex + 1)];
+                if (InheritanceHelper::isPropertyInherited($property->getContent(), $tokens)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -140,6 +181,16 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
                         $tokens->insertAt($i, new Token([T_STRING, $argumentType]));
                         $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
+                    }
+
+                    if ($nullFound) {
+                        $variables = $tokens->findGivenKind(T_VARIABLE);
+                        $variablePosition = key($variables);
+
+                        $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
+                        $tokens->insertAt(++$variablePosition, new Token('='));
+                        $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
+                        $tokens->insertAt(++$variablePosition, new Token([T_STRING, 'null']));
                     }
                     break;
                 }
