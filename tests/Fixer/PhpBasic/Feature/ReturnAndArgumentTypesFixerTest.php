@@ -27,6 +27,22 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 class UserAvatarMapper implements NormalizerInterface
                 {
                     /**
+                     * @param SomeClass[]|ArrayCollection $something
+                     * @return SomeClass[]|ArrayCollection
+                     */
+                    private function doSomething($something)
+                    {
+                    
+                    }                   
+                }',
+                null,
+            ],
+            [
+                '<?php
+                namespace WebToPay\ApiBundle\Repository;
+                class UserAvatarMapper implements NormalizerInterface
+                {
+                    /**
                      * Finds active allowance for project and wallet
                      *
                      * @param Location       $location

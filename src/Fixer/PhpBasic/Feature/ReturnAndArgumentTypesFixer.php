@@ -7,6 +7,8 @@ use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\DocBlock\Line;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -21,9 +23,6 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     const ENTITY = 'Entity';
     const REPOSITORY = 'Repository';
 
-    /**
-     * @var array
-     */
     private $scalarTypes = [
         'array',
         'callable',
@@ -35,6 +34,10 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         'string',
     ];
 
+    private $whitelist = [
+        'ArrayCollection',
+    ];
+
     /**
      * @var array
      */
@@ -43,6 +46,33 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         T_DNUMBER,
         T_LNUMBER,
     ];
+
+    public function configure(array $configuration = null)
+    {
+        parent::configure($configuration);
+
+        if ($this->configuration['exceptions'] === true) {
+            return;
+        }
+        if (isset($this->configuration['exceptions']['whitelist'])) {
+            $this->whitelist = $this->configuration['exceptions']['whitelist'];
+        }
+    }
+
+    protected function createConfigurationDefinition()
+    {
+        $exceptions = new FixerOptionBuilder(
+            'exceptions',
+            'Set Classes which presence in return or parameter definition will not trigger Fixer.'
+        );
+
+        $exceptions = $exceptions
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
+        ;
+
+        return new FixerConfigurationResolverRootless('exceptions', [$exceptions]);
+    }
 
     // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
     private static function getPassingIdNamespaceExclusions()
@@ -221,6 +251,7 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
             $selfFound = in_array('self', $types, true);
             $thisFound = in_array('$this', $types, true);
             $mixedFound = in_array('mixed', $types, true);
+            $whitelisted = count(array_intersect($this->whitelist, $types)) > 0;
             $intFound = (bool)array_intersect(['int', 'integer'], $scalarTypesFound);
 
             if ($scalarTypesCount > 1
@@ -248,8 +279,10 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
             }
 
             if ($scalarTypesCount === 0
-                && (($typeCount > 1 && !$nullFound && !$selfFound && !$thisFound && !$mixedFound)
-                    || ($typeCount > 2 && ($nullFound || $selfFound || $thisFound || $mixedFound)))
+                && (
+                    ($typeCount > 1 && !$nullFound && !$selfFound && !$thisFound && !$mixedFound && !$whitelisted)
+                    || ($typeCount > 2 && ($nullFound || $selfFound || $thisFound || $mixedFound || $whitelisted))
+                )
             ) {
                 $this->insertReturnAnnotationWarning(
                     $tokens,

@@ -37,6 +37,21 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     /**
+                     * @param int|null $constraint
+                     */
+                    public function validate($constraint = null)
+                    {
+                        if ($constraint === null) {
+                            return $constraint;
+                        }
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
                      * @param Limits $entity
                      * @param Constraint|LimitsConstraint $constraint
                      */
@@ -45,7 +60,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                         if ($entity === null) {
                             return;
                         }
-                
+
                         foreach ($entity->getLimits() as $limit) {
                             $currency = $limit->getMaxPrice()->getCurrency();
                             if (!$this->currencyFilter->isCurrencyActive($currency)) {
@@ -72,7 +87,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                         if ($entity === null) {
                             return;
                         }
-                
+
                         foreach ($entity->getLimits() as $limit) {
                             $currency = $limit->getMaxPrice()->getCurrency();
                             if (!$this->currencyFilter->isCurrencyActive($currency)) {
@@ -138,7 +153,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                      */
                     public function setValue(ValueClass $value = null)
                     {
-                 
+
                     }
                 }',
                 '<?php
@@ -149,7 +164,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
                      */
                     public function setValue($value)
                     {
-                 
+
                     }
                 }'
             ],

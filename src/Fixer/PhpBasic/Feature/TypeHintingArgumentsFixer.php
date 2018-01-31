@@ -181,16 +181,39 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
                         $tokens->insertAt($i, new Token([T_STRING, $argumentType]));
                         $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
+                        $parenthesesEndIndex += 2;
                     }
 
                     if ($nullFound) {
-                        $variables = $tokens->findGivenKind(T_VARIABLE);
-                        $variablePosition = key($variables);
+                        /** @var Token[] $variables */
+                        $variables = (clone $tokens)->findGivenKind(
+                            T_VARIABLE,
+                            $parenthesesStartIndex,
+                            $parenthesesEndIndex
+                        );
+                        $variablePosition = null;
+                        foreach ($variables as $key => $variableToken) {
+                            $expectedEqual = $tokens->getNextMeaningfulToken($key);
+                            $expectedNull = $tokens->getNextMeaningfulToken($expectedEqual);
+                            if (
+                                $tokens[$expectedEqual]->getContent() === '='
+                                && $tokens[$expectedNull]->getContent() === 'null'
+                            ) {
+                                continue;
+                            }
 
-                        $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
-                        $tokens->insertAt(++$variablePosition, new Token('='));
-                        $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
-                        $tokens->insertAt(++$variablePosition, new Token([T_STRING, 'null']));
+                            if ($variableToken->getContent() === $variable) {
+                                $variablePosition = $key;
+                                break;
+                            }
+                        }
+
+                        if ($variablePosition !== null) {
+                            $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
+                            $tokens->insertAt(++$variablePosition, new Token('='));
+                            $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
+                            $tokens->insertAt(++$variablePosition, new Token([T_STRING, 'null']));
+                        }
                     }
                     break;
                 }

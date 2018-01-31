@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.2.0
+
+### Fixed
+- `Paysera/php_basic_comment_php_doc_on_properties` fixer now supports `array` typehint. 
+- `Paysera/php_basic_feature_type_hinting_arguments` fixer now properly handles primitive nullable DocBlocks i.e. `@param int|null`
+- `Paysera/php_basic_feature_void_result` fixer now recognizes return block inside callback.
+- `Paysera/php_basic_code_style_namespaces_and_use_statements` fixer now adds `Base` if extended class has same name as its parent.
+
+### Added
+- `Paysera/php_basic_feature_return_and_argument_types` now supports configuration of whitelisted classes,
+ which presence in `@return` or `@param` DocBlock will not trigger this fixer:
+```php
+'Paysera/php_basic_feature_return_and_argument_types' => [
+    'whitelist' => ['ArrayCollection'],
+],
+```
+Old configuration is still valid: `'Paysera/php_basic_feature_return_and_argument_types' => true`, 
+this will result in same configuration as above.
+
+### Changed
+- `\Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig` now provides methods for predefined configurations.
+- `Paysera/php_basic_code_style_method_naming` fixer now ignores `process` and `handle` patterns.
+- `Paysera/php_basic_feature_type_hinting` fixer now skips if typehint starts with `Repository`
+
 ## 1.1.0
 
 ### Added

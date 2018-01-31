@@ -200,6 +200,9 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      */
     private function insertUseStatement(Tokens $tokens, $namespaceIndex, $useStatementContent)
     {
+        $classIndex = $tokens->getNextTokenOfKind(0, [new Token([T_CLASS, 'class'])]);
+        $className = $tokens[$tokens->getNextMeaningfulToken($classIndex)]->getContent();
+
         $insertIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']) + 1;
         $tokens->insertAt($insertIndex, new Token([T_WHITESPACE, "\n"]));
         $tokens->insertAt(++$insertIndex, new Token([T_USE, 'use']));
@@ -212,6 +215,20 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 $tokens->insertAt(++$insertIndex, new Token([T_NS_SEPARATOR, '\\']));
             }
         }
+
+        if (end($useStatement) === $className) {
+            $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$insertIndex, new Token([T_AS, 'as']));
+            $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$insertIndex, new Token([T_STRING, 'Base' . $className]));
+
+            $extendsIndex = $tokens->getNextTokenOfKind(0, [new Token([T_EXTENDS, 'extends'])]);
+            $tokens->clearRange($extendsIndex + 1, $extendsIndex + count($useStatement) * 2 + 1);
+
+            $tokens->insertAt(++$extendsIndex, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$extendsIndex, new Token([T_STRING, 'Base' . $className]));
+        }
+
         $tokens->insertAt(++$insertIndex, new Token(';'));
     }
 

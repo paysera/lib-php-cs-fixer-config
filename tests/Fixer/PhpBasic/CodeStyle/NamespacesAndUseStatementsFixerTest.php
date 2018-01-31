@@ -24,6 +24,21 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractFixerTestCase
             [
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+use Wallet\AccountInfo\Sample as BaseSample;
+class Sample extends BaseSample
+{
+
+}',
+                '<?php
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+class Sample extends \Wallet\AccountInfo\Sample
+{
+
+}'
+            ],
+            [
+                '<?php
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
 use Wallet\AccountInfo;
 class Sample
 {

@@ -25,6 +25,27 @@ final class VoidResultFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+                    public function sampleFunction()
+                    {
+                        foreach ($webSession->getEvents() as $event) {
+                            if ($event->getUserId() !== null) {
+                                $this->deferredRemoteJobPublisher->publishJob(
+                                    ActionWorker::JOB_KEY,
+                                    function () use ($event) {
+                                        return ["user_id" => $event->getUserId()];
+                                    }
+                                );
+                                return;
+                            }
+                        }
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     /**
                      * @return string|null
                      */

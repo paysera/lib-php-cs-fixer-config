@@ -25,6 +25,18 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+
+                    private function hash()
+                    {
+                        return hash(\'saads\');
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     /**
                      * @return bool
                      */

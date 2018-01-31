@@ -84,10 +84,25 @@ final class VoidResultFixer extends AbstractFixer
 
         $returnExists = false;
         $voidReturn = [];
+        $funcStart = null;
+        $funcEnd = null;
+
         for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+            if ($tokens[$i]->isGivenKind(T_FUNCTION)) {
+                $funcStart = $tokens->getNextTokenOfKind($i, ['{']);
+                if ($funcStart !== null) {
+                    $funcEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $funcStart);
+                }
+            }
             if ($tokens[$i]->isGivenKind(T_RETURN)) {
                 $returnValue = $tokens[$tokens->getNextMeaningfulToken($i)];
-                if (!$returnValue->equals(';')) {
+                if (
+                    $returnValue->getContent() !== ';'
+                    && (
+                        ($funcStart === null && $funcEnd === null)
+                        || ($funcStart !== null && $funcEnd !== null && ($i < $funcStart || $i > $funcEnd))
+                    )
+                ) {
                     $returnExists = true;
                 }
 

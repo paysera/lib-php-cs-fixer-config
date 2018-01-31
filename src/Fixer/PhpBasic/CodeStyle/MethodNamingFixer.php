@@ -25,8 +25,6 @@ final class MethodNamingFixer extends AbstractFixer
         'has',
         'can',
         'apply',
-        'process',
-        'handle',
         'matches',
         'check',
     ];
@@ -133,7 +131,7 @@ final class MethodNamingFixer extends AbstractFixer
                 }
 
                 $shouldReturnBool = preg_match(
-                    '#^' . implode('|', $this->validBoolFunctionPrefixes) . '#',
+                    '#^(?:' . implode('|', $this->validBoolFunctionPrefixes) . ')[A-Z]#',
                     $functionName
                 );
 

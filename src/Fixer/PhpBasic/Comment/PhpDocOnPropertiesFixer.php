@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 
@@ -210,8 +211,12 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
         for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; ++$i) {
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
-            if ($tokens[$i]->isGivenKind(T_VARIABLE)
-                && $tokens[$previousTokenIndex]->isGivenKind(T_STRING)
+            if (
+                $tokens[$i]->isGivenKind(T_VARIABLE)
+                && (
+                    $tokens[$previousTokenIndex]->isGivenKind(T_STRING)
+                    || $tokens[$previousTokenIndex]->isGivenKind(CT::T_ARRAY_TYPEHINT)
+                )
             ) {
                 $constructArguments[$tokens[$i]->getContent()] = $tokens[$previousTokenIndex]->getContent();
             }
