@@ -59,33 +59,33 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                     public function mapToEntity($data)
                     {
                         $this->logger->debug(\'Mapping confirmation session\', array($data));
-                
+
                         $confirmationSession = new ConfirmationSession();
-                
-                        if (count($data[\'client_id\']) > 0) {
+
+                        if (isset($data[\'client_id\'])) {
                             $credentials = $this->credentialsRepository->findByIdentifier($data[\'client_id\']);
                             $client = $credentials === null ? null : $credentials->getClient();
                             if ($client !== null) {
                                 $confirmationSession->setClient($client);
                             }
                         }
-                
-                        if (count($data[\'redirect_uri\']) > 0) {
+
+                        if (isset($data[\'redirect_uri\'])) {
                             $confirmationSession->setRedirectUri($data[\'redirect_uri\']);
                         }
-                        if (count($data[\'response_type\']) > 0) {
+                        if (isset($data[\'response_type\'])) {
                             $confirmationSession->setResponseType($data[\'response_type\']);
                         }
-                        if (count($data[\'scope\']) > 0) {
+                        if (isset($data[\'scope\'])) {
                             $confirmationSession->setScope($this->scopeManager->fixScopeList($data[\'scope\']));
                         }
-                        if (count($data[\'state\']) > 0) {
+                        if (isset($data[\'state\'])) {
                             $confirmationSession->setState($data[\'state\']);
                         }
-                        if (count($data[\'user\']) > 0) {
+                        if (isset($data[\'user\'])) {
                             $confirmationSession->setUserInformation($this->userInformationMapper->mapToEntity($data[\'user\']));
                         }
-                
+
                         return $confirmationSession;
                     }
                 }',
@@ -95,9 +95,9 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                     public function mapToEntity($data)
                     {
                         $this->logger->debug(\'Mapping confirmation session\', array($data));
-                
+
                         $confirmationSession = new ConfirmationSession();
-                
+
                         if (!empty($data[\'client_id\'])) {
                             $credentials = $this->credentialsRepository->findByIdentifier($data[\'client_id\']);
                             $client = $credentials === null ? null : $credentials->getClient();
@@ -105,7 +105,7 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                                 $confirmationSession->setClient($client);
                             }
                         }
-                
+
                         if (!empty($data[\'redirect_uri\'])) {
                             $confirmationSession->setRedirectUri($data[\'redirect_uri\']);
                         }
@@ -121,7 +121,7 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                         if (!empty($data[\'user\'])) {
                             $confirmationSession->setUserInformation($this->userInformationMapper->mapToEntity($data[\'user\']));
                         }
-                
+
                         return $confirmationSession;
                     }
                 }',
@@ -152,7 +152,7 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                         while (strlen($extensions) > 0) {
                             $extensionId = ord($extensions[0]);
                             $extensions = substr($extensions, 1);
-                            if (!isset($this->parserExtensions[$extensionId])) {
+                            if (empty($this->parserExtensions[$extensionId])) {
                                 throw new ParsingException(\'No extension found with such ID: \' . $extensionId);
                             }
                             $extensions = $this->parserExtensions[$extensionId]->apply($reservationCode, $extensions);
@@ -164,24 +164,28 @@ final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
-                    public function sampleFunction($arg1, $arg2)
+                    public function sampleFunction($arg1, $arg2, $arg3)
                     {
                         if (($arg1) !== \'\') {
                             return $arg1;
                         } elseif (count($arg2) > 0) {
                             return $arg2;
+                        } elseif (count($arg3) === 0) {
+                            return null;
                         }
                     }
                 }',
                 '<?php
                 class Sample
                 {
-                    public function sampleFunction($arg1, $arg2)
+                    public function sampleFunction($arg1, $arg2, $arg3)
                     {
                         if (strlen($arg1) > 0) {
                             return $arg1;
                         } elseif (!empty($arg2)) {
                             return $arg2;
+                        } elseif (empty($arg3)) {
+                            return null;
                         }
                     }
                 }',

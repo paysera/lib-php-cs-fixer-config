@@ -100,22 +100,75 @@ final class CheckingExplicitlyFixer extends AbstractFixer
 
     private function fixEmptyFunction(Tokens $tokens, $key)
     {
-        $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
-        if (!$tokens[$notOperatorIndex]->equals('!')) {
+        if ($this->tryFixEmptyToIsset($tokens, $key)) {
             return;
+        }
+
+        if ($this->tryFixNotEmptyToCount($tokens, $key)) {
+            return;
+        }
+    }
+
+    private function tryFixNotEmptyToCount(Tokens $tokens, $key)
+    {
+        $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
+        $negation = false;
+        if ($tokens[$notOperatorIndex]->equals('!')) {
+            $negation = true;
         }
 
         $parenthesesStartIndex = $tokens->getNextMeaningfulToken($key);
         if (!$tokens[$parenthesesStartIndex]->equals('(')) {
-            return;
+            return false;
         }
         $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
 
-        $tokens->overrideAt($key, new Token([T_STRING, 'count']));
+        $tokens->offsetSet($key, new Token([T_STRING, 'count']));
         $tokens->insertAt(++$parenthesesEndIndex, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(++$parenthesesEndIndex, new Token('>'));
+        if ($negation) {
+            $tokens->insertAt(++$parenthesesEndIndex, new Token('>'));
+            $tokens->clearAt($notOperatorIndex);
+        } else {
+            $tokens->insertAt(++$parenthesesEndIndex, new Token([T_IS_IDENTICAL, '===']));
+        }
         $tokens->insertAt(++$parenthesesEndIndex, new Token([T_WHITESPACE, ' ']));
         $tokens->insertAt(++$parenthesesEndIndex, new Token([T_LNUMBER, '0']));
-        $tokens->clearRange($notOperatorIndex, $notOperatorIndex);
+
+        return true;
+    }
+
+    private function tryFixEmptyToIsset(Tokens $tokens, $key)
+    {
+        $emptyBraceStart = $tokens->getNextMeaningfulToken($key);
+        $emptyBraceEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $emptyBraceStart);
+
+        $arrayAccessStart = $tokens->getNextTokenOfKind($emptyBraceStart, ['[']);
+        $arrayAccessEnd = null;
+        if ($arrayAccessStart !== null) {
+            $arrayAccessEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_INDEX_SQUARE_BRACE, $arrayAccessStart);
+        }
+
+        $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
+        $negation = false;
+        if ($tokens[$notOperatorIndex]->equals('!')) {
+            $negation = true;
+        }
+
+        if (
+            $arrayAccessStart !== null
+            && $arrayAccessEnd !== null
+            && $arrayAccessStart > $emptyBraceStart
+            && $arrayAccessEnd < $emptyBraceEnd
+        ) {
+            $tokens->offsetSet($key, new Token([T_ISSET, 'isset']));
+            if ($negation) {
+                $tokens->clearAt($notOperatorIndex);
+            } else {
+                $tokens->insertAt($notOperatorIndex + 1, new Token('!'));
+            }
+            return true;
+        }
+
+        return false;
     }
 }
