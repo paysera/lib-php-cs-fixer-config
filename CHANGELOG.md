@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.4.0
+
+### Changed
+- `PayseraConventionsConfig` SafeRules changes:
+  * `yoda_style` disabled
+- `Paysera/php_basic_code_style_namespaces_and_use_statements`:
+  * changes all occurrences FQCNs to imported use statements.
+  * does not import namespaces without root prefix `\Some\Name\Space` vs `Some\Name\Space`.
+  * properly imports global classes i.e.: `\DateTime`
+
 ## 1.3.0
 
 ### Changed

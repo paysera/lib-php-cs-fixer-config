@@ -23,6 +23,105 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+namespace My\Super\Feature;
+use DateTime;
+class Sample
+{
+    public function __construct(DateTime $b)
+    {
+        $this->b = $b;
+        $this->a = new DateTime();
+    }
+}',
+                '<?php
+namespace My\Super\Feature;
+class Sample
+{
+    public function __construct(\DateTime $b)
+    {
+        $this->b = $b;
+        $this->a = new \DateTime();
+    }
+}'
+            ],
+            [
+                '<?php
+namespace My\Super\Feature;
+use My\Other\Cool\Space;
+use DateTime;
+class Sample
+{
+    /**
+     * @var DateTime
+     */
+    private $startDate;
+
+    /**
+     * @var Space
+     */
+    private $baba;
+
+    /**
+     * @return Space
+     */
+    public function getBaba()
+    {
+        return new Space();
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+}',
+                '<?php
+namespace My\Super\Feature;
+class Sample
+{
+    /**
+     * @var \DateTime
+     */
+    private $startDate;
+
+    /**
+     * @var \My\Other\Cool\Space
+     */
+    private $baba;
+
+    /**
+     * @return \My\Other\Cool\Space
+     */
+    public function getBaba()
+    {
+        return new \My\Other\Cool\Space();
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+}'
+            ],
+            [
+                '<?php
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+class Sample
+{
+    public function doSomething()
+    {
+        /** @var Event\UserPositionEventData $positionData */
+        $positionData = $this->positionDataRepository->findOneByEventData($eventData);
+    }
+}', null
+            ],
+            [
+                '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
 use Wallet\AccountInfo\Sample as BaseSample;
 class Sample extends BaseSample
@@ -39,18 +138,18 @@ class Sample extends \Wallet\AccountInfo\Sample
             [
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
-use Wallet\AccountInfo;
+use WebToPay\ApiBundle\Entity\Wallet\AccountInfo;
 class Sample
 {
     /**
-     * @var AccountInfo not persisted to database
+     * @var Wallet\AccountInfo not persisted to database
      */
     protected $accountInfo;
 
     /**
      * Gets accountInfo
      *
-     * @param \WebToPay\ApiBundle\Entity\Wallet\AccountInfo $accountInfo
+     * @param AccountInfo $accountInfo
      *
      * @return $this
      */
@@ -216,7 +315,7 @@ namespace WebToPay\ApiBundle\Entity\PendingPayment;
 class PasswordPendingPayment extends PendingPayment
 {
     /**
-     * @param WebToPay\ApiBundle\Entity\PendingPayment $a
+     * @param \WebToPay\ApiBundle\Entity\PendingPayment $a
      */
     public function asdasd($a)
     {

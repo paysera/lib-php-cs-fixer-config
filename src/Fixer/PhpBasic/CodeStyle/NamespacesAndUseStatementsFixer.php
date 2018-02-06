@@ -117,7 +117,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 $classNameEndIndex = $this->findNamespaceEndIndex($tokens, $key);
 
                 // Saving that namespace as string
-                $useStatementContent = '';
+                $useStatementContent = '\\';
                 for ($i = $key + 1; $i <= $classNameEndIndex; ++$i) {
                     $useStatementContent .= $tokens[$i]->getContent();
                 }
@@ -126,7 +126,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                     continue;
                 }
 
-                preg_match('#\\\?[A-z0-9_\\\]*\\\(\w*)#', $useStatementContent, $endOfNamespace);
+                preg_match('#\\\?[\w\\\]*\\\(\w*)#', $useStatementContent, $endOfNamespace);
                 if (!isset($endOfNamespace[1])) {
                     continue;
                 }
@@ -151,7 +151,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      * @param int $namespaceIndex
      * @param array $endOfUseStatements
      * @param array $exceptionClassNames
-     * @return null|array
+     * @return array
      */
     private function fixDocBlockContent(
         Tokens $tokens,
@@ -162,25 +162,27 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     ) {
         $content = $tokens[$key]->getContent();
         preg_match_all(
-            '#(?<='. implode('|', $this->docBlockAnnotations) . ')\s(\\\?[A-z0-9_\\\]*\\\(\w*))\s#',
+            '#(?<='. implode('|', $this->docBlockAnnotations) . ')\s(\\\[\w\\\]*\\\?(\w*))\s#',
             $content,
             $matches,
             PREG_SET_ORDER
         );
-        if (!isset($matches)) {
-            return null;
+        if (count($matches) === 0) {
+            return [];
         }
 
         foreach ($matches as $match) {
-            if (isset($match[1]) && isset($match[2])) {
-                if (in_array($match[2], $exceptionClassNames, true)
-                    || in_array(strtolower($match[2]), $endOfUseStatements, true)
+            if (isset($match[1])) {
+                $nsParts = explode('\\', $match[1]);
+                $className = ltrim(end($nsParts), '\\');
+                if (in_array($className, $exceptionClassNames, true)
+                    || in_array(strtolower($className), $endOfUseStatements, true)
                 ) {
                     continue;
                 }
-                $tokens[$key]->setContent(strtr($tokens[$key]->getContent(), [$match[1] => $match[2]]));
+                $tokens[$key]->setContent(strtr($tokens[$key]->getContent(), [$match[1] => $className]));
                 $namespaces[] = ltrim($match[1], '\\');
-                $endOfUseStatements[] = strtolower(ltrim($match[2], '\\'));
+                $endOfUseStatements[] = strtolower(ltrim($className, '\\'));
             }
         }
 
@@ -200,6 +202,11 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      */
     private function insertUseStatement(Tokens $tokens, $namespaceIndex, $useStatementContent)
     {
+        $importedClasses = $this->getImportedClasses($tokens);
+        if (in_array($useStatementContent, $importedClasses, true)) {
+            return;
+        }
+
         $classIndex = $tokens->getNextTokenOfKind(0, [new Token([T_CLASS, 'class'])]);
         $className = $tokens[$tokens->getNextMeaningfulToken($classIndex)]->getContent();
 
@@ -208,7 +215,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         $tokens->insertAt(++$insertIndex, new Token([T_USE, 'use']));
         $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
 
-        $useStatement = explode('\\', $useStatementContent);
+        $useStatement = array_values(array_filter(explode('\\', $useStatementContent)));
         foreach ($useStatement as $key => $item) {
             $tokens->insertAt(++$insertIndex, new Token([T_STRING, $item]));
             if ($key !== count($useStatement) - 1) {
@@ -230,6 +237,30 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         }
 
         $tokens->insertAt(++$insertIndex, new Token(';'));
+    }
+
+    private function getImportedClasses(Tokens $tokens)
+    {
+        $copy = clone $tokens;
+        $usages = [];
+        for ($i = 0; $i < count($copy); $i++) {
+            if ($copy[$i]->isGivenKind(T_USE)) {
+                $namespace = '';
+                while ($copy[$i]->getContent() !== ';') {
+                    if (
+                        $copy[$i]->isGivenKind(T_NS_SEPARATOR)
+                        || $copy[$i]->isGivenKind(T_STRING)
+                    ) {
+                        $namespace .= $copy[$i]->getContent();
+                    }
+                    $i++;
+                }
+                $usages[] = $namespace;
+            }
+            $i++;
+        }
+
+        return array_filter($usages);
     }
 
     /**
