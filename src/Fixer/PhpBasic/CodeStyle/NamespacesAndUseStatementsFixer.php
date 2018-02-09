@@ -133,9 +133,8 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
 
                 $inserted = false;
                 if (!in_array(strtolower($endOfNamespace[1]), $endOfUseStatements, true)) {
-                    $this->insertUseStatement($tokens, $namespaceIndex, $useStatementContent);
+                    $inserted = $this->insertUseStatement($tokens, $namespaceIndex, $useStatementContent);
                     $endOfUseStatements[] = strtolower($endOfNamespace[1]);
-                    $inserted = true;
                 }
 
                 if (!$inserted) {
@@ -199,12 +198,13 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      * @param Tokens $tokens
      * @param int $namespaceIndex
      * @param string $useStatementContent
+     * @return bool
      */
     private function insertUseStatement(Tokens $tokens, $namespaceIndex, $useStatementContent)
     {
         $importedClasses = $this->getImportedClasses($tokens);
-        if (in_array($useStatementContent, $importedClasses, true)) {
-            return;
+        if (in_array(ltrim($useStatementContent, '\\'), $importedClasses, true)) {
+            return false;
         }
 
         $classIndex = $tokens->getNextTokenOfKind(0, [new Token([T_CLASS, 'class'])]);
@@ -237,6 +237,8 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         }
 
         $tokens->insertAt(++$insertIndex, new Token(';'));
+
+        return true;
     }
 
     private function getImportedClasses(Tokens $tokens)

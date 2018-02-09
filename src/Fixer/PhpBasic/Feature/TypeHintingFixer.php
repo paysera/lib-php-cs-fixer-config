@@ -178,7 +178,7 @@ final class TypeHintingFixer extends AbstractFixer
             foreach ($constructClassProperties as $key => $constructClassProperty) {
                 foreach ($this->exceptions as $exception) {
                     if (strpos($key, $exception) !== false) {
-                        continue;
+                        continue 2;
                     }
                 }
                 if (!preg_match('#' . $key . '$#', $useStatement)) {

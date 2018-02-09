@@ -97,13 +97,15 @@ final class TypeHintingFixerTest extends AbstractFixerTestCase
                 '<?php
                 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
                 use Doctrine\ORM\EntityManager;
+                use Doctrine\ORM\OtherClass;
                 class Sample
                 {
                     private $arg1;
                 
-                    public function __construct(EntityManager $arg1)
+                    public function __construct(EntityManager $arg1, OtherClass $arg2)
                     {
                         $this->arg1 = $arg1;
+                        $this->arg2 = $arg2;
                     }
                     
                     private function someFunction()

@@ -27,20 +27,32 @@ namespace My\Super\Feature;
 use DateTime;
 class Sample
 {
+    /**
+     * @param DateTime $b
+     * @return DateTime
+     */
     public function __construct(DateTime $b)
     {
         $this->b = $b;
         $this->a = new DateTime();
+
+        return $this->a;
     }
 }',
                 '<?php
 namespace My\Super\Feature;
 class Sample
 {
+    /**
+     * @param \DateTime $b
+     * @return \DateTime
+     */
     public function __construct(\DateTime $b)
     {
         $this->b = $b;
         $this->a = new \DateTime();
+
+        return $this->a;
     }
 }'
             ],
