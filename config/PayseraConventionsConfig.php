@@ -216,7 +216,6 @@ class PayseraConventionsConfig extends Config
     {
         return [
             '@Symfony' => true,
-            'yoda_style' => false,
             'blank_line_before_return' => false,
             'blank_line_after_opening_tag' => false,
             'cast_spaces' => false,
