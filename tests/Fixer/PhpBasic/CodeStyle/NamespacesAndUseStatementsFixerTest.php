@@ -23,6 +23,194 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+namespace Evp\DebugPenaltyBundle\Service;
+use InvalidArgumentException;
+use Evp\UserSurveillanceBundle\Scenarios;
+class ActivityScenarioSubjectMapper
+{
+    private $map = [
+        Scenarios::SCENARIO_CREDENTIALS_BRUTE_FORCE_VERY_STRONG_LINK => \'[Login Bruteforce][Very Strong]\',
+    ];
+
+    /**
+     * @param string $activity
+     * @return string
+     *
+     * @throws InvalidArgumentException
+     */
+    public function resolve($activity)
+    {
+        if (!isset($this->map[$activity])) {
+            throw new InvalidArgumentException(sprintf(\'Unknown activity %s\', $activity));
+        }
+
+        return $this->map[$activity];
+    }
+}',
+                '<?php
+namespace Evp\DebugPenaltyBundle\Service;
+use Evp\UserSurveillanceBundle\Scenarios;
+class ActivityScenarioSubjectMapper
+{
+    private $map = [
+        Scenarios::SCENARIO_CREDENTIALS_BRUTE_FORCE_VERY_STRONG_LINK => \'[Login Bruteforce][Very Strong]\',
+    ];
+
+    /**
+     * @param string $activity
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function resolve($activity)
+    {
+        if (!isset($this->map[$activity])) {
+            throw new \InvalidArgumentException(sprintf(\'Unknown activity %s\', $activity));
+        }
+
+        return $this->map[$activity];
+    }
+}'
+            ],
+            [
+                '<?php
+namespace Evp\UserSurveillanceBundle\Service;
+use DateTime;
+use Evp\UserSurveillanceBundle\Entity\AuditEvent;
+use Evp\UserSurveillanceBundle\Entity\Relation;
+use Evp\UserSurveillanceBundle\Entity\WebSession;
+use Evp\UserSurveillanceBundle\Repository\AuditEventRepository;
+use Evp\UserSurveillanceBundle\Repository\RelationRepository;
+class RelatedEventsProvider
+{
+    private $relationRepository;
+    private $eventRepository;
+
+    public function __construct(
+        RelationRepository $relationRepository,
+        AuditEventRepository $eventRepository
+    ) {
+        $this->relationRepository = $relationRepository;
+        $this->eventRepository = $eventRepository;
+    }
+
+    /**
+     * @param DateTime $date
+     * @param WebSession $webSession
+     * @param array $relationTypes
+     * @param string $eventType
+     *
+     * @return AuditEvent[]
+     */
+    public function getRelatedEvents(DateTime $date, WebSession $webSession, array $relationTypes, $eventType)
+    {
+        /** @var AuditEvent[] $events */
+        $events = [];
+
+        /** @var Relation[] $relations */
+        $relations = [];
+
+        foreach ($relationTypes as $type) {
+            $fetchedRelations = $this->relationRepository->findByTypeAndSessionIdA(
+                $date,
+                $type,
+                $webSession->getSessionId()
+            );
+
+            foreach ($fetchedRelations as $fetchedRelation) {
+                // allow only unique relations
+                if (!isset($relations[$fetchedRelation->getId()])) {
+                    $relations[$fetchedRelation->getId()] = $fetchedRelation;
+                }
+            }
+        }
+
+        $sessionIds[] = $webSession->getSessionId();
+        foreach ($relations as $relation) {
+            $sessionIds[] = $relation->getSessionIdB();
+        }
+
+        foreach ($sessionIds as $sid) {
+            $fetchedEvents = $this->eventRepository->fetchEventsByTypeAndDateAndSessionId($date, $sid, $eventType);
+
+            foreach ($fetchedEvents as $fetchedEvent) {
+                $events[] = $fetchedEvent;
+            }
+        }
+
+        return $events;
+    }
+}',
+                '<?php
+namespace Evp\UserSurveillanceBundle\Service;
+use Evp\UserSurveillanceBundle\Entity\AuditEvent;
+use Evp\UserSurveillanceBundle\Entity\Relation;
+use Evp\UserSurveillanceBundle\Entity\WebSession;
+use Evp\UserSurveillanceBundle\Repository\AuditEventRepository;
+use Evp\UserSurveillanceBundle\Repository\RelationRepository;
+class RelatedEventsProvider
+{
+    private $relationRepository;
+    private $eventRepository;
+
+    public function __construct(
+        RelationRepository $relationRepository,
+        AuditEventRepository $eventRepository
+    ) {
+        $this->relationRepository = $relationRepository;
+        $this->eventRepository = $eventRepository;
+    }
+
+    /**
+     * @param \DateTime $date
+     * @param WebSession $webSession
+     * @param array $relationTypes
+     * @param string $eventType
+     *
+     * @return AuditEvent[]
+     */
+    public function getRelatedEvents(\DateTime $date, WebSession $webSession, array $relationTypes, $eventType)
+    {
+        /** @var AuditEvent[] $events */
+        $events = [];
+
+        /** @var Relation[] $relations */
+        $relations = [];
+
+        foreach ($relationTypes as $type) {
+            $fetchedRelations = $this->relationRepository->findByTypeAndSessionIdA(
+                $date,
+                $type,
+                $webSession->getSessionId()
+            );
+
+            foreach ($fetchedRelations as $fetchedRelation) {
+                // allow only unique relations
+                if (!isset($relations[$fetchedRelation->getId()])) {
+                    $relations[$fetchedRelation->getId()] = $fetchedRelation;
+                }
+            }
+        }
+
+        $sessionIds[] = $webSession->getSessionId();
+        foreach ($relations as $relation) {
+            $sessionIds[] = $relation->getSessionIdB();
+        }
+
+        foreach ($sessionIds as $sid) {
+            $fetchedEvents = $this->eventRepository->fetchEventsByTypeAndDateAndSessionId($date, $sid, $eventType);
+
+            foreach ($fetchedEvents as $fetchedEvent) {
+                $events[] = $fetchedEvent;
+            }
+        }
+
+        return $events;
+    }
+}'
+            ],
+            [
+                '<?php
 
 namespace Evp\UserSurveillanceBundle\Entity;
 use DateTime;
@@ -370,8 +558,8 @@ class Sample
             [
                 '<?php
 namespace My\Super\Feature;
-use My\Other\Cool\Space;
 use DateTime;
+use My\Other\Cool\Space;
 class Sample
 {
     /**

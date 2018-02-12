@@ -143,6 +143,45 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 }
             }
         }
+
+        $this->clearDuplicatedImports($tokens);
+    }
+
+    private function clearDuplicatedImports(Tokens $tokens)
+    {
+        $duplicatedImports = $this->getImportedClasses($tokens);
+        $imports = array_unique($duplicatedImports);
+        $useStartIndex = null;
+        $useEndIndex = null;
+
+        if ($duplicatedImports == $imports) {
+            return;
+        }
+
+        foreach ($tokens as $key => $token) {
+            if ($token->isGivenKind(T_NAMESPACE)) {
+                $useStartIndex = $tokens->getNextTokenOfKind($key, [new Token([T_USE, 'use'])]);
+            }
+            if ($token->isGivenKind(T_CLASS)) {
+                $useEndIndex = $tokens->getPrevMeaningfulToken($key);
+            }
+        }
+
+        if ($useStartIndex === null || $useEndIndex === null) {
+            return;
+        }
+
+        $tokens->clearRange($useStartIndex - 1, $useEndIndex);
+
+        $importIndex = $useStartIndex;
+        foreach ($imports as $import) {
+            $importAs = null;
+            if (strpos($import, ' as ') !== false) {
+                $importAs = end(explode(' as ', $import));
+            }
+            $importIndex = $this->insertImport($tokens, $importIndex, $import, $importAs);
+            ++$importIndex;
+        }
     }
 
     /**
@@ -176,11 +215,8 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 $nsParts = explode('\\', $match[1]);
                 $className = ltrim(end($nsParts), '\\');
                 if (
-                    (
-                        in_array($className, $exceptionClassNames, true)
-                        || in_array(strtolower($className), $endOfUseStatements, true)
-                    )
-                    && !in_array(ltrim($match[1], '\\'), $this->getImportedClasses($tokens), true)
+                    in_array($className, $exceptionClassNames, true)
+                    || in_array(strtolower($className), $endOfUseStatements, true)
                 ) {
                     continue;
                 }
@@ -206,41 +242,54 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      */
     private function insertUseStatement(Tokens $tokens, $namespaceIndex, $useStatementContent)
     {
-        $importedClasses = $this->getImportedClasses($tokens);
-        if (in_array($useStatementContent, $importedClasses, true)) {
-            return;
-        }
-
         $classIndex = $tokens->getNextTokenOfKind(0, [new Token([T_CLASS, 'class'])]);
         $className = $tokens[$tokens->getNextMeaningfulToken($classIndex)]->getContent();
 
         $insertIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']) + 1;
-        $tokens->insertAt($insertIndex, new Token([T_WHITESPACE, "\n"]));
-        $tokens->insertAt(++$insertIndex, new Token([T_USE, 'use']));
-        $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
 
+        $importAs = null;
         $useStatement = array_values(array_filter(explode('\\', $useStatementContent)));
+        if (end($useStatement) === $className) {
+            $extendsIndex = $tokens->getNextTokenOfKind(0, [new Token([T_EXTENDS, 'extends'])]);
+            $tokens->clearRange($extendsIndex + 1, $extendsIndex + count($useStatement) * 2 + 1);
+            $importAs = 'Base' . $className;
+            $tokens->insertAt(++$extendsIndex, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$extendsIndex, new Token([T_STRING, $importAs]));
+        }
+
+        $this->insertImport($tokens, $insertIndex, $useStatementContent, $importAs);
+    }
+
+    /**
+     * @param Tokens $tokens
+     * @param int $position
+     * @param string $import
+     * @param null|string $importAs
+     * @return int
+     */
+    private function insertImport(Tokens $tokens, $position, $import, $importAs = null)
+    {
+        $tokens->insertAt($position, new Token([T_WHITESPACE, "\n"]));
+        $tokens->insertAt(++$position, new Token([T_USE, 'use']));
+        $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
+
+        $useStatement = array_values(array_filter(explode('\\', $import)));
         foreach ($useStatement as $key => $item) {
-            $tokens->insertAt(++$insertIndex, new Token([T_STRING, $item]));
+            $tokens->insertAt(++$position, new Token([T_STRING, $item]));
             if ($key !== count($useStatement) - 1) {
-                $tokens->insertAt(++$insertIndex, new Token([T_NS_SEPARATOR, '\\']));
+                $tokens->insertAt(++$position, new Token([T_NS_SEPARATOR, '\\']));
             }
         }
 
-        if (end($useStatement) === $className) {
-            $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$insertIndex, new Token([T_AS, 'as']));
-            $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$insertIndex, new Token([T_STRING, 'Base' . $className]));
-
-            $extendsIndex = $tokens->getNextTokenOfKind(0, [new Token([T_EXTENDS, 'extends'])]);
-            $tokens->clearRange($extendsIndex + 1, $extendsIndex + count($useStatement) * 2 + 1);
-
-            $tokens->insertAt(++$extendsIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$extendsIndex, new Token([T_STRING, 'Base' . $className]));
+        if ($importAs !== null) {
+            $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$position, new Token([T_AS, 'as']));
+            $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertAt(++$position, new Token([T_STRING, $importAs]));
         }
+        $tokens->insertAt(++$position, new Token(';'));
 
-        $tokens->insertAt(++$insertIndex, new Token(';'));
+        return $position;
     }
 
     private function getImportedClasses(Tokens $tokens)
