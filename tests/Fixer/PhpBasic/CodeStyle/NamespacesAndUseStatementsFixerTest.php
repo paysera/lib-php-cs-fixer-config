@@ -23,6 +23,329 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+
+namespace Evp\UserSurveillanceBundle\Entity;
+use DateTime;
+class Action
+{
+    const STATUS_PENDING = \'pending\';
+    const STATUS_CANCELLED = \'cancelled\';
+    const STATUS_PROCESSING = \'processing\';
+    const STATUS_DONE = \'done\';
+
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @var WebSession
+     */
+    private $webSession;
+
+    /**
+     * @var string
+     */
+    private $type;
+
+    /**
+     * @var string
+     */
+    private $status;
+
+    /**
+     * @var DateTime
+     */
+    private $createdAt;
+
+    /**
+     * @var string
+     */
+    private $processorKey;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return WebSession
+     */
+    public function getWebSession()
+    {
+        return $this->webSession;
+    }
+
+    /**
+     * @param WebSession $webSession
+     *
+     * @return $this
+     */
+    public function setWebSession($webSession)
+    {
+        $this->webSession = $webSession;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return $this
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     *
+     * @return $this
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param DateTime $createdAt
+     *
+     * @return $this
+     */
+    public function setCreatedAt(DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProcessorKey()
+    {
+        return $this->processorKey;
+    }
+
+    /**
+     * @param string $processorKey
+     *
+     * @return $this
+     */
+    public function setProcessorKey($processorKey)
+    {
+        $this->processorKey = $processorKey;
+
+        return $this;
+    }
+}',
+                '<?php
+
+namespace Evp\UserSurveillanceBundle\Entity;
+class Action
+{
+    const STATUS_PENDING = \'pending\';
+    const STATUS_CANCELLED = \'cancelled\';
+    const STATUS_PROCESSING = \'processing\';
+    const STATUS_DONE = \'done\';
+
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @var WebSession
+     */
+    private $webSession;
+
+    /**
+     * @var string
+     */
+    private $type;
+
+    /**
+     * @var string
+     */
+    private $status;
+
+    /**
+     * @var \DateTime
+     */
+    private $createdAt;
+
+    /**
+     * @var string
+     */
+    private $processorKey;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return WebSession
+     */
+    public function getWebSession()
+    {
+        return $this->webSession;
+    }
+
+    /**
+     * @param WebSession $webSession
+     *
+     * @return $this
+     */
+    public function setWebSession($webSession)
+    {
+        $this->webSession = $webSession;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return $this
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     *
+     * @return $this
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     *
+     * @return $this
+     */
+    public function setCreatedAt(\DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProcessorKey()
+    {
+        return $this->processorKey;
+    }
+
+    /**
+     * @param string $processorKey
+     *
+     * @return $this
+     */
+    public function setProcessorKey($processorKey)
+    {
+        $this->processorKey = $processorKey;
+
+        return $this;
+    }
+}'
+            ],
+            [
+                '<?php
 namespace My\Super\Feature;
 use DateTime;
 class Sample

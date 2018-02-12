@@ -175,8 +175,12 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             if (isset($match[1])) {
                 $nsParts = explode('\\', $match[1]);
                 $className = ltrim(end($nsParts), '\\');
-                if (in_array($className, $exceptionClassNames, true)
-                    || in_array(strtolower($className), $endOfUseStatements, true)
+                if (
+                    (
+                        in_array($className, $exceptionClassNames, true)
+                        || in_array(strtolower($className), $endOfUseStatements, true)
+                    )
+                    && !in_array(ltrim($match[1], '\\'), $this->getImportedClasses($tokens), true)
                 ) {
                     continue;
                 }
@@ -257,7 +261,6 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 }
                 $usages[] = $namespace;
             }
-            $i++;
         }
 
         return array_filter($usages);
