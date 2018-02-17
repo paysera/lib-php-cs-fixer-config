@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## 1.4.0
 
 ### Changed
-- `PayseraConventionsConfig` SafeRules changes:
-  * `yoda_style` disabled
 - `Paysera/php_basic_code_style_namespaces_and_use_statements`:
   * changes all occurrences FQCNs to imported use statements.
   * does not import namespaces without root prefix `\Some\Name\Space` vs `Some\Name\Space`.
