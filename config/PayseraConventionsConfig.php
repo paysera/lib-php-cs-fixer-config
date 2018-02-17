@@ -214,7 +214,7 @@ class PayseraConventionsConfig extends Config
 
     private function getSafeRules()
     {
-        $rules = [
+        return [
             '@Symfony' => true,
             'blank_line_before_return' => false,
             'blank_line_after_opening_tag' => false,
@@ -266,11 +266,5 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_function_count' => true,
             'Paysera/php_basic_feature_function_is_null' => true,
         ];
-
-        if (class_exists('\PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer')) {
-            $rules['yoda_style'] = false;
-        }
-
-        return $rules;
     }
 }
