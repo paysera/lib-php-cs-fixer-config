@@ -2,6 +2,7 @@
 
 namespace Paysera\PhpCsFixerConfig\Config;
 
+use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CheckingExplicitlyFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\LogicalOperatorsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\StrictComparisonOperatorsFixer;
@@ -106,6 +107,7 @@ class PayseraConventionsConfig extends Config
                 new StrictComparisonOperatorsFixer(),
                 new LogicalOperatorsFixer(),
                 new VoidResultFixer(),
+                new DocBlockWhitespaceFixer(),
             ]
         );
     }
@@ -265,6 +267,7 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_condition_results' => true,
             'Paysera/php_basic_feature_function_count' => true,
             'Paysera/php_basic_feature_function_is_null' => true,
+            'Paysera/php_basic_code_style_doc_block_whitespace' => true,
         ];
 
         if (class_exists('\PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer')) {
