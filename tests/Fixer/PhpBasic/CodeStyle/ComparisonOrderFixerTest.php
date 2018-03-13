@@ -25,16 +25,38 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+                    public function shouldPostFieldsBeSigned($request)
+                    {
+                        return (bool)(!$this->config->get(\'disable_post_params\')
+                            && $request instanceof \stdClass
+                            && strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\') !== false);
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function shouldPostFieldsBeSigned($request)
+                    {
+                        return (bool)(!$this->config->get(\'disable_post_params\')
+                            && $request instanceof \stdClass
+                            && false !== strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\'));
+                    }
+                }'
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     public function validate($object, Constraint $constraint)
                     {
                         if ($object->getDebitCommission() === null && $object->getCreditCommission() === null) {
                             return;
                         }
-                    
+
                         if ($object->getDebitCommission() !== null && $object->getPayment()->getBeneficiaryIdentifier() === null) {
                             $this->context->addViolation($constraint->message);
                         }
-                    
+
                         $paymentAmountInCents = $object->getPayment()->getPrice()->getAmountInCents();
                         if ($object->getDebitCommission() !== null) {
                             $paymentAmountInCents -= $object->getDebitCommission()->getAmountInCents();
@@ -42,7 +64,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         if ($object->getCreditCommission() !== null) {
                             $paymentAmountInCents -= $object->getCreditCommission()->getAmountInCents();
                         }
-                    
+
                         if ($paymentAmountInCents <= 0) {
                             $this->context->addViolation($constraint->message);
                         }
@@ -56,11 +78,11 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         if (null === $object->getDebitCommission() && null === $object->getCreditCommission()) {
                             return;
                         }
-                    
+
                         if (null !== $object->getDebitCommission() && null === $object->getPayment()->getBeneficiaryIdentifier()) {
                             $this->context->addViolation($constraint->message);
                         }
-                    
+
                         $paymentAmountInCents = $object->getPayment()->getPrice()->getAmountInCents();
                         if (null !== $object->getDebitCommission()) {
                             $paymentAmountInCents -= $object->getDebitCommission()->getAmountInCents();
@@ -68,7 +90,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         if (null !== $object->getCreditCommission()) {
                             $paymentAmountInCents -= $object->getCreditCommission()->getAmountInCents();
                         }
-                    
+
                         if ($paymentAmountInCents <= 0) {
                             $this->context->addViolation($constraint->message);
                         }
@@ -82,7 +104,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                     public function onPaymentDone(PaymentEvent $event)
                     {
                         $payment = $event->getPayment();
-                    
+
                         if ($payment->getCommission() !== null
                             && (
                                 $payment->getCommission()->getCreditCommission() !== null
@@ -93,7 +115,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                             $paidCommission->setWallet($payment->getProject()->getWallet());
                             $paidCommission->setCommissionEntity($payment->getCommission());
                             $paidCommission->setStatus(PaidCommission::STATUS_PENDING);
-                    
+
                             $this->entityManager->persist($paidCommission);
                         }
                     }
@@ -104,7 +126,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                     public function onPaymentDone(PaymentEvent $event)
                     {
                         $payment = $event->getPayment();
-                    
+
                         if (null !== $payment->getCommission()
                             && (
                                 null !== $payment->getCommission()->getCreditCommission()
@@ -115,7 +137,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                             $paidCommission->setWallet($payment->getProject()->getWallet());
                             $paidCommission->setCommissionEntity($payment->getCommission());
                             $paidCommission->setStatus(PaidCommission::STATUS_PENDING);
-                    
+
                             $this->entityManager->persist($paidCommission);
                         }
                     }
@@ -133,7 +155,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                
+
                         return false;
                     }
                 }',
@@ -148,7 +170,7 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                
+
                         return false;
                     }
                 }',
@@ -169,14 +191,14 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                    
+
                         public function sampleFunction()
                         {
                             $a = 0;
                             $b = "string";
                             $d = false;
                             $f = null;
-                            
+
                             if ($a == 0) {
                                 if ($b === "string") {
                                     if ($this->someOtherFunction() !== true) {
@@ -198,14 +220,14 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
                         {
                             return true;
                         }
-                    
+
                         public function sampleFunction()
                         {
                             $a = 0;
                             $b = "string";
                             $d = false;
                             $f = null;
-                            
+
                             if (0 == $a) {
                                 if ("string" === $b) {
                                     if (true !== $this->someOtherFunction()) {

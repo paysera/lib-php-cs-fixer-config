@@ -131,14 +131,18 @@ final class ComparisonOrderFixer extends AbstractFixer
                 T_LOGICAL_XOR,
             ])
         ) {
-            if ($tokens[$argumentEndIndex]->equals('(')) {
-                $argumentEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $argumentEndIndex);
+            $startMeaningful = $tokens->getNextMeaningfulToken($argumentStartIndex);
+            if ($tokens[$startMeaningful]->equals('(')) {
+                $argumentEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $startMeaningful);
+                return $this->getArgument($tokens, $argumentStartIndex, $argumentEndIndex);
             }
 
-            if (($tokens[$argumentEndIndex + 1]->equals(')')
-                    && $tokens[$tokens->getNextMeaningfulToken($argumentEndIndex + 1)]->equals('{'))
-                || $tokens[$argumentEndIndex + 1]->isWhitespace()
-                || $tokens[$argumentEndIndex + 1]->equals(';')
+            $endMeaningful = $tokens->getNextMeaningfulToken($argumentEndIndex);
+            if (
+                $tokens[$endMeaningful]->equals(')')
+                && $tokens[$tokens->getNextMeaningfulToken($endMeaningful)]->equals('{')
+                || $tokens[$endMeaningful]->isWhitespace()
+                || $tokens[$endMeaningful]->equals(';')
             ) {
                 return $this->getArgument($tokens, $argumentStartIndex, $argumentEndIndex);
             }
