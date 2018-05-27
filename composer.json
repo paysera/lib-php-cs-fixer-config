@@ -4,12 +4,12 @@
     "type": "library",
     "require": {
         "php": "^7.0",
-        "friendsofphp/php-cs-fixer": ">=2.2,<2.11",
         "doctrine/inflector": "^1.1"
     },
     "require-dev": {
         "gecko-packages/gecko-php-unit": "^2.0",
-        "phpunit/phpunit": "^5.0"
+        "phpunit/phpunit": "^5.0",
+        "friendsofphp/php-cs-fixer": "^2.11"
     },
     "autoload": {
         "psr-4": {
@@ -21,7 +21,10 @@
     "autoload-dev": {
         "psr-4": {
             "Paysera\\PhpCsFixerConfig\\Tests\\": "tests"
-        }
+        },
+        "files": [
+            "vendor/friendsofphp/php-cs-fixer/tests/Test/Constraint/SameStringsConstraint.php"
+        ]
     },
     "suggest": {
         "paysera/lib-arcanist-php-cs-extension": "Integrates PHP CS Fixer into arcanist workflow"
