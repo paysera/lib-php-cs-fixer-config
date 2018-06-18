@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.7.4
+
+### Changed
+
+- Downgraded `doctrine/inflector` from `^1.1` to `~1.0.0`
+
+## 1.7.3
+
+### Changed
+
+- Include autoload in `.php_cs*` config files
+- Lock `friendsofphp/php-cs-fixer` version on `2.11.1`
+
+## 1.7.2
+
+### Changed
+
+- Require `friendsofphp/php-cs-fixer` only in dev
+
 ## 1.7.1
 ### Fixed
 - Changed `friendsofphp/php-cs-fixer` required version to be below `2.11` since it introduced breaking changes causing tests to fail.
