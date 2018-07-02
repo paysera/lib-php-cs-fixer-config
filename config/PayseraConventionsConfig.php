@@ -6,7 +6,6 @@ use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocNecessityFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CheckingExplicitlyFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\LogicalOperatorsFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\StrictComparisonOperatorsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\FluidInterfaceFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\CommentStylesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocContentsFixer;
@@ -19,8 +18,6 @@ use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\MethodNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\PropertyNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CallingParentConstructorFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ChainedMethodCallsFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ClassConstructorsFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ComparisonOrderFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ComparingToBooleanFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ComparingToNullFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\DateTimeFixer;
@@ -32,12 +29,10 @@ use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ReturnAndArgumentTypesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ThrowBaseExceptionFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TraitsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DirectoryAndNamespaceFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\FunctionIsNullFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingArgumentsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\UnnecessaryVariablesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\VisibilityPropertiesFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\FunctionCountFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\StaticMethodsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\MagicMethodsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\AssignmentsInConditionsFixer;
@@ -70,9 +65,7 @@ class PayseraConventionsConfig extends Config
                 new GlobalsFixer(),
                 new SingleClassPerFileFixer(),
                 new ChainedMethodCallsFixer(),
-                new ClassConstructorsFixer(),
                 new ClassNamingFixer(),
-                new ComparisonOrderFixer(),
                 new DirectoryAndNamespaceFixer(),
                 new FullNamesFixer(),
                 new InterfaceNamingFixer(),
@@ -92,8 +85,6 @@ class PayseraConventionsConfig extends Config
                 new ComparingToNullFixer(),
                 new ConditionResultsFixer(),
                 new DateTimeFixer(),
-                new FunctionCountFixer(),
-                new FunctionIsNullFixer(),
                 new MagicMethodsFixer(),
                 new ReturnAndArgumentTypesFixer(),
                 new ReusingVariablesFixer(),
@@ -105,7 +96,6 @@ class PayseraConventionsConfig extends Config
                 new UnnecessaryStructuresFixer(),
                 new UnnecessaryVariablesFixer(),
                 new VisibilityPropertiesFixer(),
-                new StrictComparisonOperatorsFixer(),
                 new LogicalOperatorsFixer(),
                 new VoidResultFixer(),
                 new DocBlockWhitespaceFixer(),
@@ -200,17 +190,16 @@ class PayseraConventionsConfig extends Config
             'is_null' => ['use_yoda_style' => false],
             'no_unreachable_default_argument_value' => true,
             'strict_comparison' => true,
+            'strict_param' => true,
             'psr4' => true,
             'Paysera/psr_1_class_constant_upper_case' => true,
             'Paysera/psr_1_class_name_studly_caps' => true,
             'Paysera/psr_1_function_name_camel_case' => true,
-            'Paysera/php_basic_code_style_comparison_order' => true,
             'Paysera/php_basic_code_style_full_names' => true,
             'Paysera/php_basic_code_style_interface_naming' => true,
             'Paysera/php_basic_code_style_namespaces_and_use_statements' => true,
             'Paysera/php_basic_feature_calling_parent_constructor' => true,
             'Paysera/php_basic_feature_logical_operators' => true,
-            'Paysera/php_basic_feature_strict_comparison_operators' => true,
             'Paysera/php_basic_feature_type_hinting_arguments' => true,
             'Paysera/php_basic_feature_unnecessary_variables' => true,
         ];
@@ -247,6 +236,12 @@ class PayseraConventionsConfig extends Config
             'no_useless_else' => true,
             'semicolon_after_instruction' => true,
             'no_empty_comment' => true,
+            'new_with_braces' => true,
+            'yoda_style' => false,
+            'strict_comparison' => false,
+            'no_alias_functions' => true,
+            'strict_param' => false,
+            'is_null' => false,
             'ordered_class_elements' => [
                 'use_trait',
                 'constant',
@@ -259,7 +254,6 @@ class PayseraConventionsConfig extends Config
                 'method',
             ],
             'Paysera/php_basic_code_style_chained_method_calls' => true,
-            'Paysera/php_basic_code_style_class_constructors' => true,
             'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
             'Paysera/php_basic_comment_comment_styles' => true,
             'Paysera/php_basic_comment_fluid_interface' => true,
@@ -267,15 +261,9 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_feature_comparing_to_null' => true,
             'Paysera/php_basic_feature_condition_results' => true,
-            'Paysera/php_basic_feature_function_count' => true,
-            'Paysera/php_basic_feature_function_is_null' => true,
             'Paysera/php_basic_code_style_doc_block_whitespace' => true,
             'Paysera/php_basic_comment_php_doc_necessity' => true,
         ];
-
-        if (class_exists('\PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer')) {
-            $rules['yoda_style'] = false;
-        }
 
         return $rules;
     }

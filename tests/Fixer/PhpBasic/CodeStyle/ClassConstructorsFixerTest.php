@@ -2,7 +2,6 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ClassConstructorsFixer;
 use PhpCsFixer\Test\AbstractFixerTestCase;
 
 final class ClassConstructorsFixerTest extends AbstractFixerTestCase
@@ -74,17 +73,8 @@ final class ClassConstructorsFixerTest extends AbstractFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
-    {
-        $fixerFactory = parent::createFixerFactory();
-        $fixerFactory->registerCustomFixers([
-            new ClassConstructorsFixer(),
-        ]);
-        return $fixerFactory;
-    }
-
     public function getFixerName()
     {
-        return 'Paysera/php_basic_code_style_class_constructors';
+        return 'new_with_braces';
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ComparisonOrderFixer;
 use PhpCsFixer\Test\AbstractFixerTestCase;
 
 final class ComparisonOrderFixerTest extends AbstractFixerTestCase
@@ -15,6 +14,11 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
      */
     public function testFix($expected, $input = null)
     {
+        $this->fixer->configure([
+            'equal' => false,
+            'identical' => false,
+            'less_and_greater' => false,
+        ]);
         $this->doTest($expected, $input);
     }
 
@@ -246,17 +250,8 @@ final class ComparisonOrderFixerTest extends AbstractFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
-    {
-        $fixerFactory = parent::createFixerFactory();
-        $fixerFactory->registerCustomFixers([
-            new ComparisonOrderFixer(),
-        ]);
-        return $fixerFactory;
-    }
-
     public function getFixerName()
     {
-        return 'Paysera/php_basic_code_style_comparison_order';
+        return 'yoda_style';
     }
 }

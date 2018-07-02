@@ -232,14 +232,15 @@ final class ConditionResultsFixer extends AbstractFixer
 
         $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
         if ($returnCondition === self::TRUE) {
-            $tokens->insertAt(++$insertionIndex, new Token([T_BOOL_CAST, '(bool)']));
+            $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
+            $overrideIndex = $insertionIndex;
         } else {
             $tokens->insertAt(++$insertionIndex, new Token('!'));
+            $tokens->insertAt(++$insertionIndex, new Token('('));
+            $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
+            $overrideIndex = $insertionIndex;
+            $tokens->insertAt(++$insertionIndex, new Token(')'));
         }
-        $tokens->insertAt(++$insertionIndex, new Token('('));
-        $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
-        $overrideIndex = $insertionIndex;
-        $tokens->insertAt(++$insertionIndex, new Token(')'));
         $tokens->insertAt(++$insertionIndex, new Token(';'));
 
         $tokens->overrideRange(

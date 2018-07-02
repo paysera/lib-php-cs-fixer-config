@@ -2,7 +2,6 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\FunctionCountFixer;
 use PhpCsFixer\Test\AbstractFixerTestCase;
 
 final class FunctionCountFixerTest extends AbstractFixerTestCase
@@ -36,17 +35,8 @@ final class FunctionCountFixerTest extends AbstractFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
-    {
-        $fixerFactory = parent::createFixerFactory();
-        $fixerFactory->registerCustomFixers([
-            new FunctionCountFixer(),
-        ]);
-        return $fixerFactory;
-    }
-
     public function getFixerName()
     {
-        return 'Paysera/php_basic_feature_function_count';
+        return 'no_alias_functions';
     }
 }

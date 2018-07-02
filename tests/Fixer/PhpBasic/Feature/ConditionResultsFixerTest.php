@@ -30,49 +30,49 @@ final class ConditionResultsFixerTest extends AbstractFixerTestCase
                 '<?php return $a && $b ? false : true;',
             ],
             [
-                '<?php return (bool)($d && $e);',
+                '<?php return $d && $e;',
                 '<?php return $d && $e ? true : false;',
             ],
             [
                 '<?php
-                
-                $a = (bool)($d && $e);
-                return (bool)($a && $b);',
+
+                $a = $d && $e;
+                return $a && $b;',
                 '<?php
-                
+
                 $a = $d && $e ? true : false;
                 if ($a && $b) {
                     return true;
                 }
-                
+
                 return false;',
             ],
             [
                 '<?php
                 $a = true;
                 $b = true;
-                
+
                 return !($a && $b);',
                 '<?php
                 $a = true;
                 $b = true;
-                
+
                 if ($a && $b) {
                     return false;
                 }
-                
+
                 return true;',
             ],
             [
                 '<?php
                 $a = true;
                 $b = true;
-                
+
                 return !($a && $b);',
                 '<?php
                 $a = true;
                 $b = true;
-                
+
                 if ($a && $b) {
                     return false;
                 } else {
@@ -88,7 +88,27 @@ final class ConditionResultsFixerTest extends AbstractFixerTestCase
                 }
                 return true;',
             ],
-
+            [
+                '<?php
+                class Some
+                {                
+                    public function b($attribute, $user)
+                    {
+                        return $attribute === "a" && $user instanceof AuthToken;
+                    }
+                }',
+                '<?php
+                class Some
+                {                
+                    public function b($attribute, $user)
+                    {
+                        if ($attribute === "a" && $user instanceof AuthToken) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }',
+            ],
         ];
     }
 
