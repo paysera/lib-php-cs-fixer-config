@@ -110,7 +110,8 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 continue;
             }
 
-            if (!$tokens[$key - 1]->isGivenKind(T_STRING)
+            if (
+                !$tokens[$key - 1]->isGivenKind(T_STRING)
                 && !$tokens[$key - 2]->isGivenKind(T_USE)
                 && isset($namespaceIndex)
             ) {
@@ -322,16 +323,15 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
      */
     private function findNamespaceEndIndex(Tokens $tokens, $startIndex)
     {
-        for ($i = $startIndex; $i < $tokens->count() - 1; ++$i) {
-            if ($tokens[$i + 1]->isGivenKind(T_WHITESPACE)
-                || $tokens[$i + 1]->equals('(')
-                || $tokens[$i + 1]->equals(')')
-                || $tokens[$i + 1]->equals(';')
-                || $tokens[$i + 1]->isGivenKind(T_DOUBLE_COLON)
+        for ($i = $startIndex + 1; $i < $tokens->count(); $i++) {
+            $token = $tokens[$i];
+            if (
+                !$token->isGivenKind(T_STRING)
+                && !$token->isGivenKind(T_NS_SEPARATOR)
             ) {
-                return $i;
+                return $i - 1;
             }
         }
-        return null;
+        return $i;
     }
 }
