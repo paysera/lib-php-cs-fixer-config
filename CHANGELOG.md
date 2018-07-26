@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 some of previous cases. Previous behavior in many cases made the code less readable and/or changed the execution
 order of function calls etc.
 
+### Fixed
+
+- `Paysera/php_basic_code_style_namespaces_and_use_statements` was fixed for cases where comma is after the class name,
+like when implementing a few interfaces.
+
 ## 1.7.4
 
 ### Changed
