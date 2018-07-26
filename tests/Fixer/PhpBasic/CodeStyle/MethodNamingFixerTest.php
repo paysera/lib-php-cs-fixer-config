@@ -61,6 +61,17 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                      */
                     private function isReady()
                     {
+                        return $this->ready;
+                    }
+                    
+                    private function isEqual()
+                    {
+                        return "a" === "b";
+                    }
+                    
+                    private function isTokenSomething($token)
+                    {
+                        return $token->isSomething();
                     }
                 }',
                 null
@@ -73,7 +84,14 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                      * @return SomeObject
                      */
                     private function areListed()
-                    { // TODO: "areListed" - PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions
+                    { // TODO: Question-type functions always return boolean (https://bit.ly/psg-methods)
+                        return $this->object;
+                    }
+                    
+                    private function hasRights()
+                    { // TODO: Question-type functions always return boolean (https://bit.ly/psg-methods)
+                        makeSomething();
+                        throw new Exception();
                     }
                 }',
                 '<?php
@@ -84,6 +102,13 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                      */
                     private function areListed()
                     {
+                        return $this->object;
+                    }
+                    
+                    private function hasRights()
+                    {
+                        makeSomething();
+                        throw new Exception();
                     }
                 }'
             ],
@@ -93,65 +118,30 @@ final class MethodNamingFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     public function backupNumber()
-                    { // TODO: "backupNumber" - PhpBasic convention 2.5.5: Invalid entity function name
+                    {
                         $this->setNumberBackup($this->getNumber());
                         $this->setNumber(null);
                     }
                 }',
+                null
+            ],
+            'Works with PHP 7 scalar return types' => [
                 '<?php
-                namespace Evp\Bundle\BankTransferBundle\Entity;
                 class Sample
                 {
-                    public function backupNumber()
+                    private function areListed(): int
+                    { // TODO: Question-type functions always return boolean (https://bit.ly/psg-methods)
+                        return $this->listed;
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    private function areListed(): int
                     {
-                        $this->setNumberBackup($this->getNumber());
-                        $this->setNumber(null);
+                        return $this->listed;
                     }
                 }'
-            ],
-            [
-                '<?php
-                namespace Paysera\RestrictionBundle\Entity;
-                
-                class Sample
-                {
-                    public function __construct()
-                    {
-                    }
-                    
-                    public function getStatuses()
-                    {
-                    }
-                    
-                    public function addStatus()
-                    {
-                    }
-                    
-                    public function setType()
-                    {
-                    }
-                    
-                    public function markAsWaitingFunds()
-                    {
-                    }
-                    
-                    public function removeBankAccount()
-                    {
-                    }
-                    
-                    public function isFinalStatus()
-                    {
-                    }
-                    
-                    public function areLocalBanksIncluded()
-                    {
-                    }
-                    
-                    public function hasEditPermission()
-                    {
-                    }
-                }',
-                null,
             ],
         ];
     }

@@ -5,47 +5,23 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 
 final class MethodNamingFixer extends AbstractFixer
 {
-    const BOOL_FUNCTION = 'PhpBasic convention 2.5.5: We use prefix - has, is, can for bool functions';
-    const ENTITY_FUNCTIONS = 'PhpBasic convention 2.5.5: Invalid entity function name';
-    const ENTITY = 'Entity';
-    const TRUE = 'true';
-    const FALSE = 'false';
+    const BOOL_FUNCTION_COMMENT = 'Question-type functions always return boolean (https://bit.ly/psg-methods)';
 
     /**
      * @var array
      */
-    private $validBoolFunctionPrefixes = [
+    private $boolFunctionPrefixes = [
         'is',
         'are',
         'has',
         'can',
-        'apply',
-        'matches',
-        'check',
-    ];
-
-    /**
-     * @var array
-     */
-    private $validEntityFunctionPrefixes = [
-        'is',
-        'are',
-        'has',
-        'can',
-        'on',
-        'get',
-        'set',
-        'add',
-        'create',
-        'remove',
-        'clear',
-        'mark',
-        '__',
+        'does',
     ];
 
     public function getDefinition()
@@ -67,9 +43,14 @@ final class MethodNamingFixer extends AbstractFixer
                 <?php
                     class Sample
                     {
-                        public function someInvalidName()
+                        public function isThisNeeded()
                         {
-                            return false;
+                            return 123;
+                        }
+                        
+                        public function hasAllRights()
+                        {
+                            soSomething();
                         }
                     }
                 '),
@@ -95,92 +76,82 @@ final class MethodNamingFixer extends AbstractFixer
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        $classNamespace = null;
         foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_NAMESPACE)) {
-                $semicolonIndex = $tokens->getNextTokenOfKind($key, [';']);
-                if ($tokens[$semicolonIndex - 1]->isGivenKind(T_STRING)) {
-                    $classNamespace = $tokens[$semicolonIndex - 1]->getContent();
-                }
-            }
-
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
                 $functionName = $tokens[$key]->getContent();
                 $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
-                $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
-                if (!$tokens[$curlyBraceStartIndex]->equals('{')) {
+                $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+
+                $returnType = null;
+                if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
+                    $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                    $returnType = $tokens[$typeIndex]->getContent();
+                    $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
+                }
+
+                if (!$tokens[$nextIndex]->equals('{')) {
                     continue;
                 }
 
-                if ($classNamespace === self::ENTITY) {
-                    $this->validateEntityFunctionName($tokens, $functionName, $curlyBraceStartIndex);
-                    continue;
-                }
-
-                $index = $tokens->getPrevNonWhitespace($visibilityTokenIndex);
-                $docBlockIndex = null;
-                if ($tokens[$index]->isGivenKind(T_DOC_COMMENT)) {
-                    $docBlockIndex = $index;
-                } elseif ($tokens[$tokens->getPrevNonWhitespace($index)]->isGivenKind(T_DOC_COMMENT)) {
-                    $docBlockIndex = $tokens->getPrevNonWhitespace($index);
-                }
-
-                $shouldReturnBool = preg_match(
-                    '#^(?:' . implode('|', $this->validBoolFunctionPrefixes) . ')[A-Z]#',
-                    $functionName
-                );
-
-                if ($docBlockIndex !== null) {
-                    $returnsBool = preg_match('#@return\s.*(boolean|bool)#', $tokens[$docBlockIndex]->getContent());
-                    if ($shouldReturnBool && !$returnsBool) {
-                        $this->insertComment($tokens, $curlyBraceStartIndex, $functionName, self::BOOL_FUNCTION);
-                    }
-                } else {
-                    $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-                    for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
-                        if ($tokens[$i]->isGivenKind(T_FUNCTION)) {
-                            break;
-                        }
-                        $nextTokenValue = strtolower($tokens[$tokens->getNextMeaningfulToken($i)]->getContent());
-                        if ($tokens[$i]->isGivenKind(T_RETURN)
-                            && !in_array($nextTokenValue, [self::TRUE, self::FALSE], true)
-                            && $shouldReturnBool
-                        ) {
-                            $this->insertComment($tokens, $curlyBraceStartIndex, $functionName, self::BOOL_FUNCTION);
-                            break;
-                        }
-                    }
-                }
+                $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param string $functionName
-     * @param int $insertIndex
-     */
-    private function validateEntityFunctionName(Tokens $tokens, $functionName, $insertIndex)
+    private function fixMethod(Tokens $tokens, $functionName, $visibilityTokenIndex, $curlyBraceStartIndex, $returnType)
     {
-        if (!preg_match('#^' . implode('|', $this->validEntityFunctionPrefixes) . '#', $functionName)) {
-            $this->insertComment($tokens, $insertIndex, $functionName, self::ENTITY_FUNCTIONS);
+        $index = $tokens->getPrevNonWhitespace($visibilityTokenIndex);
+        $docBlockIndex = null;
+        if ($tokens[$index]->isGivenKind(T_DOC_COMMENT)) {
+            $docBlockIndex = $index;
+        } elseif ($tokens[$tokens->getPrevNonWhitespace($index)]->isGivenKind(T_DOC_COMMENT)) {
+            $docBlockIndex = $tokens->getPrevNonWhitespace($index);
+        }
+
+        $shouldReturnBool = preg_match(
+            '#^(?:' . implode('|', $this->boolFunctionPrefixes) . ')[A-Z]#',
+            $functionName
+        );
+
+        if (!$shouldReturnBool) {
+            return;
+        }
+
+        if ($returnType !== null) {
+            $returnsBool = $returnType === 'bool';
+        } elseif ($docBlockIndex !== null) {
+            $comment = $tokens[$docBlockIndex]->getContent();
+            $returnsBool = preg_match('#@return\s+(boolean|bool)(\s|\n)#', $comment);
+        } else {
+            $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
+            $returnsBool = $this->hasFunctionReturnClause($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex);
+        }
+
+        if (!$returnsBool) {
+            $this->insertComment($tokens, $curlyBraceStartIndex);
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $functionName
-     * @param string $convention
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $functionName, $convention)
+    private function hasFunctionReturnClause(Tokens $tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
     {
-        $comment = '// TODO: "' . $functionName . '" - ' . $convention;
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
+            if ($tokens[$i]->isGivenKind(T_RETURN)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function insertComment(Tokens $tokens, int $insertIndex)
+    {
+        $comment = '// TODO: ' . self::BOOL_FUNCTION_COMMENT;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertAt($insertIndex + 1, new Token([T_COMMENT, $comment]));
             $tokens->insertAt($insertIndex + 1, new Token([T_WHITESPACE, ' ']));

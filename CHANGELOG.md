@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `Paysera/php_basic_feature_unnecessary_variables` now is not so aggressive as previously and handles only
 some of previous cases. Previous behavior in many cases made the code less readable and/or changed the execution
 order of function calls etc.
+- `Paysera/php_basic_code_style_method_naming` changed to correspond with the convention - for question-type
+functions it's required to return boolean. If we're not sure of the return type, don't add the warning. Also
+entity function prefix checks were removed, as conventions does not state that Entity cannot have any other
+function than with defined prefixes.
 
 ### Fixed
 
