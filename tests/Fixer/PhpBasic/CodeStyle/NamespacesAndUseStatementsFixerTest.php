@@ -23,6 +23,26 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+namespace MyNamespace;
+use IteratorAggregate;
+use ArrayAccess;
+
+class A implements ArrayAccess, IteratorAggregate
+{
+
+}
+',
+                '<?php
+namespace MyNamespace;
+
+class A implements \ArrayAccess, \IteratorAggregate
+{
+
+}
+',
+            ],
+            [
+                '<?php
 namespace Evp\DebugPenaltyBundle\Service;
 use InvalidArgumentException;
 use Evp\UserSurveillanceBundle\Scenarios;
