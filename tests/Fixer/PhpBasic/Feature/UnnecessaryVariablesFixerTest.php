@@ -25,6 +25,102 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+                    public function getSomething()
+                    {
+                        return get();
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        $a = get();
+                        return $a;
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        if (something()) {
+                            doSomething();
+                            return get();
+                        }
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        if (something()) {
+                            doSomething();
+                            $a = get();
+                            return $a;
+                        }
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        return get();
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        $a = get(); // this calls get() and sets it to variable a
+                        
+                        return /* returns a */ $a;
+                    }
+                }',
+            ],
+            'fixes several occurrences in file' => [
+                '<?php
+                function getSomething()
+                {
+                    return get();
+                }
+                function make() {
+                    return get(12, "we" . (123 * 33));
+                }',
+                '<?php
+                function getSomething()
+                {
+                    $a = get();
+                    return $a;
+                }
+                function make() {
+                    $b = get(12, "we" . (123 * 33));
+                    return $b;
+                }',
+            ],
+            'does not inline when it can be used for readability' => [
+                '<?php
+                class Sample
+                {
+                    public function getSomething()
+                    {
+                        $currentBalanceForUser = getFromDb(123, "balance");
+                        return sendEmailAbout($currentBalanceForUser);
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     public function generate($length = null)
                     {
                         if ($length === null) {
@@ -48,49 +144,35 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
+            'does not change order of called methods' => [
                 '<?php
                 class Sample
                 {
-                    private function getSomething()
+                    public function myMethod()
                     {
-                        $c = getNone();
-                        if ($c) {
-                            return get();
-                        } else {
-                            return getAll();
-                        }
+                        $variable = makeFirstThing();
+                        makeSecondThing();
+                        return $variable;
                     }
                 }',
-                '<?php
-                class Sample
-                {
-                    private function getSomething()
-                    {
-                        $a = get();
-                        $b = getAll();
-                        $c = getNone();
-                        if ($c) {
-                            return $a;
-                        } else {
-                            return $b;
-                        }
-                    }
-                }',
+                null,
             ],
-            [
+            'does not inline if in condition' => [
                 '<?php
                 class Sample
                 {
                     private function getSomething()
                     {
-                        if (true) {
-                            return get();
-                        } else {
-                            return getAll();
+                        $c = doSomething();
+                        if ($c) {
+                            return true;
                         }
+                        return false;
                     }
                 }',
+                null,
+            ],
+            'does not inline if several methods have to be called' => [
                 '<?php
                 class Sample
                 {
@@ -105,40 +187,7 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                         }
                     }
                 }',
-            ],
-            [
-                '<?php
-                class Sample
-                {
-                    public function getStringToSign(RequestInterface $request, $timestamp, $nonce)
-                    {
-                        // Convert booleans to strings.
-                        $params = $this->prepareParameters($params);
-                
-                        $url = Url::factory($request->getUrl())->setQuery(\'\')->setFragment(null);
-                
-                        return strtoupper($request->getMethod()) . \'&\'
-                             . rawurlencode($url) . \'&\'
-                             . rawurlencode((string) new QueryString($params));
-                    }
-                }',
-                '<?php
-                class Sample
-                {
-                    public function getStringToSign(RequestInterface $request, $timestamp, $nonce)
-                    {
-                        // Convert booleans to strings.
-                        $params = $this->prepareParameters($params);
-                      
-                        $parameterString = new QueryString($params);
-                
-                        $url = Url::factory($request->getUrl())->setQuery(\'\')->setFragment(null);
-                
-                        return strtoupper($request->getMethod()) . \'&\'
-                             . rawurlencode($url) . \'&\'
-                             . rawurlencode((string) $parameterString);
-                    }
-                }',
+                null,
             ],
             [
                 '<?php
@@ -183,17 +232,7 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
-                '<?php
-                class Sample
-                {
-                    protected function supports($attribute, $subject)
-                    {
-                        $supports = $subject === null || $subject instanceof Restriction || $subject instanceof RestrictionFilter;
-                        
-                        return isset($this->permissionScopeMap[$attribute]) && $supports;
-                    }
-                }',
+            'does not inline when variables make constructs - this makes it easier to understand the code' => [
                 '<?php
                 class Sample
                 {
@@ -205,25 +244,7 @@ final class UnnecessaryVariablesFixerTest extends AbstractFixerTestCase
                         return $hasScope && $supports;
                     }
                 }',
-            ],
-            [
-                '<?php
-                class Sample
-                {
-                    public function getSomething()
-                    {
-                        return get();
-                    }
-                }',
-                '<?php
-                class Sample
-                {
-                    public function getSomething()
-                    {
-                        $a = get();
-                        return $a;
-                    }
-                }',
+                null,
             ],
         ];
     }
