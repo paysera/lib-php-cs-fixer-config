@@ -11,6 +11,9 @@
         "phpunit/phpunit": "^5.0",
         "friendsofphp/php-cs-fixer": "2.11.1"
     },
+    "conflict": {
+        "friendsofphp/php-cs-fixer": ">=2.11.2"
+    },
     "autoload": {
         "psr-4": {
             "Paysera\\PhpCsFixerConfig\\Composer\\": "composer",
