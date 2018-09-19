@@ -2,6 +2,14 @@
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
+use Paysera\PhpCsFixerConfig\Parser\Entity\ComplexItemList;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
+use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
+use Paysera\PhpCsFixerConfig\Parser\Entity\EmptyToken;
+use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
+use Paysera\PhpCsFixerConfig\Parser\Parser;
+use Paysera\PhpCsFixerConfig\Parser\Entity\SeparatedItemList;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
@@ -11,10 +19,20 @@ use PhpCsFixer\Tokenizer\Tokens;
 
 final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
+    private $parser;
+    private $contextualTokenBuilder;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->parser = new Parser(new GroupSeparatorHelper());
+        $this->contextualTokenBuilder = new ContextualTokenBuilder();
+    }
+
     public function getDefinition()
     {
         return new FixerDefinition(
-            'Checks if &&, || etc. comes in the beginning of the line, not the end',
+            'Formats new lines, whitespaces and operators as needed when splitting in several lines',
             [
                 new CodeSample('
                 <?php
@@ -67,214 +85,226 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
 
     public function isCandidate(Tokens $tokens)
     {
-        return $tokens->isAnyTokenKindsFound([T_BOOLEAN_AND, T_BOOLEAN_OR, T_STRING]);
-    }
-
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
-    {
-        foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])) {
-                if (
-                    $tokens[$key + 1]->isWhitespace()
-                    && strpos($tokens[$key + 1]->getContent(), "\n") !== false
-                ) {
-                    $indent = $tokens[$key + 1]->getContent();
-                    $tokens[$key + 1]->setContent(' ');
-                }
-
-                if (
-                    isset($indent)
-                    && $tokens[$key - 1]->isWhitespace()
-                    && strpos($tokens[$key - 1]->getContent(), "\n") === false
-                ) {
-                    $tokens[$key - 1]->setContent($indent);
-                }
-            }
-
-            if (
-                $token->equals('(')
-                && $tokens[$tokens->getPrevNonWhitespace($key)]->isGivenKind([T_STRING, T_ARRAY])
-            ) {
-                $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key);
-
-                $whitespaceToken = $this->checkForArgumentSplits($tokens, $key, $parenthesesEndIndex);
-                if ($whitespaceToken !== null) {
-                    $this->fixArgumentPlacements(
-                        $tokens,
-                        $whitespaceToken->getContent(),
-                        $key + 1,
-                        $parenthesesEndIndex - 1
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return Token|null
-     */
-    private function checkForArgumentSplits(Tokens $tokens, $startIndex, $endIndex)
-    {
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
-            // Skipping this function if argument splits belongs to another function
-            if (
-                $tokens[$tokens->getNextNonWhitespace($i)]->equals('(')
-                && $tokens[$i]->isGivenKind([T_STRING, T_ARRAY, T_FUNCTION])
-            ) {
-                return null;
-            }
-
-            if ($tokens[$i]->isWhitespace() && strpos($tokens[$i]->getContent(), "\n") !== false) {
-                // Takes first newline indent
-                return $tokens[$i];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param string $whitespaceToken
-     * @param int $startIndex
-     * @param int $parenthesesEndIndex
-     */
-    private function fixArgumentPlacements(Tokens $tokens, $whitespaceToken, $startIndex, $parenthesesEndIndex)
-    {
-        $indent = $whitespaceToken;
-        $endIndex = $parenthesesEndIndex;
-
-        // Checking first argument if it's not an array square brace
-        if ($tokens[$startIndex]->getContent() !== '[' && strpos($tokens[$startIndex]->getContent(), "\n") === false) {
-            $tokens->insertAt($startIndex, new Token([T_WHITESPACE, $indent]));
-            $endIndex++;
-        }
-
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
-            // Skipping if another function is found
-            if ($tokens[$i]->equals('(')) {
-                $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
-            }
-
-            // Skip index type arrays: $var['something'] or $var['some']['thing']  or $var[$i]
-            // And conditional elements (?, :): true ? [T_IS_IDENTICAL, '==='] : [T_IS_NOT_IDENTICAL, '!==']
-            $blockType = Tokens::detectBlockType($tokens[$i]);
-            if ($blockType['type'] === Tokens::BLOCK_TYPE_INDEX_SQUARE_BRACE && $blockType['isStart']) {
-                $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_INDEX_SQUARE_BRACE, $i);
-            } elseif ($blockType['type'] === Tokens::BLOCK_TYPE_ARRAY_SQUARE_BRACE && $blockType['isStart']) {
-                $endSquareBraceIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_ARRAY_SQUARE_BRACE, $i);
-                $conditionTokenIndex = $tokens->getPrevMeaningfulToken($i);
-                if ($this->isSingleArgumentArray($tokens, $i, $endSquareBraceIndex)
-                    || $tokens[$conditionTokenIndex]->equalsAny(['?', ':'])
-                ) {
-                    $i = $endSquareBraceIndex;
-                }
-            }
-
-            // For first square opening brace doubling indent
-            if (($tokens[$i]->getContent() === '[' || $tokens[$i]->equals('('))
-                && $tokens[$i - 1]->isGivenKind([T_WHITESPACE, ',', T_STRING])
-            ) {
-                $openSquareTokenIndex = $i;
-                $indent .= $this->whitespacesConfig->getIndent();
-                $endIndex = $this->insertWhitespace($tokens, $i + 1, $endIndex, $indent);
-            }
-
-            $nextTokenSquareBraceIndex = $tokens->getNextMeaningfulToken($i);
-            if ($tokens[$i]->equals(',') && $tokens[$nextTokenSquareBraceIndex]->getContent() !== ']'
-                && !$tokens[$tokens->getNextNonWhitespace($i)]->isGivenKind([T_COMMENT, T_DOC_COMMENT])
-            ) {
-                $endIndex = $this->insertWhitespace($tokens, $i + 1, $endIndex, $indent);
-            }
-
-            // Check if it's array, not argument in array
-            if (($tokens[$i + 1]->getContent() === ']' || $tokens[$i + 1]->equals(')'))
-                && isset($openSquareTokenIndex)
-                && $tokens[$openSquareTokenIndex - 1]->isGivenKind([T_WHITESPACE, ',', T_STRING])
-            ) {
-                // For last closing brackets overriding indent
-                if (strpos($tokens[$openSquareTokenIndex - 1]->getContent(), "\n") === false) {
-                    // Removing 4 spaces if square open brace had no newline before it
-                    $indent = preg_replace(
-                        '/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/',
-                        '',
-                        $indent,
-                        1
-                    );
-                } else {
-                    // Overriding to original indent if there was newline before square open brace
-                    $indent = $whitespaceToken;
-                }
-                if ($tokens[$i]->isWhitespace()) {
-                    $tokens[$i]->setContent($indent);
-                } else {
-                    $tokens->insertAt($i + 1, new Token([T_WHITESPACE, $indent]));
-                    $endIndex++;
-                }
-            }
-        }
-
-        if (strpos($tokens[$startIndex]->getContent(), "\n") === 0) {
-            // Removing 4 spaces if regular open brace had no newline before it
-            $indent = preg_replace('/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/', '', $indent, 1);
-        }
-
-        if ($tokens[$endIndex]->isWhitespace()) {
-            $tokens[$endIndex]->setContent($indent);
-            // Don't insert newline if square open brace was near start parentheses: ([
-        } elseif (!$tokens[$endIndex]->isWhitespace()
-            && ($tokens[$endIndex]->getContent() !== ']'
-                || !($tokens[$startIndex]->getContent() === '[' && $tokens[$startIndex - 1]->equals('(')))
-        ) {
-            $tokens->insertAt($endIndex + 1, new Token([T_WHITESPACE, $indent]));
-        }
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return bool
-     */
-    private function isSingleArgumentArray(Tokens $tokens, $startIndex, $endIndex)
-    {
-        for ($i = $startIndex + 1; $i < $endIndex; $i++) {
-            // Skipping all parentheses
-            if ($tokens[$i]->equals('(')) {
-                $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
-            }
-            // Skipping all square braces
-            if (Tokens::detectBlockType($tokens[$i])['type'] === Tokens::BLOCK_TYPE_ARRAY_SQUARE_BRACE) {
-                $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_ARRAY_SQUARE_BRACE, $i);
-            } elseif (Tokens::detectBlockType($tokens[$i])['type'] === Tokens::BLOCK_TYPE_INDEX_SQUARE_BRACE) {
-                $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_INDEX_SQUARE_BRACE, $i);
-            }
-
-            // If comma found and it's not the last - array has multiple arguments
-            if ($tokens[$i]->equals(',') && $i + 1 !== $endIndex) {
-                return false;
-            }
-        }
         return true;
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param int $endIndex
-     * @param string $indent
-     * @return int
+     * @param \SplFileInfo $file
+     * @param Tokens|Token[] $tokens
      */
-    private function insertWhitespace(Tokens $tokens, $insertIndex, $endIndex, $indent)
+    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        if ($tokens[$insertIndex]->isWhitespace()) {
-            $tokens[$insertIndex]->setContent($indent);
-        } else {
-            $tokens->insertAt($insertIndex, new Token([T_WHITESPACE, $indent]));
-            $endIndex++;
+        $startEndTokens = [
+            '=' => ';',
+            'return' => ';',
+            '(' => ')',
+            '[' => ']',
+        ];
+
+        $firstToken = $this->contextualTokenBuilder->buildFromTokens($tokens);
+
+        $token = $firstToken;
+        do {
+            foreach ($startEndTokens as $startValue => $endValue) {
+                if ($token->getContent() === $startValue) {
+                    $groupedItem = $this->parser->parseUntil($token, $endValue);
+                    $this->fixWhitespaceForItem($groupedItem);
+
+                    $token = $groupedItem->lastToken();
+                }
+            }
+
+            $token = $token->getNextToken();
+        } while ($token !== null);
+
+
+        $this->overrideTokens($tokens, $firstToken);
+    }
+
+    private function fixWhitespaceForItem(ItemInterface $groupedItem)
+    {
+        $standardIndent = $this->whitespacesConfig->getIndent();
+
+        $itemLists = $groupedItem->getComplexItemLists();
+        foreach ($itemLists as $itemList) {
+            if (!$itemList->isSplitIntoSeveralLines()) {
+                continue;
+            }
+
+            $prefixItem = $itemList->getFirstPrefixItem();
+            $tokenForIndent = $prefixItem !== null
+                ? $prefixItem->firstToken()
+                : $itemList->firstToken()->previousNonWhitespaceToken();
+            $firstLineIndent = $tokenForIndent->getLineIndent();
+
+            $indent = "\n" . $firstLineIndent . $standardIndent;
+            $lastIndent = "\n" . $firstLineIndent;
+
+            $skipPrefixHandling = $itemList instanceof SeparatedItemList && $itemList->getSeparator() === '->';
+
+            if (!$skipPrefixHandling) {
+                $this->ensureContentForPrefixWhitespace($itemList, $indent);
+            }
+            $this->ensureContentForPostfixWhitespace($itemList, $lastIndent);
+
+            if ($itemList instanceof SeparatedItemList) {
+                $this->fixSeparators($itemList, $indent);
+            }
         }
-        return $endIndex;
+    }
+
+
+    private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content)
+    {
+        $prefixWhitespaceItem = $itemList->getFirstPrefixWhitespaceItem();
+
+        $prefixWhitespaceToken = null;
+        if ($prefixWhitespaceItem !== null) {
+            $prefixWhitespaceToken = $prefixWhitespaceItem->firstToken();
+            if (!$prefixWhitespaceToken->isWhitespace()) {
+                $prefixWhitespaceToken = null;
+            }
+        }
+
+        if ($prefixWhitespaceToken !== null) {
+            if ($prefixWhitespaceToken->getContent() !== $content) {
+                $prefixWhitespaceToken->replaceWith(new ContextualToken($content));
+            }
+            return;
+        }
+
+        $token = new ContextualToken($content);
+
+        $prefixItem = $itemList->getFirstPrefixItem();
+        if ($prefixItem !== null) {
+            $prefixItem->lastToken()->insertAfter($token);
+            return;
+        }
+
+        $firstToken = $itemList->firstToken();
+        $previousToken = $firstToken->previousToken();
+        if ($previousToken instanceof EmptyToken) {
+            $beforePreviousToken = $previousToken->previousToken();
+            if ($beforePreviousToken !== null && $beforePreviousToken->isWhitespace()) {
+                $beforePreviousToken->replaceWith($token);
+            } else {
+                $previousToken->insertBefore($token);
+            }
+        } elseif ($previousToken === null || !$previousToken->isWhitespace()) {
+            $firstToken->insertBefore($token);
+        }
+    }
+
+    private function ensureContentForPostfixWhitespace(ComplexItemList $itemList, string $content)
+    {
+        $postfixWhitespaceItem = $itemList->getFirstPostfixWhitespaceItem();
+
+        $postfixWhitespaceToken = null;
+        if ($postfixWhitespaceItem !== null) {
+            $postfixWhitespaceToken = $postfixWhitespaceItem->lastToken();
+            if (!$postfixWhitespaceToken->isWhitespace()) {
+                $postfixWhitespaceToken = null;
+            }
+        }
+
+        if ($postfixWhitespaceToken !== null) {
+            if ($postfixWhitespaceToken->getContent() !== $content) {
+                $postfixWhitespaceToken->replaceWith(new ContextualToken($content));
+            }
+            return;
+        }
+
+        $token = new ContextualToken($content);
+
+        $postfixItem = $itemList->getFirstPostfixItem();
+        if ($postfixItem !== null) {
+            $postfixItem->firstToken()->insertBefore($token);
+            return;
+        }
+
+        $lastToken = $itemList->lastToken();
+        $nextToken = $lastToken->nextToken();
+        if ($nextToken === null || (!$nextToken->isWhitespace() && !$nextToken instanceof EmptyToken)) {
+            $lastToken->insertAfter($token);
+        }
+    }
+
+    private function fixSeparators(SeparatedItemList $itemList, string $indent)
+    {
+        $separator = $itemList->getSeparator();
+        if ($separator === '->') {
+            $whitespaceBefore = $indent;
+            $whitespaceAfter = null;
+            $forceWhitespace = false;
+        } elseif ($separator === ',') {
+            $whitespaceBefore = null;
+            $whitespaceAfter = $indent;
+            $forceWhitespace = true;
+        } else {
+            $whitespaceBefore = $indent;
+            $whitespaceAfter = ' ';
+            $forceWhitespace = true;
+        }
+
+        foreach ($itemList->getSeparatorItems() as $item) {
+            $this->fixWhitespaceBefore($item, $whitespaceBefore, $forceWhitespace);
+            $this->fixWhitespaceAfter($item, $whitespaceAfter, $forceWhitespace);
+        }
+
+        $separatorAfterContents = $itemList->getSeparatorAfterContents();
+        if ($separatorAfterContents !== null) {
+            $this->fixWhitespaceBefore($separatorAfterContents, $whitespaceBefore, $forceWhitespace);
+        }
+    }
+
+    /**
+     * @param ItemInterface $item
+     * @param string|null $whitespaceBefore
+     * @param bool $forceWhitespace
+     */
+    private function fixWhitespaceBefore(ItemInterface $item, $whitespaceBefore, bool $forceWhitespace)
+    {
+        $firstToken = $item->firstToken();
+        if ($firstToken->isWhitespace()) {
+            $this->replaceWith($firstToken, $whitespaceBefore);
+        } elseif ($forceWhitespace && $whitespaceBefore !== null) {
+            $firstToken->insertBefore(new ContextualToken($whitespaceBefore));
+        }
+    }
+
+    /**
+     * @param ItemInterface $item
+     * @param string|null $whitespaceAfter
+     * @param bool $forceWhitespace
+     */
+    private function fixWhitespaceAfter(ItemInterface $item, $whitespaceAfter, bool $forceWhitespace)
+    {
+        $lastToken = $item->lastToken();
+        if ($lastToken->isWhitespace()) {
+            $this->replaceWith($lastToken, $whitespaceAfter);
+        } elseif ($forceWhitespace && $whitespaceAfter !== null) {
+            $lastToken->insertAfter(new ContextualToken($whitespaceAfter));
+        }
+    }
+
+    private function replaceWith(ContextualToken $token, string $replacement = null)
+    {
+        if ($replacement === null) {
+            $token->previousToken()->setNextContextualToken($token->getNextToken());
+        } else {
+            $token->replaceWith(new ContextualToken($replacement));
+        }
+    }
+
+    private function overrideTokens(Tokens $tokens, ContextualToken $firstToken)
+    {
+        $allTokens = [];
+        $token = $firstToken;
+        do {
+            $allTokens[] = new Token($token->getPrototype());
+            $token = $token->getNextToken();
+        } while ($token !== null);
+
+        $tokens->overrideRange(0, count($tokens) - 1, $allTokens);
     }
 }
