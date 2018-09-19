@@ -21,7 +21,36 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
     public function provideCases()
     {
         return [
-            [
+            'simple array' => [
+                '<?php
+                [
+                    \'type\' => FundsSource::TYPE_BUY,
+                    \'details\' => \'Bought something\',
+                ];',
+                null,
+            ],
+            'simple array without prefix and postfix' => [
+                '<?php
+                [
+                    \'type\' => FundsSource::TYPE_BUY,
+                    \'details\' => \'Bought something\',
+                ];',
+                '<?php
+                [\'type\' => FundsSource::TYPE_BUY,
+                    \'details\' => \'Bought something\',];',
+            ],
+            'simple array with several levels' => [
+                '<?php
+                [
+                    \'1\' => [
+                        \'1.1\' => \'value\',
+                        \'1.2\' => \'value\',
+                        \'1.3\' => \'value\',
+                    ],
+                ];',
+                null,
+            ],
+            'ok with several lines' => [
                 '<?php class Sample {
                     public function shouldPostFieldsBeSigned()
                     {
@@ -43,12 +72,82 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null
             ],
+            'Return with fluent interface and several lines when ok' => [
+                '<?php
+                return $this->getService()
+                    ->doStuff()
+                ;',
+                null
+            ],
+            'Return with fluent interface and several lines' => [
+                '<?php
+                return $this->getService()
+                    ->doStuff()
+                ;',
+                '<?php
+                return $this-> getService()
+                        ->doStuff()
+                ;',
+            ],
+            'Complex multiline logic with parenthesis' => [
+                '<?php
+                return (
+                    (
+                        $a
+                        && $b
+                    )
+                    || (
+                        $c
+                        && $d
+                    )
+                );',
+                '<?php
+                return (($a &&
+                                $b) ||
+                                ($c &&
+                                $d)
+                            );',
+            ],
+            'Complex multiline logic without parenthesis' => [
+                '<?php
+                return (
+                        $a
+                        && $b
+                    ||
+                        $c
+                        && $d
+                );',
+                '<?php
+                return ($a &&
+                                $b ||
+                                $c &&
+                                $d
+                            );',
+            ],
+            'Complex multiline logic with mixed parenthesis' => [
+                '<?php
+                return (
+                        $a
+                        && $b
+                    || (
+                        $c
+                        && $d
+                    )
+                );',
+                '<?php
+                return ($a &&
+                                $b ||
+                                ($c &&
+                                 $d)
+                            );',
+            ],
             [
                 '<?php class Sample {
                     public function shouldPostFieldsBeSigned()
                     {
                         return $this->getEntityManager()
-                            ->createQuery(\'SELECT t FROM WebToPayApiBundle:TransactionNotification t WHERE
+                            ->createQuery(
+                                \'SELECT t FROM WebToPayApiBundle:TransactionNotification t WHERE
                                 t.transaction = :transaction
                                 AND t.event = :event\'
                             )
@@ -71,7 +170,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null
             ],
-            [
+            'default parameter value' => [
                 '<?php class Sample {
                     public function shouldPostFieldsBeSigned($request)
                     {
@@ -92,10 +191,11 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 '<?php class Sample {
                     public function shouldPostFieldsBeSigned($request)
                     {
-                        if (!$this->config->get(\'disable_post_params\')
+                        if (
+                            !$this->config->get(\'disable_post_params\')
                             && $request instanceof EntityEnclosingRequestInterface
-                            && false !== strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\'))
-                        {
+                            && false !== strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\')
+                        ) {
                             return true;
                         }
 
@@ -107,8 +207,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     {
                         if (!$this->config->get(\'disable_post_params\') &&
                             $request instanceof EntityEnclosingRequestInterface &&
-                            false !== strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\'))
-                        {
+                            false !== strpos($request->getHeader(\'Content-Type\'), \'application/x-www-form-urlencoded\')) {
                             return true;
                         }
 
@@ -141,19 +240,13 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
+            'ternary operators in separate line as single argument' => [
                 '<?php class Sample {
-                    private function fixIsNullFunction(Tokens $tokens, $startClearIndex, $endClearIndex, $identical)
+                    private function something($tokens, $identical)
                     {
-                        $endParenthesesIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $endClearIndex + 1);
-                        $tokens->insertAt(++$endParenthesesIndex, new Token([T_WHITESPACE, \' \']));
-                        $tokens->insertAt(++$endParenthesesIndex, new Token(
+                        $tokens->insertAt(0, new Token(
                             $identical ? [T_IS_IDENTICAL, \'===\'] : [T_IS_NOT_IDENTICAL, \'!==\']
                         ));
-                        $tokens->insertAt(++$endParenthesesIndex, new Token([T_WHITESPACE, \' \']));
-                        $tokens->insertAt(++$endParenthesesIndex, new Token([T_STRING, \'null\']));
-
-                        $tokens->clearRange($startClearIndex, $endClearIndex);
                     }
                 }',
                 null,
@@ -164,11 +257,11 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     {
                         $iterator->uasort(function(Account $first, Account $second) use ($mainAccount) {
                             if ($first->getNumber() === $mainAccount->getNumber()) {
-                               return -1;
+                                return -1;
                             }
 
                             if ($second->getNumber() === $mainAccount->getNumber()) {
-                               return 1;
+                                return 1;
                             }
 
                             return 0;
@@ -196,8 +289,22 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
-                '<?php $emailRule = array_filter(
+            'return without colons' => [
+                '<?php
+                $emailRule = array_filter(
+                    $this->emailRules,
+                    function($rule) use ($identityDocument, $facePhotoDocument) {
+                        return
+                            $rule["document"] === $identityDocument->getReviewStatus()
+                            && (
+                                ($rule["face_photo"] === "" && $facePhotoDocument === null)
+                                || ($facePhotoDocument !== null && $rule["face_photo"] === $facePhotoDocument->getReviewStatus())
+                            )
+                        ;
+                    }
+                );',
+                '<?php
+                $emailRule = array_filter(
                     $this->emailRules,
                     function($rule) use ($identityDocument, $facePhotoDocument) {
                         return $rule["document"] === $identityDocument->getReviewStatus()
@@ -207,10 +314,10 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                             );
                     }
                 );',
-                null,
             ],
-            [
-                '<?php return array_map(
+            '2 blocks ending with single new line' => [
+                '<?php 
+                return array_map(
                     function ($item) {
                         return $item["covenanteeId"];
                     },
@@ -264,24 +371,13 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 '<?php class Sample {
                     public function findAllValidByUserId($userId)
                     {
-                        $this->generateUrl(
-                            $this->routeContact,
-                            [
-                                "userId" => $contactData["user_id"]["something"],
-                                "contactId" => $contactData["contact_id"],
-                            ]
-                        );
-                    }
-                }',
-                '<?php class Sample {
-                    public function findAllValidByUserId($userId)
-                    {
                         $this->generateUrl($this->routeContact, [
                             "userId" => $contactData["user_id"]["something"],
                             "contactId" => $contactData["contact_id"],
                         ]);
                     }
-                }'
+                }',
+                null
             ],
             [
                 '<?php class Sample {
@@ -304,7 +400,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
+            'arrays' => [
                 '<?php
                 in_array(
                     $a,
@@ -314,6 +410,19 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                         3,
                     ]
                 );',
+                '<?php
+                in_array($a, [1,
+                    2, 3,]
+                    
+                    );'
+            ],
+            [
+                '<?php
+                in_array($a, [
+                    1,
+                    2,
+                    3,
+                ]);',
                 '<?php
                 in_array($a, [1,
                     2, 3,]);'
@@ -331,7 +440,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                 }',
                 null,
             ],
-            [
+            'double new line on initial line' => [
                 '<?php class Sample {
                     private function sampleFunction(){
                         $a = 0;
@@ -341,10 +450,7 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                             1,
                             2,
                             3,
-                            [
-                                "some",
-                                "thing",
-                            ]
+                            ["some","thing",]
                         );
                     }
                 }',
@@ -364,17 +470,13 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     {
                         $a = 0;
 
-                        in_array(
-                            $a,
-                            [
-                                1,
-                                2,
-                                3,
-                                4,
-                                5
-                            ],
-                            true
-                        );
+                        in_array($a, [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ], true);
                     }
                 }',
                 '<?php class Sample
@@ -411,30 +513,36 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                         $d = 3;
 
                         if ($a === 1) {
-                            return ($a
-                                && $b
-                                || $c
-                                && $d
+                            return (
+                                    $a
+                                    && $b
+                                ||
+                                    $c
+                                    && $d
                             );
                         }
 
                         if ($a === 2) {
-                            return ($a
-                                && $b
-                                || $c
-                                && $d
+                            return (
+                                    $a
+                                    && $b
+                                ||
+                                    $c
+                                    && $d
                             );
                         }
 
                         if ($a === 3) {
-                            return ((
-                                $a
-                                && $b
-                            )
+                            return (
+                                (
+                                    $a
+                                    && $b
+                                )
                                 || (
-                                $c
-                                && $d
-                            ));
+                                    $c
+                                    && $d
+                                )
+                            );
                         }
                     }
                 }',
@@ -504,6 +612,144 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     }
                 }',
                 null,
+            ],
+            [
+                '<?php class Sample {
+                    public function getDefinition()
+                    {
+                        return new FixerDefinition(
+                            \'asd\',
+                            [
+                                new CodeSample(),
+                            ]
+                        );
+                    }
+                }',
+                null
+            ],
+            [
+                '<?php class Sample {
+                    public function getDefinition()
+                    {
+                        return new FixerDefinition(
+                            \'
+                            multi
+                            line
+                            \',
+                            [
+                                new CodeSample(),
+                            ]
+                        );
+                    }
+                }',
+                '<?php class Sample {
+                    public function getDefinition()
+                    {
+                        return new FixerDefinition(\'
+                            multi
+                            line
+                            \',
+                            [
+                                new CodeSample(),
+                            ]
+                        );
+                    }
+                }',
+            ],
+            [
+                '<?php
+                return ($a && $b || $c && $d);
+
+                return (
+                    $a && $b
+                    || $c && $d
+                );
+                
+                return ((
+                    $a
+                    && $b
+                ) || (
+                    $c
+                    && $d
+                ));
+                
+                return (
+                    (
+                        $a
+                        && $b
+                    )
+                    || (
+                        $c
+                        && $d
+                    )
+                );
+                
+                return ($a && in_array($b, [1, 2, 3]));
+                
+                return (
+                    $a
+                    && in_array($b, [1, 2, 3])
+                );
+                
+                return ($a && in_array(
+                    $b,
+                    [1, 2, 3]
+                ));
+                
+                return ($a && in_array($b, [
+                    1,
+                    2,
+                    3,
+                ]));
+                
+                return ($a && in_array(
+                    $b,
+                    [
+                        1,
+                        2,
+                        3,
+                    ]
+                ));
+                
+                return (
+                    $a
+                    && in_array(
+                        $b,
+                        [
+                            1,
+                            2,
+                            3,
+                        ]
+                    )
+                );
+                ',
+                null,
+            ],
+            'with comments' => [
+                '<?php
+                return [
+                    \'a\',    // use 4 spaces, not 8 here
+                    \'b\', /* another comment */
+                ];',
+                '<?php
+                return [
+                        \'a\',    // use 4 spaces, not 8 here
+                        \'b\'  , /* another comment */
+                    ];',
+
+            ],
+            'with double comments' => [
+                '<?php
+                return [
+                    \'a\',    /* use 4 spaces, not 8 here */
+                    \'b\',
+                ];',
+                '<?php
+                return [
+                        \'a\',    /* use 4 spaces, not 8 here */
+                        \'b\',
+                    ];',
+
             ],
         ];
     }
