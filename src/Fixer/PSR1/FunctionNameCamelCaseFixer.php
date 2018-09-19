@@ -91,9 +91,7 @@ final class FunctionNameCamelCaseFixer extends AbstractFixer
 
         $string = ucwords($string);
         $string = strtr($string, [' ' => '']);
-        $string = lcfirst($string);
-
-        return $string;
+        return lcfirst($string);
     }
 
     /**
@@ -102,9 +100,12 @@ final class FunctionNameCamelCaseFixer extends AbstractFixer
      */
     private function isFunctionNameValid($string)
     {
-        return preg_match('#^__[^_]#', $string) !== 0
-            || (!(preg_match('|[^a-zA-Z]|', substr($string, 1)) > 0)
-            && !(preg_match('/^[a-z]/', $string) === 0))
+        return
+            preg_match('#^__[^_]#', $string) !== 0
+            || (
+                !(preg_match('|[^a-zA-Z]|', substr($string, 1)) > 0)
+                && !(preg_match('/^[a-z]/', $string) === 0)
+            )
         ;
     }
 }

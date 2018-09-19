@@ -23,7 +23,8 @@ final class UnnecessaryStructuresFixer extends AbstractFixer implements Whitespa
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We avoid unnecessary structures.
             ',
             [
@@ -83,7 +84,7 @@ final class UnnecessaryStructuresFixer extends AbstractFixer implements Whitespa
         $childEndCurlyBraceIndex = $tokens->getPrevMeaningfulToken($parentEndCurlyBraceIndex);
 
         if ($tokens[$childEndCurlyBraceIndex]->equals('}')) {
-            for ($i = $parentStartCurlyBraceIndex; $i < $parentEndCurlyBraceIndex; ++$i) {
+            for ($i = $parentStartCurlyBraceIndex; $i < $parentEndCurlyBraceIndex; $i++) {
                 $conditionalStatementIndex = $tokens->getNextMeaningfulToken($i);
                 if (!$tokens[$conditionalStatementIndex]->isGivenKind($this->conditionalStatements)) {
                     break;

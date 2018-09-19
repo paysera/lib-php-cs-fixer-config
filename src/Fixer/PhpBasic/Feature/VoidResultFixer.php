@@ -14,7 +14,8 @@ final class VoidResultFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We always return something or return nothing. If method does not return anything (“returns” void),
             we do not return null, false or any other value in that case.
             
@@ -60,7 +61,9 @@ final class VoidResultFixer extends AbstractFixer
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -87,7 +90,7 @@ final class VoidResultFixer extends AbstractFixer
         $funcStart = null;
         $funcEnd = null;
 
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_FUNCTION)) {
                 $funcStart = $tokens->getNextTokenOfKind($i, ['{']);
                 if ($funcStart !== null) {

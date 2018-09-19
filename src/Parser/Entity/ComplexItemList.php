@@ -28,7 +28,7 @@ class ComplexItemList implements ItemInterface
 
     public function getContent()
     {
-        return array_reduce($this->typedItemList, function(string $result, TypedItem $item) {
+        return array_reduce($this->typedItemList, function (string $result, TypedItem $item) {
             return $result . $item->getItem()->getContent();
         }, '');
     }
@@ -87,7 +87,7 @@ class ComplexItemList implements ItemInterface
         $this->typedItemList[$key] = new TypedItem($item, $this->typedItemList[$key]->getType());
 
         if ($item instanceof SimpleItemList) {
-            $item->setReplaceCallback(function(ItemInterface $item) use ($key) {
+            $item->setReplaceCallback(function (ItemInterface $item) use ($key) {
                 $this->setItemAtKey($key, $item);
             });
         }

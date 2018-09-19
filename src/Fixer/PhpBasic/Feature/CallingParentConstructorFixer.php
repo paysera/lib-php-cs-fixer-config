@@ -51,7 +51,8 @@ final class CallingParentConstructorFixer extends AbstractFixer
     public function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_STRING)
+            if (
+                $token->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
                 && $tokens[$tokens->getPrevMeaningfulToken($key)]->isGivenKind(T_FUNCTION)
             ) {
@@ -72,7 +73,8 @@ final class CallingParentConstructorFixer extends AbstractFixer
     private function fixParentConstructPosition(Tokens $tokens, $startIndex, $endIndex)
     {
         for ($i = $startIndex; $i < $endIndex; $i++) {
-            if ($tokens[$i]->getContent() === self::PARENT
+            if (
+                $tokens[$i]->getContent() === self::PARENT
                 && $tokens[$i + 1]->isGivenKind(T_DOUBLE_COLON)
                 && $tokens[$i + 2]->getContent() === self::CONSTRUCT
             ) {
@@ -111,7 +113,8 @@ final class CallingParentConstructorFixer extends AbstractFixer
     private function isParentConstructFirstStatement(Tokens $tokens, $startIndex)
     {
         $firstStatementTokenIndex = $tokens->getNextNonWhitespace($startIndex);
-        return $tokens[$firstStatementTokenIndex]->getContent() === self::PARENT
+        return
+            $tokens[$firstStatementTokenIndex]->getContent() === self::PARENT
             && $tokens[$firstStatementTokenIndex + 1]->isGivenKind(T_DOUBLE_COLON)
             && $tokens[$firstStatementTokenIndex + 2]->getContent() === self::CONSTRUCT
         ;

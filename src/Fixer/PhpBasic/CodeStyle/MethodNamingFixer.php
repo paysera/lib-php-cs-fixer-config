@@ -26,7 +26,8 @@ final class MethodNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use verbs for methods that perform action and/or return something,
             questions only for methods which return boolean.
             
@@ -80,7 +81,8 @@ final class MethodNamingFixer extends AbstractFixer
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
-                $token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {

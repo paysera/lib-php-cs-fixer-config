@@ -62,11 +62,14 @@ final class ThrowBaseExceptionFixer extends AbstractFixer
             }
 
             $exceptionIndex = $tokens->getNextMeaningfulToken($newIndex);
-            if (strtolower($tokens[$exceptionIndex]->getContent()) === self::EXCEPTION
-                || ($tokens[$exceptionIndex]->isGivenKind(T_NS_SEPARATOR)
+            if (
+                strtolower($tokens[$exceptionIndex]->getContent()) === self::EXCEPTION
+                || (
+                    $tokens[$exceptionIndex]->isGivenKind(T_NS_SEPARATOR)
                     && strtolower(
                         $tokens[$tokens->getNextMeaningfulToken($exceptionIndex)]->getContent()
-                    ) === self::EXCEPTION)
+                    ) === self::EXCEPTION
+                )
             ) {
                 $endOfLineIndex = $tokens->getNextTokenOfKind($key, [';']);
                 $commentIndex = $tokens->getNextNonWhitespace($endOfLineIndex);

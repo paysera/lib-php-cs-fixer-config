@@ -2,6 +2,7 @@
 
 namespace Paysera\PhpCsFixerConfig\Util;
 
+use ReflectionException;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
 use ReflectionProperty;
@@ -17,12 +18,13 @@ class InheritanceHelper
     {
         try {
             $reflection = static::getReflection($tokens);
-        } catch (\ReflectionException $exception) {
+        } catch (ReflectionException $exception) {
             return false;
         }
 
         foreach ($reflection->getInterfaces() as $interface) {
-            foreach ($interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED) as $method) {
+            $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+            foreach ($methods as $method) {
                 if ($method->getName() === $methodName) {
                     return true;
                 }
@@ -41,7 +43,7 @@ class InheritanceHelper
     {
         try {
             $reflection = static::getReflection($tokens);
-        } catch (\ReflectionException $exception) {
+        } catch (ReflectionException $exception) {
             return false;
         }
         $parents = [];
@@ -69,7 +71,7 @@ class InheritanceHelper
                 $index = $key + 1;
                 $namespace = '';
                 while (!$tokens[$index + 1]->equals(';')) {
-                    ++$index;
+                    $index++;
                     $namespace .= $tokens[$index]->getContent();
                 }
                 $fqcn = $namespace;

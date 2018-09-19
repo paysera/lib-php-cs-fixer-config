@@ -29,7 +29,8 @@ final class PhpDocOnMethodsFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We put PhpDoc comment on all methods with exception of constructors (can be skipped in some cases).
             
             We put PhpDoc comment on constructors when IDE (for example PhpStorm) cannot guess classes of attributes,
@@ -70,7 +71,9 @@ final class PhpDocOnMethodsFixer extends AbstractFixer
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -83,7 +86,8 @@ final class PhpDocOnMethodsFixer extends AbstractFixer
                     $docBlockIndex = $tokens->getPrevNonWhitespace($index);
                 }
 
-                if ($docBlockIndex !== null
+                if (
+                    $docBlockIndex !== null
                     && !preg_match('#@inheritdoc#', strtolower($tokens[$docBlockIndex]->getContent()))
                 ) {
                     $this->validateDocBlock($tokens, $docBlockIndex, $key + 1, $parenthesesEndIndex);
@@ -102,11 +106,12 @@ final class PhpDocOnMethodsFixer extends AbstractFixer
     {
         $variablesWithoutTypeHint = 0;
         $variableCount = 0;
-        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; ++$i) {
+        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
                 $variableCount++;
                 $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
-                if (!$tokens[$previousTokenIndex]->isGivenKind(T_STRING)
+                if (
+                    !$tokens[$previousTokenIndex]->isGivenKind(T_STRING)
                     && !$tokens[$previousTokenIndex]->isGivenKind($this->typeHints)
                 ) {
                     $variablesWithoutTypeHint++;
@@ -120,7 +125,8 @@ final class PhpDocOnMethodsFixer extends AbstractFixer
             $lineCount = count($docBlock->getLines());
             $paramAnnotations = $docBlock->getAnnotationsOfType('param');
 
-            if (preg_match('#\/\*\*\n#', $docBlock->getLine(0)) === 1
+            if (
+                preg_match('#\/\*\*\n#', $docBlock->getLine(0)) === 1
                 && preg_match('#\*\/#', trim($docBlock->getLine($lineCount - 1))) === 1
                 && count($paramAnnotations) === $lineCount - 2
                 && $tokens[$docBlockIndex + 1]->isWhitespace()

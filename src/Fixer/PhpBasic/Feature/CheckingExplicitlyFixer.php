@@ -14,7 +14,8 @@ final class CheckingExplicitlyFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use only functions or conditions that are designed for specific task we are trying to accomplish. 
             We don’t use unrelated features, even if they give required result with less code.
             

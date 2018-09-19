@@ -126,7 +126,8 @@ final class TypeHintingFixer extends AbstractFixer
                 $useStatements[] = $this->getUseStatementContent($tokens, $key);
             }
 
-            if ($token->isGivenKind(T_STRING)
+            if (
+                $token->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
                 && $tokens[$tokens->getPrevMeaningfulToken($key)]->isGivenKind(T_FUNCTION)
             ) {
@@ -139,15 +140,18 @@ final class TypeHintingFixer extends AbstractFixer
                 );
             }
 
-            if (empty($constructClassProperties)) {
+            if (count($constructClassProperties) === 0) {
                 continue;
             }
 
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
             $methodIndex = $tokens->getNextMeaningfulToken($key);
-            if ($token->isGivenKind(T_OBJECT_OPERATOR)
-                && ($tokens[$previousTokenIndex]->isGivenKind(T_STRING)
-                    || $tokens[$previousTokenIndex]->isGivenKind(T_VARIABLE))
+            if (
+                $token->isGivenKind(T_OBJECT_OPERATOR)
+                && (
+                    $tokens[$previousTokenIndex]->isGivenKind(T_STRING)
+                    || $tokens[$previousTokenIndex]->isGivenKind(T_VARIABLE)
+                )
                 && $tokens[$methodIndex]->isGivenKind(T_STRING)
                 && $tokens[$tokens->getNextMeaningfulToken($methodIndex)]->equals('(')
             ) {
@@ -196,14 +200,14 @@ final class TypeHintingFixer extends AbstractFixer
                 try {
                     $reflectionClass = new ReflectionClass($useStatement);
                     $interfaces = $reflectionClass->getInterfaces();
-                    if (empty($interfaces)) {
+                    if (count($interfaces) === 0) {
                         continue;
                     }
 
                     /** @var ReflectionClass $interface */
                     foreach (array_reverse($interfaces) as $interface) {
                         $reflectionMethods = $interface->getMethods();
-                        if (empty($reflectionMethods)) {
+                        if (count($reflectionMethods) === 0) {
                             continue;
                         }
 
@@ -240,10 +244,11 @@ final class TypeHintingFixer extends AbstractFixer
     private function getConstructArgumentClassesAndAssignedProperties(Tokens $tokens, $startIndex, $endIndex)
     {
         $constructClassProperties = [];
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             $classNameIndex = $tokens->getPrevMeaningfulToken($i);
             $className = $tokens[$classNameIndex]->getContent();
-            if ($tokens[$i]->isGivenKind(T_VARIABLE)
+            if (
+                $tokens[$i]->isGivenKind(T_VARIABLE)
                 && $tokens[$classNameIndex]->isGivenKind(T_STRING)
             ) {
                 $constructClassProperties[$className]['Variable'] = $tokens[$i]->getContent();
@@ -251,14 +256,15 @@ final class TypeHintingFixer extends AbstractFixer
         }
 
         $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($endIndex);
-        if (!$tokens[$curlyBraceStartIndex]->equals('{') || empty($constructClassProperties)) {
+        if (!$tokens[$curlyBraceStartIndex]->equals('{') || count($constructClassProperties) === 0) {
             return null;
         }
 
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             $assignIndex = $tokens->getPrevMeaningfulToken($i);
-            if ($tokens[$i]->isGivenKind(T_VARIABLE)
+            if (
+                $tokens[$i]->isGivenKind(T_VARIABLE)
                 && $tokens[$assignIndex]->equals('=')
             ) {
                 $propertyIndex = $tokens->getPrevMeaningfulToken($assignIndex);

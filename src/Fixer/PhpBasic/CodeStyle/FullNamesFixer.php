@@ -25,7 +25,8 @@ final class FullNamesFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
             Risky for possible local variable duplicate renaming
             ',
@@ -71,9 +72,12 @@ final class FullNamesFixer extends AbstractFixer
             $variableContent = $token->getContent();
             $namespaceName = $this->getNamespaceName($tokens, $key);
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
-            if ($namespaceName !== null
-                && (strlen($variableContent) < self::MINIMUM_NAMESPACE_CHARACTER_LENGTH
-                    || $this->isVariableTruncated($variableContent, $namespaceName))
+            if (
+                $namespaceName !== null
+                && (
+                    strlen($variableContent) < self::MINIMUM_NAMESPACE_CHARACTER_LENGTH
+                    || $this->isVariableTruncated($variableContent, $namespaceName)
+                )
                 && !$tokens[$previousTokenIndex]->isGivenKind([T_PRIVATE, T_PUBLIC, T_PROTECTED, T_STATIC])
                 && !$tokens[$previousTokenIndex]->equals([T_OBJECT_OPERATOR])
                 && !in_array($tokens[$previousTokenIndex]->getContent(), $this->scalarTypes, true)
@@ -95,7 +99,8 @@ final class FullNamesFixer extends AbstractFixer
             $variableContent = $token->getContent();
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
             $namespaceName = array_search($variableContent, $invalidVariableNames, true);
-            if ($namespaceName
+            if (
+                $namespaceName
                 && !$tokens[$previousTokenIndex]->isGivenKind([T_PRIVATE, T_PUBLIC, T_PROTECTED, T_STATIC])
                 && !$tokens[$previousTokenIndex]->equals([T_OBJECT_OPERATOR])
             ) {
@@ -151,13 +156,15 @@ final class FullNamesFixer extends AbstractFixer
     {
         $namespaceIndex = $tokens->getPrevMeaningfulToken($key);
         $nextTokenIndex = $tokens->getNextMeaningfulToken($key);
-        if ($tokens[$namespaceIndex]->isGivenKind(T_STRING)
+        if (
+            $tokens[$namespaceIndex]->isGivenKind(T_STRING)
             && !$tokens[$nextTokenIndex]->equals('=')
         ) {
             return $tokens[$namespaceIndex]->getContent();
         }
 
-        if ($tokens[$nextTokenIndex]->equals('=')
+        if (
+            $tokens[$nextTokenIndex]->equals('=')
             && $tokens[$tokens->getNextMeaningfulToken($nextTokenIndex)]->isGivenKind(T_NEW)
         ) {
             $namespaceIndex = $tokens->getNextTokenOfKind($key, ['(', ';']) - 1;

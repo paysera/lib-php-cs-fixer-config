@@ -23,7 +23,8 @@ final class AssignmentsInConditionsFixer extends AbstractFixer implements Whites
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We do not use assignments inside conditional statements.
             Exception: in a while loop condition.
             ',
@@ -86,7 +87,7 @@ final class AssignmentsInConditionsFixer extends AbstractFixer implements Whites
     private function checkConditionalStatement(Tokens $tokens, $startIndex)
     {
         $endIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $startIndex);
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->equals('=')) {
                 $this->insertComment(
                     $tokens,

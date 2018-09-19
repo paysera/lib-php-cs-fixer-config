@@ -11,7 +11,8 @@ final class LogicalOperatorsFixer extends AbstractFixer
 {
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             Use `&&` and `||` logical operators instead of `and` and `or`.
             Risky, if lower precedence was used intentionally
             ',

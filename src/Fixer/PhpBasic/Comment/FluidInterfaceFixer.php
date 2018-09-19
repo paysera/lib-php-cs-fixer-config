@@ -17,7 +17,8 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             If method returns $this, we use @return $this that IDE could guess correct type
             if we use this method for objects of sub-classes.
             ',
@@ -63,7 +64,9 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
 
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -91,11 +94,12 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
     private function validateFluidInterface(Tokens $tokens, $curlyBraceStartIndex, $docBlockIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_RETURN)) {
                 $thisVariableIndex = $tokens->getNextMeaningfulToken($i);
                 $semicolonIndex = $tokens->getNextMeaningfulToken($thisVariableIndex);
-                if ($tokens[$thisVariableIndex]->isGivenKind(T_VARIABLE)
+                if (
+                    $tokens[$thisVariableIndex]->isGivenKind(T_VARIABLE)
                     && $tokens[$thisVariableIndex]->getContent() === self::VARIABLE_THIS
                     && $tokens[$semicolonIndex]->equals(';')
                 ) {

@@ -12,7 +12,8 @@ final class ComparingToNullFixer extends AbstractFixer
 {
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             When comparing to null, we always compare explicitly.
             ',
             [
@@ -67,7 +68,9 @@ final class ComparingToNullFixer extends AbstractFixer
                 if ($tokens[$parenthesesStartIndex]->equals('(')) {
                     $this->validateLongIfExplicitCompare($tokens, $parenthesesStartIndex, $objectVariables);
                 }
-            } elseif ($token->isGivenKind(T_VARIABLE) && in_array($token->getContent(), $objectVariables, true)
+            } elseif (
+                $token->isGivenKind(T_VARIABLE)
+                && in_array($token->getContent(), $objectVariables, true)
                 && $tokens[$tokens->getNextMeaningfulToken($key)]->equals('?')
             ) {
                 $this->validateShortIfExplicitCompare($tokens, $key);
@@ -98,25 +101,36 @@ final class ComparingToNullFixer extends AbstractFixer
     private function validateLongIfExplicitCompare(Tokens $tokens, $startIndex, $objectVariables)
     {
         $endIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $startIndex);
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_VARIABLE) && in_array($tokens[$i]->getContent(), $objectVariables, true)) {
                 $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
                 $previousPreviousTokenIndex = $tokens->getPrevMeaningfulToken($previousTokenIndex);
                 $nextTokenIndex = $tokens->getNextMeaningfulToken($i);
-                if (!$tokens[$nextTokenIndex]->isGivenKind([T_IS_IDENTICAL, T_IS_NOT_IDENTICAL])
-                    && (($tokens[$nextTokenIndex]->equals(')') && $nextTokenIndex === $endIndex)
-                        || $tokens[$nextTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR]))
+                if (
+                    !$tokens[$nextTokenIndex]->isGivenKind([T_IS_IDENTICAL, T_IS_NOT_IDENTICAL])
+                    && (
+                        ($tokens[$nextTokenIndex]->equals(')') && $nextTokenIndex === $endIndex)
+                        || $tokens[$nextTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])
+                    )
                 ) {
-                    if ($tokens[$previousTokenIndex]->equals('!')
-                        && ($tokens[$previousPreviousTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])
-                            || ($tokens[$previousPreviousTokenIndex]->equals('(')
-                                && $previousPreviousTokenIndex === $startIndex))
+                    if (
+                        $tokens[$previousTokenIndex]->equals('!')
+                        && (
+                            $tokens[$previousPreviousTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])
+                            || (
+                                $tokens[$previousPreviousTokenIndex]->equals('(')
+                                && $previousPreviousTokenIndex === $startIndex
+                            )
+                        )
                     ) {
                         $this->insertNullExplicitCompare($tokens, $i, true);
                         $tokens->clearRange($previousTokenIndex, $previousTokenIndex);
-                    } elseif ($tokens[$previousTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])
-                            || ($tokens[$previousTokenIndex]->equals('(')
-                                && $previousTokenIndex === $startIndex)
+                    } elseif (
+                        $tokens[$previousTokenIndex]->isGivenKind([T_BOOLEAN_AND, T_BOOLEAN_OR])
+                        || (
+                            $tokens[$previousTokenIndex]->equals('(')
+                            && $previousTokenIndex === $startIndex
+                        )
                     ) {
                         $this->insertNullExplicitCompare($tokens, $i, false);
                     }

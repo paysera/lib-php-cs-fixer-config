@@ -80,7 +80,7 @@ class SimpleItemList implements ItemInterface
 
     public function getContent()
     {
-        return array_reduce($this->itemList, function($result, ItemInterface $item) {
+        return array_reduce($this->itemList, function ($result, ItemInterface $item) {
             return $result . $item->getContent();
         }, '');
     }

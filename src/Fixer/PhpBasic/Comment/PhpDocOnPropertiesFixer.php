@@ -17,7 +17,8 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use PhpDoc on properties that are not injected via constructor.
             
             We do NOT put PhpDoc on services, that are type-casted and injected via constructor,
@@ -68,7 +69,8 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($tokens[$key]->isGivenKind(T_STRING)
+            if (
+                $tokens[$key]->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
                 && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
@@ -104,9 +106,10 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
                     continue;
                 }
-            // Existing DocBlock
+                // Existing DocBlock
             } elseif (
-                $property !== null && isset($property['DocBlockIndex'])
+                $property !== null
+                && isset($property['DocBlockIndex'])
                 && (
                     $this->isPropertyDefinedInDocBlock($property, $constructFunction)
                     || $this->isPropertyDefinedInArguments($property, $constructFunction)
@@ -128,7 +131,8 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
      */
     private function isPropertyDefinedInDocBlock($property, $constructFunction)
     {
-        return isset($constructFunction['DocBlock'])
+        return
+            isset($constructFunction['DocBlock'])
             && isset($property['Variable'])
             && preg_match('#\\' . $property['Variable'] . '#', $constructFunction['DocBlock'])
         ;
@@ -165,7 +169,8 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
      */
     private function isPropertyDefinedInArguments($property, $constructFunction)
     {
-        return count($constructFunction['ConstructArguments']) > 0
+        return
+            count($constructFunction['ConstructArguments']) > 0
             && isset($property['Variable'])
             && in_array($property['Variable'], $constructFunction['ConstructArguments'], true)
         ;
@@ -182,7 +187,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         $curlyBracesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBracesStartIndex);
 
         $assignments = [];
-        for ($i = $curlyBracesStartIndex; $i < $curlyBracesEndIndex; ++$i) {
+        for ($i = $curlyBracesStartIndex; $i < $curlyBracesEndIndex; $i++) {
             if (
                 $tokens[$i]->isGivenKind(T_VARIABLE)
                 && $tokens[$i]->getContent() === '$this'
@@ -209,7 +214,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     {
         $constructArguments = [];
         $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
-        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; ++$i) {
+        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; $i++) {
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
             if (
                 $tokens[$i]->isGivenKind(T_VARIABLE)
@@ -234,11 +239,13 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
             $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
-            if ($tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            if (
+                $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$previousPreviousTokenIndex]->isGivenKind(T_COMMENT)
             ) {
                 return $this->getPropertyValues($tokens, $key, $previousTokenIndex);
-            } elseif ($tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
+            } elseif (
+                $tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
                 && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$tokens->getPrevNonWhitespace($previousPreviousTokenIndex)]->isGivenKind(T_COMMENT)
             ) {

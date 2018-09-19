@@ -36,7 +36,8 @@ final class MagicMethodsFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We do not use __toString method for main functionality, only for debugging purposes.
             It applies to all magic methods except __construct().
             ',

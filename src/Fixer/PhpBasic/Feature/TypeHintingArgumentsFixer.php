@@ -37,7 +37,8 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             If argument is optional, we provide default value for it.
             If optional argument is object, we type hint it with required class and add default to null.
             
@@ -85,7 +86,9 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -156,8 +159,9 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         $parenthesesStartIndex,
         $parenthesesEndIndex
     ) {
+        $currentParenthesesEndIndex = $parenthesesEndIndex;
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
-        for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex ; --$i) {
+        for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex ; $i--) {
             if (!$tokens[$i]->isGivenKind(T_VARIABLE)) {
                 continue;
             }
@@ -166,7 +170,8 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                 /** @var Annotation $annotation */
                 foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                     $variable = $tokens[$i]->getContent();
-                    if (!preg_match('#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m', $annotation)
+                    if (
+                        !preg_match('#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m', $annotation)
                         || preg_match('#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m', $annotation)
                     ) {
                         continue;
@@ -175,13 +180,14 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                     $argumentTypes = $annotation->getTypes();
                     $argumentTypeCount = count($argumentTypes);
                     $nullFound = in_array('null', $argumentTypes, true);
-                    if (!array_intersect($argumentTypes, $this->unavailableTypeHints)
+                    if (
+                        !array_intersect($argumentTypes, $this->unavailableTypeHints)
                         && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
                         $tokens->insertAt($i, new Token([T_STRING, $argumentType]));
                         $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
-                        $parenthesesEndIndex += 2;
+                        $currentParenthesesEndIndex += 2;
                     }
 
                     if ($nullFound) {
@@ -189,7 +195,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                         $variables = (clone $tokens)->findGivenKind(
                             T_VARIABLE,
                             $parenthesesStartIndex,
-                            $parenthesesEndIndex
+                            $currentParenthesesEndIndex
                         );
                         $variablePosition = null;
                         foreach ($variables as $key => $variableToken) {

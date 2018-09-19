@@ -40,7 +40,8 @@ final class PropertyNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use nouns or adjectives for property names, not verbs or questions.
             ',
             [
@@ -80,9 +81,12 @@ final class PropertyNamingFixer extends AbstractFixer
             if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
                 $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
                 $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
-                if ($tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                    || ($tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
-                        && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE]))
+                if (
+                    $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                    || (
+                        $tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
+                        && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                    )
                 ) {
                     $this->validatePropertyName($tokens, $key);
                 }
@@ -98,7 +102,8 @@ final class PropertyNamingFixer extends AbstractFixer
     {
         $propertyName = $tokens[$key]->getContent();
         $insertIndex = $tokens->getNextTokenOfKind($key, [';']);
-        if (preg_match('#\$' . implode('|', $this->invalidPropertyVerbs) . '$#', $propertyName)
+        if (
+            preg_match('#\$' . implode('|', $this->invalidPropertyVerbs) . '$#', $propertyName)
             || preg_match('#\$(' . implode('|', $this->invalidPropertyPrefixes) . ')([A-Z]).*#', $propertyName)
             || preg_match('#(' . implode('|', $this->invalidPropertySuffixes) . ')$#', $propertyName)
         ) {

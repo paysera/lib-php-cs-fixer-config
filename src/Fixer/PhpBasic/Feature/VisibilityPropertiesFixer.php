@@ -29,7 +29,8 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We don’t use public and dynamic properties. All used properties must be defined.
             
             We prefer private over protected as it constraints the scope - it’s easier to refactor,
@@ -134,7 +135,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
                 $index = $key + 1;
                 $namespace = '';
                 while (!$tokens[$index + 1]->equals(';')) {
-                    ++$index;
+                    $index++;
                     $namespace .= $tokens[$index]->getContent();
                 }
                 $classNamespace = $namespace;
@@ -147,7 +148,8 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
             if ($token->isGivenKind(T_EXTENDS)) {
                 while (!$tokens[$key]->equals('{')) {
                     $classNameToken = $tokens->getNextTokenOfKind($key, [[T_STRING]]);
-                    if (isset($classNameToken)
+                    if (
+                        isset($classNameToken)
                         && in_array(
                             $tokens[$classNameToken]->getContent(),
                             $this->excludedParents,
@@ -169,7 +171,8 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
 
                 $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
                 $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
-                if ($tokens[$previousTokenIndex]->getContent() === '{'
+                if (
+                    $tokens[$previousTokenIndex]->getContent() === '{'
                     && $tokens[$previousPreviousTokenIndex]->isGivenKind(T_OBJECT_OPERATOR)
                 ) {
                     $this->insertComment(
@@ -181,10 +184,13 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
                 }
             }
 
-            if ($token->isGivenKind(T_STRING)
+            if (
+                $token->isGivenKind(T_STRING)
                 && $tokens[$previousTokenIndex]->isGivenKind(T_OBJECT_OPERATOR)
-                && ($tokens[$nextTokenIndex]->isGivenKind(T_OBJECT_OPERATOR)
-                    || $tokens[$key + 1]->isWhitespace())
+                && (
+                    $tokens[$nextTokenIndex]->isGivenKind(T_OBJECT_OPERATOR)
+                    || $tokens[$key + 1]->isWhitespace()
+                )
                 && $tokens[$tokens->getPrevMeaningfulToken($previousTokenIndex)]->getContent() === self::THIS
             ) {
                 $this->validateNotDefinedProperties(
@@ -213,7 +219,8 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
         $classNamespace
     ) {
         $variable = '$' . $propertyName;
-        if (!in_array($variable, $propertyVariables, true)
+        if (
+            !in_array($variable, $propertyVariables, true)
             && !$this->isPropertyInAnotherClass($propertyName, $classNamespace)
         ) {
             $this->insertVariablePropertyWarning($tokens, $key, self::VISIBILITY_CONVENTION);
@@ -253,19 +260,28 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     {
         $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
         $previousPreviousTokenIndex = $tokens->getPrevMeaningfulToken($previousTokenIndex);
-        if ($tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            || ($tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
-                && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE]))
+        if (
+            $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            || (
+                $tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
+                && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            )
         ) {
-            if (($tokens[$previousTokenIndex]->isGivenKind(T_PUBLIC)
-                || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PUBLIC))
+            if (
+                (
+                    $tokens[$previousTokenIndex]->isGivenKind(T_PUBLIC)
+                    || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PUBLIC)
+                )
                 && !$propertyExclusion
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PUBLIC_PROPERTIES_CONVENTION);
             }
 
-            if (($tokens[$previousTokenIndex]->isGivenKind(T_PROTECTED)
-                || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PROTECTED))
+            if (
+                (
+                    $tokens[$previousTokenIndex]->isGivenKind(T_PROTECTED)
+                    || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PROTECTED)
+                )
                 && !$propertyExclusion
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PROTECTED_PROPERTIES_CONVENTION);

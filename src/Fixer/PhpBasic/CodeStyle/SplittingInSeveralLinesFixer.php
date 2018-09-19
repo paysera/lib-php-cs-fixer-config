@@ -117,7 +117,6 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
             $token = $token->getNextToken();
         } while ($token !== null);
 
-
         $this->overrideTokens($tokens, $firstToken);
     }
 
@@ -152,7 +151,6 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
             }
         }
     }
-
 
     private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content)
     {

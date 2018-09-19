@@ -119,7 +119,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
 
                 // Saving that namespace as string
                 $useStatementContent = '\\';
-                for ($i = $key + 1; $i <= $classNameEndIndex; ++$i) {
+                for ($i = $key + 1; $i <= $classNameEndIndex; $i++) {
                     $useStatementContent .= $tokens[$i]->getContent();
                 }
 
@@ -155,7 +155,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         $useStartIndex = null;
         $useEndIndex = null;
 
-        if ($duplicatedImports == $imports) {
+        if ($duplicatedImports === $imports) {
             return;
         }
 
@@ -181,7 +181,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 $importAs = end(explode(' as ', $import));
             }
             $importIndex = $this->insertImport($tokens, $importIndex, $import, $importAs);
-            ++$importIndex;
+            $importIndex++;
         }
     }
 
@@ -202,7 +202,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     ) {
         $content = $tokens[$key]->getContent();
         preg_match_all(
-            '#(?<='. implode('|', $this->docBlockAnnotations) . ')\s(\\\[\w\\\]*\\\?(\w*))\s#',
+            '#(?<=' . implode('|', $this->docBlockAnnotations) . ')\s(\\\[\w\\\]*\\\?(\w*))\s#',
             $content,
             $matches,
             PREG_SET_ORDER

@@ -23,7 +23,8 @@ final class ComparingToBooleanFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We do not use true/false keywords when checking variable which is already boolean.
             ',
             [

@@ -69,7 +69,8 @@ final class GlobalsFixer extends AbstractFixer
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
-            if ($tokens[$key]->isGivenKind(T_GLOBAL)
+            if (
+                $tokens[$key]->isGivenKind(T_GLOBAL)
                 || ($tokens[$key]->isGivenKind(T_VARIABLE) && $tokens[$key]->getContent() === self::GLOBALS_VARIABLE)
             ) {
                 $tokenIndex = $tokens->getNextTokenOfKind($key, [';']);
@@ -101,7 +102,7 @@ final class GlobalsFixer extends AbstractFixer
      */
     private function isGlobalFound(Tokens $tokens, $endIndex)
     {
-        for ($i = 0; $i < $endIndex; ++$i) {
+        for ($i = 0; $i < $endIndex; $i++) {
             if ($tokens[$i]->isGivenKind(Token::getClassyTokenKinds())) {
                 return true;
             }

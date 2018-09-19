@@ -15,7 +15,8 @@ final class PhpDocNecessityFixer extends AbstractFixer
 {
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             If phpdoc comment doesn\'t reflect any used parameters, return types
             or exceptions being thrown, we remove it.
             ',
@@ -105,7 +106,7 @@ final class PhpDocNecessityFixer extends AbstractFixer
 
         do {
             $tokenKey = $tokens->getNextMeaningfulToken($tokenKey);
-        } while(!$tokens[$tokenKey]->isGivenKind([T_FUNCTION, T_VARIABLE, T_CLASS]));
+        } while (!$tokens[$tokenKey]->isGivenKind([T_FUNCTION, T_VARIABLE, T_CLASS]));
 
         if ($tokens[$tokenKey]->isGivenKind([T_VARIABLE, T_CLASS])) {
             return false;

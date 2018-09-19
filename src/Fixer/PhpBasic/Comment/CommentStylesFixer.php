@@ -13,7 +13,8 @@ final class CommentStylesFixer extends AbstractFixer
 {
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use multi-line /** */ comments for method, property and class annotations.
             We use single-line /** @var Class $object */ annotation for local variables.
             We can use // single line comments in the code.
@@ -54,7 +55,8 @@ final class CommentStylesFixer extends AbstractFixer
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_COMMENT)
+            if (
+                $token->isGivenKind(T_COMMENT)
                 && isset($tokens[$key + 1])
                 && $tokens[$key + 1]->isWhitespace()
                 && strpos($tokens[$key + 1]->getContent(), "\n") !== false
@@ -78,7 +80,9 @@ final class CommentStylesFixer extends AbstractFixer
             // Get function docBlock
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($tokens[$key]->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $tokens[$key]->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -157,9 +161,12 @@ final class CommentStylesFixer extends AbstractFixer
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
             $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
-            if ($tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                || ($tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
-                    && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE]))
+            if (
+                $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                || (
+                    $tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
+                    && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                )
             ) {
                 $index = $tokens->getPrevNonWhitespace($previousTokenIndex);
                 if ($tokens[$index]->isGivenKind(T_DOC_COMMENT)) {
@@ -184,7 +191,8 @@ final class CommentStylesFixer extends AbstractFixer
             $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
             if ($tokens[$previousTokenIndex]->isGivenKind(T_DOC_COMMENT)) {
                 return $previousTokenIndex;
-            } elseif (isset($previousPreviousTokenIndex)
+            } elseif (
+                isset($previousPreviousTokenIndex)
                 && $tokens[$previousPreviousTokenIndex]->isGivenKind(T_DOC_COMMENT)
             ) {
                 return $tokens->getPrevNonWhitespace($previousTokenIndex);
@@ -215,9 +223,10 @@ final class CommentStylesFixer extends AbstractFixer
     private function validateSingleLineDocBlocks(Tokens $tokens, $curlyBraceStartIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             $docBlockContent = $tokens[$i]->getContent();
-            if ($tokens[$i]->isGivenKind(T_DOC_COMMENT)
+            if (
+                $tokens[$i]->isGivenKind(T_DOC_COMMENT)
                 && strpos($docBlockContent, "\n")
                 && strpos($docBlockContent, '@')
             ) {
