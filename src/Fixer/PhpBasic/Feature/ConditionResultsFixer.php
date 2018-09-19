@@ -125,7 +125,7 @@ final class ConditionResultsFixer extends AbstractFixer
                     );
                 }
             }
-            ++$index;
+            $index++;
         }
     }
 
@@ -162,7 +162,7 @@ final class ConditionResultsFixer extends AbstractFixer
         }
 
         $ifStatementConditionTokens = [];
-        for ($i = $parenthesesStartIndex + 1; $i < $parenthesesEndIndex; ++$i) {
+        for ($i = $parenthesesStartIndex + 1; $i < $parenthesesEndIndex; $i++) {
             $ifStatementConditionTokens[] = $tokens[$i];
         }
 

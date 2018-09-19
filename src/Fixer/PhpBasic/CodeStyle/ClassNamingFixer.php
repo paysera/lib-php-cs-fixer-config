@@ -37,7 +37,8 @@ final class ClassNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use nouns for class names.
             For services we use some suffix to represent the job of that service, usually *er:
             manager
@@ -131,7 +132,8 @@ final class ClassNamingFixer extends AbstractFixer
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
             if (strpos($tokens[$key - 1]->getContent(), "\n") !== false) {
                 $newLineIndex = $key - 1;
-            } elseif ($tokens[$previousTokenIndex]->isGivenKind([T_ABSTRACT, T_FINAL])
+            } elseif (
+                $tokens[$previousTokenIndex]->isGivenKind([T_ABSTRACT, T_FINAL])
                 && strpos($tokens[$previousTokenIndex - 1]->getContent(), "\n") !== false
             ) {
                 $newLineIndex = $previousTokenIndex - 1;

@@ -79,7 +79,8 @@ final class ClassNameStudlyCapsFixer extends AbstractFixer
      */
     private function isValidClassName($string)
     {
-        return !(preg_match('/^[A-Z]/', $string) === 0)
+        return
+            !(preg_match('/^[A-Z]/', $string) === 0)
             && !(preg_match('|[^a-zA-Z0-9]|', substr($string, 1)) > 0)
         ;
     }
@@ -96,9 +97,7 @@ final class ClassNameStudlyCapsFixer extends AbstractFixer
 
         $string = ucwords($string);
         $string = strtr($string, [' ' => '']);
-        $string = ucfirst($string);
-        $string = ($string);
 
-        return $string;
+        return ucfirst($string);
     }
 }

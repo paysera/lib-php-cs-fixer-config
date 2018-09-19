@@ -53,15 +53,12 @@ class ConstructItem implements ItemInterface
         return $this->contentItem;
     }
 
-    /**
-     * @param ItemInterface $contentItem
-     */
     private function setContentItem(ItemInterface $contentItem)
     {
         $this->contentItem = $contentItem;
 
         if ($contentItem instanceof SimpleItemList) {
-            $contentItem->setReplaceCallback(function(ItemInterface $item) {
+            $contentItem->setReplaceCallback(function (ItemInterface $item) {
                 $this->setContentItem($item);
             });
         }

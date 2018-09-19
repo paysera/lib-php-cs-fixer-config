@@ -2,8 +2,8 @@
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
 
-use PhpCsFixer\Tokenizer\Token;
 use RuntimeException;
+use PhpCsFixer\Tokenizer\Token;
 
 class ContextualToken extends Token implements ItemInterface
 {
@@ -11,15 +11,19 @@ class ContextualToken extends Token implements ItemInterface
      * @var ContextualToken|null
      */
     private $previousContextualToken;
+
+    /**
+     * @var ContextualToken|null
+     */
     private $nextContextualToken;
 
     public function __construct($token)
     {
         if (is_string($token) && trim($token, " \t\n\r\0\x0B") === '' && $token !== '') {
-            $token = [T_WHITESPACE, $token];
+            parent::__construct([T_WHITESPACE, $token]);
+        } else {
+            parent::__construct($token);
         }
-
-        parent::__construct($token);
     }
 
     public function setNextContextualToken(ContextualToken $contextualToken)
@@ -69,7 +73,7 @@ class ContextualToken extends Token implements ItemInterface
     public function nextToken(): ContextualToken
     {
         if ($this->nextContextualToken === null) {
-            throw new \RuntimeException('No more tokens');
+            throw new RuntimeException('No more tokens');
         }
 
         return $this->nextContextualToken;
@@ -78,7 +82,7 @@ class ContextualToken extends Token implements ItemInterface
     public function previousToken(): ContextualToken
     {
         if ($this->previousContextualToken === null) {
-            throw new \RuntimeException('No more tokens');
+            throw new RuntimeException('No more tokens');
         }
 
         return $this->previousContextualToken;
@@ -126,7 +130,7 @@ class ContextualToken extends Token implements ItemInterface
             }
         }
         if (preg_match('/^([\s\t]*)/', $codeBefore, $matches) !== 1) {
-            throw new \RuntimeException('Expected regexp to always match when searching for line indent');
+            throw new RuntimeException('Expected regexp to always match when searching for line indent');
         }
         return $matches[1];
     }

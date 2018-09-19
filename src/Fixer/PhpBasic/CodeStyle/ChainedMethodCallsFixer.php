@@ -73,12 +73,13 @@ final class ChainedMethodCallsFixer extends AbstractFixer implements Whitespaces
      */
     private function validateMethodSplits(Tokens $tokens, $startIndex, $endIndex, $indent)
     {
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->equals('(')) {
                 $i = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
             }
 
-            if ($tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
+            if (
+                $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
                 && $tokens[$i - 1]->equals(')')
             ) {
                 $tokens->insertAt($i, new Token([T_WHITESPACE, $indent]));
@@ -103,13 +104,14 @@ final class ChainedMethodCallsFixer extends AbstractFixer implements Whitespaces
      */
     private function checkForMethodSplits(Tokens $tokens, $startIndex, $endIndex)
     {
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->equals('(')) {
                 $blockEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
                 $i = $blockEndIndex;
             }
 
-            if ($tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
+            if (
+                $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
                 && $tokens[$i - 1]->isWhitespace()
             ) {
                 return $tokens[$i - 1]->getContent();

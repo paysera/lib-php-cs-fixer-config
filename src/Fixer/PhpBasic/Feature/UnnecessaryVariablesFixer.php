@@ -76,7 +76,6 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
                 $tokens[$variableIndex]->isGivenKind(T_VARIABLE)
                 && $tokens[$equalsIndex]->equals('=')
             ) {
-
                 $tokens->overrideRange($variableIndex, $endToken, $this->getTokenRange(
                     $tokens,
                     [new Token([T_RETURN, 'return'])],
@@ -84,7 +83,6 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
                     $assignmentColon
                 ));
             }
-
         } while (true);
     }
 

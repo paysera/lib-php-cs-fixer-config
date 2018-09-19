@@ -4,9 +4,7 @@ namespace Paysera\PhpCsFixerConfig\Parser\Entity;
 
 interface ItemInterface
 {
-
     public function lastToken(): ContextualToken;
-
 
     public function firstToken(): ContextualToken;
 

@@ -148,9 +148,9 @@ final class FileSideEffectsFixer extends AbstractFixer
     private function countSideEffects(Token $token, Token $bracketToken)
     {
         if (
-            $token->isGivenKind(T_STRING)
-            && in_array($token->getContent(), $this->forbiddenFunctions, true)
-            && $bracketToken->equals('(')
+                $token->isGivenKind(T_STRING)
+                && in_array($token->getContent(), $this->forbiddenFunctions, true)
+                && $bracketToken->equals('(')
             || $token->isGivenKind($this->forbiddenTokens)
         ) {
             return 1;

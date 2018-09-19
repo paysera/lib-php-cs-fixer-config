@@ -41,7 +41,8 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We use singular for namespaces: Service, Bundle, Entity, Controller etc.
             Exception: if English word does not have singular form.
             
@@ -106,7 +107,8 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
         for ($i = $index; $i < $semicolonIndex; $i++) {
             if ($tokens[$index]->isGivenKind(T_STRING)) {
                 $namespaceName = $tokens[$index]->getContent();
-                if ($namespaceName !== Inflector::singularize($namespaceName)
+                if (
+                    $namespaceName !== Inflector::singularize($namespaceName)
                     && !in_array($namespaceName, $this->exclusions, true)
                 ) {
                     $this->insertComment($tokens, $semicolonIndex, $namespaceName, self::SINGULAR_CONVENTION);

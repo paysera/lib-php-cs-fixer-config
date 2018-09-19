@@ -44,7 +44,8 @@ final class ReusingVariablesFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We do not set value to variable passed as an argument.
             We do not change the type of the variable.
             ',
@@ -91,7 +92,8 @@ final class ReusingVariablesFixer extends AbstractFixer
 
             $functionIndex = $tokens->getPrevMeaningfulToken($key);
             $parenthesesStartIndex = $tokens->getNextMeaningfulToken($key);
-            if (!$tokens[$parenthesesStartIndex]->equals('(')
+            if (
+                !$tokens[$parenthesesStartIndex]->equals('(')
                 && !$tokens[$functionIndex]->isGivenKind(T_FUNCTION)
             ) {
                 continue;
@@ -99,7 +101,7 @@ final class ReusingVariablesFixer extends AbstractFixer
             $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
 
             $methodArguments = $this->getMethodArguments($tokens, $parenthesesStartIndex, $parenthesesEndIndex);
-            if (empty($methodArguments)) {
+            if (count($methodArguments) === 0) {
                 continue;
             }
 
@@ -123,22 +125,26 @@ final class ReusingVariablesFixer extends AbstractFixer
     {
         $localVariables = [];
 
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if (!$tokens[$i]->isGivenKind(T_VARIABLE)) {
                 continue;
             }
             $variableContent = $tokens[$i]->getContent();
             $equalTokenIndex = $tokens->getNextMeaningfulToken($i);
-            if (in_array($variableContent, $methodArguments, true)
-                && ($tokens[$equalTokenIndex]->isGivenKind($this->assignmentOperators)
-                || $tokens[$equalTokenIndex]->equals('='))
+            if (
+                in_array($variableContent, $methodArguments, true)
+                && (
+                    $tokens[$equalTokenIndex]->isGivenKind($this->assignmentOperators)
+                    || $tokens[$equalTokenIndex]->equals('=')
+                )
             ) {
                 $this->insertComment($tokens, $tokens->getNextTokenOfKind($i, [';']), $variableContent);
                 continue;
             }
 
             $typeCastIndex = $tokens->getNextMeaningfulToken($equalTokenIndex);
-            if (in_array($variableContent, $localVariables, true)
+            if (
+                in_array($variableContent, $localVariables, true)
                 && $tokens[$typeCastIndex]->isGivenKind($this->typeCasters)
             ) {
                 $this->insertComment($tokens, $tokens->getNextTokenOfKind($i, [';']), $variableContent);
@@ -160,7 +166,7 @@ final class ReusingVariablesFixer extends AbstractFixer
     private function getMethodArguments(Tokens $tokens, $startIndex, $endIndex)
     {
         $methodArguments = [];
-        for ($i = $startIndex; $i < $endIndex; ++$i) {
+        for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
                 $methodArguments[] = $tokens[$i]->getContent();
             }

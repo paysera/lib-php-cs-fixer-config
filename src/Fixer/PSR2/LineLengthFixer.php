@@ -86,7 +86,9 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
         while (!$openedFile->eof()) {
             $line = preg_replace('#\n#', '', $openedFile->getCurrentLine());
             $lineNumber++;
-            if (isset($this->softLimit) && strlen($line) > $this->softLimit
+            if (
+                isset($this->softLimit)
+                && strlen($line) > $this->softLimit
                 && !$this->isCommentFound($tokens, $lineNumber)
             ) {
                 $this->addResult(
@@ -96,7 +98,9 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
                     $this->softLimit,
                     'soft_limit'
                 );
-            } elseif (isset($this->hardLimit) && strlen($line) > $this->hardLimit
+            } elseif (
+                isset($this->hardLimit)
+                && strlen($line) > $this->hardLimit
                 && !$this->isCommentFound($tokens, $lineNumber)
             ) {
                 $this->addResult(
@@ -134,7 +138,8 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
     {
         // Find if comment is already added
         foreach ($tokens as $token) {
-            if ($token->isGivenKind(T_COMMENT)
+            if (
+                $token->isGivenKind(T_COMMENT)
                 && preg_match("#\/\/\sTODO:\sLine\s\(" . $currentLineNumber . "\)#", $token->getContent()) === 1
             ) {
                 return true;

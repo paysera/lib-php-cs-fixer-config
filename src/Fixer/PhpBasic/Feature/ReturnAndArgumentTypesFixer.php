@@ -23,6 +23,9 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     const ENTITY = 'Entity';
     const REPOSITORY = 'Repository';
 
+    /**
+     * @var array
+     */
     private $scalarTypes = [
         'array',
         'callable',
@@ -34,6 +37,9 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         'string',
     ];
 
+    /**
+     * @var array
+     */
     private $whitelist = [
         'ArrayCollection',
     ];
@@ -46,6 +52,15 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         T_DNUMBER,
         T_LNUMBER,
     ];
+
+    // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
+    private static function getPassingIdNamespaceExclusions()
+    {
+        return [
+            self::ENTITY,
+            self::REPOSITORY,
+        ];
+    }
 
     public function configure(array $configuration = null)
     {
@@ -74,18 +89,10 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         return new FixerConfigurationResolverRootless('exceptions', [$exceptions]);
     }
 
-    // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
-    private static function getPassingIdNamespaceExclusions()
-    {
-        return [
-            self::ENTITY,
-            self::REPOSITORY,
-        ];
-    }
-
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We always return value of one type. Optionally, we can return null when using any other return type, too.
             
             For example, we can*not* return boolean|string or SuccessResult|FailureResult
@@ -148,7 +155,9 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
 
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -182,14 +191,15 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
 
         $firstReturnValue = null;
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_RETURN)) {
                 $returnValue = $tokens[$tokens->getNextMeaningfulToken($i)];
                 if ($returnValue->getContent() === 'null') {
                     continue;
                 }
 
-                if (!$returnValue->isGivenKind($this->strictValues)
+                if (
+                    !$returnValue->isGivenKind($this->strictValues)
                     && $returnValue->getContent() !== 'true'
                     && $returnValue->getContent() !== 'false'
                 ) {
@@ -254,12 +264,19 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
             $whitelisted = count(array_intersect($this->whitelist, $types)) > 0;
             $intFound = (bool)array_intersect(['int', 'integer'], $scalarTypesFound);
 
-            if ($scalarTypesCount > 1
+            if (
+                $scalarTypesCount > 1
                 || $mixedFound
                 || ($typeCount > 1 && $scalarTypesCount === 1 && $objectTypesCount > 1 && !$nullFound)
-                || ($typeCount > 1 && $scalarTypesCount === 1 && $objectTypesCount === 1
-                    && (!$intFound
-                        || ($intFound && !in_array($classNamespace, self::getPassingIdNamespaceExclusions(), true))))
+                || (
+                    $typeCount > 1
+                    && $scalarTypesCount === 1
+                    && $objectTypesCount === 1
+                    && (
+                        !$intFound
+                        || ($intFound && !in_array($classNamespace, self::getPassingIdNamespaceExclusions(), true))
+                    )
+                )
             ) {
                 $this->insertReturnAnnotationWarning(
                     $tokens,
@@ -278,7 +295,8 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
                 );
             }
 
-            if ($scalarTypesCount === 0
+            if (
+                $scalarTypesCount === 0
                 && (
                     ($typeCount > 1 && !$nullFound && !$selfFound && !$thisFound && !$mixedFound && !$whitelisted)
                     || ($typeCount > 2 && ($nullFound || $selfFound || $thisFound || $mixedFound || $whitelisted))

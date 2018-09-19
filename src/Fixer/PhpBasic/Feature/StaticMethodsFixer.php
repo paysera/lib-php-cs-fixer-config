@@ -28,7 +28,8 @@ final class StaticMethodsFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We do use static methods only in these cases:
             * to create an entity for fluent interface, if PHP version in the project is lower than 5.4.
                 We use (new Entity())->set(\'a\') in 5.4 or above
@@ -76,19 +77,21 @@ final class StaticMethodsFixer extends AbstractFixer
             $functionIndex = $tokens->getNextMeaningfulToken($key);
             $functionNameIndex = $tokens->getNextMeaningfulToken($functionIndex);
 
-            if ($token->isGivenKind(T_STATIC)
+            if (
+                $token->isGivenKind(T_STATIC)
                 && $tokens[$functionIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$functionNameIndex]->isGivenKind(T_STRING)
             ) {
                 $curlyBraceStartIndex = $tokens->getNextTokenOfKind($key, ['{']);
                 $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-                if (!$this->isStaticMethodValid($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
+                if (
+                    !$this->isStaticMethodValid($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
                     && !$tokens[$curlyBraceStartIndex - 2]->isGivenKind(T_COMMENT)
                 ) {
                     $tokens->insertAt($curlyBraceStartIndex - 1, new Token([
                         T_COMMENT,
                         '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
-                        ]));
+                    ]));
                     $tokens->insertAt($curlyBraceStartIndex - 1, new Token([T_WHITESPACE, ' ']));
                 }
             }
@@ -104,7 +107,8 @@ final class StaticMethodsFixer extends AbstractFixer
     private function isStaticMethodValid(Tokens $tokens, $startIndex, $endIndex)
     {
         for ($i = $startIndex + 1; $i < $endIndex; $i++) {
-            if ($tokens[$i]->isGivenKind($this->validTokens)
+            if (
+                $tokens[$i]->isGivenKind($this->validTokens)
                 || $tokens[$i]->equalsAny([',', ';'])
                 || $tokens[$i]->getContent() === '['
                 || $tokens[$i]->getContent() === ']'

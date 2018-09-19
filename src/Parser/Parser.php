@@ -58,6 +58,7 @@ class Parser
      * @param string $endTokenValue
      * @param string|null $abortOnToken if this token found before end token, abort item grouping
      * @return ItemInterface|null
+     * @throws RuntimeException
      */
     private function groupItems(ItemInterface $prefixItem, string $endTokenValue, $abortOnToken = null)
     {
@@ -69,9 +70,8 @@ class Parser
             if ($token->getContent() === $endTokenValue) {
                 if (count($contents) > 0) {
                     return $this->buildConstructItem($prefixItem, $contents, $token);
-                } else {
-                    return new SimpleItemList([$prefixItem, $token]);
                 }
+                return new SimpleItemList([$prefixItem, $token]);
             } elseif ($abortOnToken !== null && $token->getContent() === $abortOnToken) {
                 return null;
             }
@@ -116,7 +116,7 @@ class Parser
     private function buildConstructItem(ItemInterface $prefixItem, array $contents, ItemInterface $postfixItem)
     {
         $contentList = new SimpleItemList($contents);
-        $contentList->setReplaceCallback(function() {
+        $contentList->setReplaceCallback(function () {
             // we need replacing for internal calls, here we'll just get replaced item returned from method call
         });
 
@@ -135,6 +135,7 @@ class Parser
      * Ternary operators (? and :) are not supported here
      *
      * @param SimpleItemList $itemList
+     * @param bool $wrapIntoComplex
      * @return ComplexItemList
      */
     private function regroup(SimpleItemList $itemList, bool $wrapIntoComplex = false): ComplexItemList

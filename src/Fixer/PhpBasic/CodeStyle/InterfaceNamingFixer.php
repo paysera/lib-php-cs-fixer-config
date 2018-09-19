@@ -13,7 +13,8 @@ final class InterfaceNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             We always add suffix Interface to interfaces, even if interface name would be adjective.
             Risky for renaming interface name.
             ',

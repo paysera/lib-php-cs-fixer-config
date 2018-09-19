@@ -30,7 +30,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
 
     public function getDefinition()
     {
-        return new FixerDefinition('
+        return new FixerDefinition(
+            '
             If we use phpdoc comment, it must contain all information about parameters,
             return type and exceptions that the method throws.
             
@@ -87,7 +88,9 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if ($token->isGivenKind(T_STRING) && $tokens[$key + 1]->equals('(')
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
@@ -101,7 +104,9 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
                     $docBlockIndex = $tokens->getPrevNonWhitespace($index);
                 }
 
-                if ($docBlockIndex !== null && $tokens[$curlyBraceStartIndex]->equals('{')
+                if (
+                    $docBlockIndex !== null
+                    && $tokens[$curlyBraceStartIndex]->equals('{')
                     && !preg_match('#@inheritdoc#', strtolower($tokens[$docBlockIndex]->getContent()))
                 ) {
                     $this->validateDocBlockParameters($tokens, $key + 1, $parenthesesEndIndex, $docBlockIndex);
@@ -125,13 +130,14 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
     ) {
         $parameters = [];
         // Collect parameters
-        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; ++$i) {
+        for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
                 $parameter = null;
                 $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
                 if ($tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
                     $index = $previousTokenIndex;
-                    while (!$tokens[$index]->equals('(')
+                    while (
+                        !$tokens[$index]->equals('(')
                         && !$tokens[$index]->equals(',')
                         && !$tokens[$index]->isWhitespace()
                     ) {
@@ -144,7 +150,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
 
                 $parameter['Nullable'] = false;
                 $nextTokenIndex = $tokens->getNextMeaningfulToken($i);
-                if ($tokens[$nextTokenIndex]->equals('=')
+                if (
+                    $tokens[$nextTokenIndex]->equals('=')
                     && $tokens[$tokens->getNextMeaningfulToken($nextTokenIndex)]->getContent() === 'null'
                 ) {
                     $parameter['Nullable'] = true;
@@ -161,8 +168,10 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
 
             foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                 // If object is optional and does not have null in docBlock - add it
-                if (preg_match('#^[^$]+@param\s([^$].*?)\s\\' . $parameter['Variable'] . '#m', $annotation)
-                    && !in_array('null', $annotation->getTypes(), true) && $parameter['Nullable']
+                if (
+                    preg_match('#^[^$]+@param\s([^$].*?)\s\\' . $parameter['Variable'] . '#m', $annotation)
+                    && !in_array('null', $annotation->getTypes(), true)
+                    && $parameter['Nullable']
                 ) {
                     $annotation->setTypes(array_merge($annotation->getTypes(), ['null']));
                     $tokens[$docBlockIndex]->setContent(implode('', $lines));
@@ -244,7 +253,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         /** @var Line $annotation */
         foreach ($lines as $index => &$annotation) {
             $annotationContent = $annotation->getContent();
-            if (!preg_match('#\\' . $match . '#', $annotationContent)
+            if (
+                !preg_match('#\\' . $match . '#', $annotationContent)
                 || preg_match('#' . $warning . '#', $annotationContent)
             ) {
                 continue;
@@ -299,12 +309,13 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
         $exceptions = [];
 
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; ++$i) {
+        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             $nextTokenIndex = $tokens->getNextMeaningfulToken($i);
             $nextNextTokenIndex = $tokens->getNextMeaningfulToken($nextTokenIndex);
 
             // Collect Exception namespace
-            if ($tokens[$i]->isGivenKind(T_STRING)
+            if (
+                $tokens[$i]->isGivenKind(T_STRING)
                 && $tokens[$nextTokenIndex]->isGivenKind(T_VARIABLE)
                 && preg_match('#Exception#', $tokens[$i]->getContent())
             ) {
@@ -317,7 +328,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
                 $exceptions[$namespace] = $tokens[$nextTokenIndex]->getContent();
             }
 
-            if ($tokens[$i]->isGivenKind(T_THROW)
+            if (
+                $tokens[$i]->isGivenKind(T_THROW)
                 && $tokens[$nextTokenIndex]->isGivenKind([T_VARIABLE])
                 && $tokens[$nextNextTokenIndex]->equals(';')
             ) {
@@ -330,7 +342,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
                 );
             }
 
-            if ($tokens[$i]->isGivenKind(T_THROW)
+            if (
+                $tokens[$i]->isGivenKind(T_THROW)
                 && $tokens[$nextTokenIndex]->isGivenKind(T_NEW)
                 && $tokens[$nextNextTokenIndex]->isGivenKind([T_STRING, T_NS_SEPARATOR])
             ) {
@@ -363,7 +376,8 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         preg_match('/^(\s*).*$/', $lines[count($lines) - 1]->getContent(), $indent);
         $returnAnnotations = $docBlock->getAnnotationsOfType('return');
 
-        if (!preg_match('#' . self::MISSING_RETURN . '#', $tokens[$docBlockIndex]->getContent())
+        if (
+            !preg_match('#' . self::MISSING_RETURN . '#', $tokens[$docBlockIndex]->getContent())
             && !isset($returnAnnotations[0])
             && isset($indent[1])
         ) {
@@ -389,7 +403,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
      */
     private function validateThrowAnnotation(Tokens $tokens, $docBlockIndex, $variableIndex, $exceptions, $docBlock)
     {
-        $exception = array_search($tokens[$variableIndex]->getContent(), $exceptions);
+        $exception = array_search($tokens[$variableIndex]->getContent(), $exceptions, true);
         $this->insertThrowsAnnotation($tokens, $docBlockIndex, $exception, $docBlock);
 
         return new DocBlock($tokens[$docBlockIndex]->getContent());
