@@ -4,6 +4,7 @@ namespace Paysera\PhpCsFixerConfig\Parser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use PhpCsFixer\Tokenizer\Token;
+use PhpCsFixer\Tokenizer\Tokens;
 
 class ContextualTokenBuilder
 {
@@ -31,5 +32,17 @@ class ContextualTokenBuilder
         }
 
         return $firstContextualToken;
+    }
+
+    public function overrideTokens(Tokens $tokens, ContextualToken $firstToken)
+    {
+        $allTokens = [];
+        $token = $firstToken;
+        do {
+            $allTokens[] = new Token($token->getPrototype());
+            $token = $token->getNextToken();
+        } while ($token !== null);
+
+        $tokens->overrideRange(0, count($tokens) - 1, $allTokens);
     }
 }

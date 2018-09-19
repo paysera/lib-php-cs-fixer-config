@@ -10,7 +10,6 @@ use Paysera\PhpCsFixerConfig\Parser\Entity\TypedItem;
 
 class GroupSeparatorHelper
 {
-
     /**
      * Return SeparatedItemList built by splitting items with separator and excluding whitespace from the items.
      *
