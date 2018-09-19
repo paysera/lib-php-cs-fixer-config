@@ -197,10 +197,10 @@ class PayseraConventionsConfig extends Config
             ],
             'php_unit_construct' => true,
             'psr4' => true,
-            'self_accessor' => true,
             'silenced_deprecation_error' => true,
             // exceptions
             'is_null' => ['use_yoda_style' => false],
+            'self_accessor' => false,
 
             // other base rules
             'no_unreachable_default_argument_value' => true,
