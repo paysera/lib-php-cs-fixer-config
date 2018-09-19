@@ -15,8 +15,8 @@ final class LineLengthFixerTest extends AbstractFixerTestCase
      */
     public function testFix($expected, $input = null)
     {
-        $this->fixer->configure(['soft_limit' => 110]);
-        $this->doTest($expected, $input, new \SplFileInfo('tests/Fixer/PSR2/Fixtures/temp.php'));
+        $this->fixer->configure(['soft_limit' => 80, 'hard_limit' => 119]);
+        $this->doTest($expected, $input);
     }
 
     public function provideFixCases()
@@ -24,28 +24,28 @@ final class LineLengthFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
-
-class Sample
+function main($a)
 {
-    private function sampleFunction()
-    {
-        $a = 0;
-        $b = "Some" . "long" . "but" . "not" . "so" . "long" . "hard" . "limit" ."string" . "for" . "test";
+    if ($a) {
+        // todo: following line exceeds 119 characters
         $c = "And" . "some" . "another" . "a" . "bit" . "more" . "longer" . "soft" . "limit" . "exceeding" ."string" . "for" . "testing";
     }
 }
-// TODO: Line (9) exceeds SOFT_LIMIT of 110 characters; contains 137 characters',
+',
                 '<?php
-
-class Sample
+function main($a)
 {
-    private function sampleFunction()
-    {
-        $a = 0;
-        $b = "Some" . "long" . "but" . "not" . "so" . "long" . "hard" . "limit" ."string" . "for" . "test";
+    if ($a) {
         $c = "And" . "some" . "another" . "a" . "bit" . "more" . "longer" . "soft" . "limit" . "exceeding" ."string" . "for" . "testing";
     }
-}',
+}
+',
+            ],
+            [
+                '<?php
+                $a = "Some really long string. Some really long string. Some really long string. Some really long string.";
+                ',
+                null,
             ],
         ];
     }

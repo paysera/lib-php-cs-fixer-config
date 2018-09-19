@@ -26,10 +26,12 @@ class ContextualToken extends Token implements ItemInterface
         }
     }
 
-    public function setNextContextualToken(ContextualToken $contextualToken)
+    public function setNextContextualToken(ContextualToken $contextualToken): self
     {
         $this->nextContextualToken = $contextualToken;
         $contextualToken->previousContextualToken = $this;
+
+        return $this;
     }
 
     public function replaceWith(ContextualToken $contextualToken)
@@ -138,5 +140,18 @@ class ContextualToken extends Token implements ItemInterface
     public function equalsToItem(ItemInterface $item): bool
     {
         return $item instanceof $this && $this instanceof $item && $this->equals($item);
+    }
+
+    /**
+     * @param array|Token[] $tokens
+     */
+    public function replaceWithTokens(array $tokens)
+    {
+        $lastToken = $this->previousToken();
+        foreach ($tokens as $token) {
+            $lastToken->setNextContextualToken($token);
+            $lastToken = $token;
+        }
+        $lastToken->setNextContextualToken($this->nextToken());
     }
 }

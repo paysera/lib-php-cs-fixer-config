@@ -117,7 +117,7 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
             $token = $token->getNextToken();
         } while ($token !== null);
 
-        $this->overrideTokens($tokens, $firstToken);
+        $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
 
     private function fixWhitespaceForItem(ItemInterface $groupedItem)
@@ -292,17 +292,5 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
         } else {
             $token->replaceWith(new ContextualToken($replacement));
         }
-    }
-
-    private function overrideTokens(Tokens $tokens, ContextualToken $firstToken)
-    {
-        $allTokens = [];
-        $token = $firstToken;
-        do {
-            $allTokens[] = new Token($token->getPrototype());
-            $token = $token->getNextToken();
-        } while ($token !== null);
-
-        $tokens->overrideRange(0, count($tokens) - 1, $allTokens);
     }
 }

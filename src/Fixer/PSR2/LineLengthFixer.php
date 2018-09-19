@@ -2,6 +2,9 @@
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PSR2;
 
+use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
+use Paysera\PhpCsFixerConfig\Parser\Entity\EmptyToken;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\ConfigurationDefinitionFixerInterface;
 use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
@@ -79,39 +82,73 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
         }
     }
 
+    /**
+     * @param \SplFileInfo $file
+     * @param Tokens|Token[] $tokens
+     */
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        $openedFile = $file->openFile();
-        $lineNumber = 0;
-        while (!$openedFile->eof()) {
-            $line = preg_replace('#\n#', '', $openedFile->getCurrentLine());
-            $lineNumber++;
-            if (
-                isset($this->softLimit)
-                && strlen($line) > $this->softLimit
-                && !$this->isCommentFound($tokens, $lineNumber)
-            ) {
-                $this->addResult(
-                    $tokens,
-                    $lineNumber,
-                    strlen($line),
-                    $this->softLimit,
-                    'soft_limit'
-                );
-            } elseif (
-                isset($this->hardLimit)
-                && strlen($line) > $this->hardLimit
-                && !$this->isCommentFound($tokens, $lineNumber)
-            ) {
-                $this->addResult(
-                    $tokens,
-                    $lineNumber,
-                    strlen($line),
-                    $this->hardLimit,
-                    'hard_limit'
-                );
+        $contextualTokenBuilder = new ContextualTokenBuilder();
+        $token = $contextualTokenBuilder->buildFromTokens($tokens);
+        $firstToken = (new EmptyToken())->setNextContextualToken($token);
+
+        $maxTokenLength = 0;
+        $currentLineLength = 0;
+        $firstLineToken = $token;
+        $previousMatches = null;
+        while ($token !== null) {
+            if (preg_match('/^([^\n]*)(.*?\n.*?)([^\n]*)$/', $token->getContent(), $matches) === 1) {
+                $currentLineLength += mb_strlen($matches[1]);
+                $this->handleLineEnd($firstLineToken, $currentLineLength, $maxTokenLength, $previousMatches);
+
+                $firstLineToken = $token;
+                $currentLineLength = $maxTokenLength = mb_strlen($matches[3]);
+                $previousMatches = $matches;
+            } else {
+                $tokenLength = mb_strlen($token->getContent());
+                $currentLineLength += $tokenLength;
+                if ($tokenLength > $maxTokenLength) {
+                    $maxTokenLength = $tokenLength;
+                }
             }
+
+            $token = $token->getNextToken();
         }
+
+        $contextualTokenBuilder->overrideTokens($tokens, $firstToken);
+    }
+
+    private function handleLineEnd(
+        ContextualToken $firstToken,
+        int $lineLength,
+        int $maxTokenLength,
+        array $newLineParts = null
+    ) {
+        if ($lineLength <= $this->hardLimit || $newLineParts === null) {
+            return;
+        }
+
+        $comment = sprintf('// todo: following line exceeds %s characters', $this->hardLimit);
+
+        if ($firstToken->previousToken()->getContent() === $comment) {
+            return;
+        }
+
+        if ($maxTokenLength + mb_strlen($newLineParts[3]) > 0.8 * $this->hardLimit) {
+            return;
+        }
+
+        $contents = [];
+        if ($newLineParts[1] !== '') {
+            $contents[] = new ContextualToken($newLineParts[1]);
+        }
+        $contents[] = new ContextualToken($newLineParts[2] . $newLineParts[3]);
+        $contents[] = new ContextualToken(
+            [T_COMMENT, $comment]
+        );
+        $contents[] = new ContextualToken("\n" . $newLineParts[3]);
+
+        $firstToken->replaceWithTokens($contents);
     }
 
     protected function createConfigurationDefinition()
@@ -127,53 +164,5 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
         ;
 
         return new FixerConfigurationResolverRootless('limits', [$limits]);
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $currentLineNumber
-     * @return bool
-     */
-    private function isCommentFound(Tokens $tokens, $currentLineNumber)
-    {
-        // Find if comment is already added
-        foreach ($tokens as $token) {
-            if (
-                $token->isGivenKind(T_COMMENT)
-                && preg_match("#\/\/\sTODO:\sLine\s\(" . $currentLineNumber . "\)#", $token->getContent()) === 1
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $lineNumber
-     * @param int $lineLength
-     * @param int $limit
-     * @param string $limitName
-     */
-    private function addResult(Tokens $tokens, $lineNumber, $lineLength, $limit, $limitName)
-    {
-        $comment = '// TODO: Line (' . $lineNumber . ') exceeds ' . strtoupper($limitName) . ' of ' . $limit
-            . ' characters; contains ' . $lineLength . ' characters';
-
-        $tokens->insertAt(
-            $tokens->count(),
-            new Token([
-                T_WHITESPACE,
-                "\n",
-            ])
-        );
-
-        $tokens->insertAt(
-            $tokens->count(),
-            new Token([
-                T_COMMENT,
-                $comment,
-            ])
-        );
     }
 }
