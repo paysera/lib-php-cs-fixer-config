@@ -12,7 +12,6 @@ use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocContentsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\FullNamesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ClassNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\InterfaceNamingFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocOnMethodsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocOnPropertiesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\MethodNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\PropertyNamingFixer;
@@ -76,7 +75,6 @@ class PayseraConventionsConfig extends Config
                 new CommentStylesFixer(),
                 new FluidInterfaceFixer(),
                 new PhpDocContentsFixer(),
-                new PhpDocOnMethodsFixer(),
                 new PhpDocOnPropertiesFixer(),
                 new AssignmentsInConditionsFixer(),
                 new CallingParentConstructorFixer(),
@@ -345,7 +343,9 @@ class PayseraConventionsConfig extends Config
             'blank_line_before_return' => false,
             'is_null' => array('use_yoda_style' => false),
             'phpdoc_order' => false,
-            'phpdoc_add_missing_param_annotation' => false,
+            'phpdoc_add_missing_param_annotation' => [
+                'only_untyped' => false,
+            ],
             'pre_increment' => false,
             'no_multiline_whitespace_before_semicolons' => false,
             'ordered_imports' => false,
@@ -375,7 +375,6 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
             'Paysera/php_basic_comment_comment_styles' => true,
             'Paysera/php_basic_comment_fluid_interface' => true,
-            'Paysera/php_basic_comment_php_doc_on_methods' => true,
             'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_feature_comparing_to_null' => true,
             'Paysera/php_basic_feature_condition_results' => true,
