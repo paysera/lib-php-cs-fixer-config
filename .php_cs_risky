@@ -7,6 +7,6 @@ if (file_exists($autoload)) {
 }
 
 return Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig::create()
-    ->setDefaultFinder()
+    ->setDefaultFinder(['src'], ['Overwritten'])
     ->setRiskyRules()
 ;
