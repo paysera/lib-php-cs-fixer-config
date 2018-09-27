@@ -58,9 +58,7 @@ final class CallingParentConstructorFixer extends AbstractFixer
             ) {
                 $startIndex = $tokens->getNextTokenOfKind($key, ['{']);
                 $endIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $startIndex);
-                if (!$this->isParentConstructFirstStatement($tokens, $startIndex)) {
-                    $this->fixParentConstructPosition($tokens, $startIndex, $endIndex);
-                }
+                $this->fixParentConstructPosition($tokens, $startIndex, $endIndex);
             }
         }
     }
@@ -72,12 +70,21 @@ final class CallingParentConstructorFixer extends AbstractFixer
      */
     private function fixParentConstructPosition(Tokens $tokens, $startIndex, $endIndex)
     {
+        $thisBeforeParentConstructor = false;
         for ($i = $startIndex; $i < $endIndex; $i++) {
+            if ($tokens[$i]->getContent() === '$this') {
+                $thisBeforeParentConstructor = true;
+            }
+
             if (
                 $tokens[$i]->getContent() === self::PARENT
                 && $tokens[$i + 1]->isGivenKind(T_DOUBLE_COLON)
                 && $tokens[$i + 2]->getContent() === self::CONSTRUCT
             ) {
+                if (!$thisBeforeParentConstructor) {
+                    return;
+                }
+
                 $parentEndIndex = $tokens->getNextTokenOfKind($i, [';']);
                 $parentStatement = $this->getParentStatement($tokens, $i, $parentEndIndex);
 
@@ -85,7 +92,7 @@ final class CallingParentConstructorFixer extends AbstractFixer
                 $oldIndexStart = $i + count($parentStatement) - 1;
                 $oldIndexEnd = $oldIndexStart + count($parentStatement) - 1;
                 $tokens->clearRange($oldIndexStart, $oldIndexEnd);
-                break;
+                return;
             }
         }
     }
@@ -103,20 +110,5 @@ final class CallingParentConstructorFixer extends AbstractFixer
             $argumentTokens[] = $tokens[$i];
         }
         return $argumentTokens;
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @return bool
-     */
-    private function isParentConstructFirstStatement(Tokens $tokens, $startIndex)
-    {
-        $firstStatementTokenIndex = $tokens->getNextNonWhitespace($startIndex);
-        return
-            $tokens[$firstStatementTokenIndex]->getContent() === self::PARENT
-            && $tokens[$firstStatementTokenIndex + 1]->isGivenKind(T_DOUBLE_COLON)
-            && $tokens[$firstStatementTokenIndex + 2]->getContent() === self::CONSTRUCT
-        ;
     }
 }

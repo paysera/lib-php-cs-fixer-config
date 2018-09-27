@@ -71,6 +71,53 @@ final class CallingParentConstructorFixerTest extends AbstractFixerTestCase
                     }
                 }'
             ],
+            'Allows actions that do not involve the instance' => [
+                '<?php
+                class Sample
+                {
+                    public function __construct($token)
+                    {
+                        $internalToken = $token . "a";
+                        parent::__construct($internalToken);
+                    }
+                }',
+                null,
+            ],
+            'Allows actions with structures that do not involve the instance' => [
+                '<?php
+                class Sample
+                {
+                    public function __construct($token)
+                    {
+                        if (is_string($token) && trim($token, " \t\n\r\0\x0B") === \'\' && $token !== \'\') {
+                            parent::__construct([T_WHITESPACE, $token]);
+                        } else {
+                            parent::__construct($token);
+                        }
+                    }
+                }',
+                null,
+            ],
+            'Makes invalid code in some rare cases' => [
+                '<?php
+                class Sample
+                {
+                    public function __construct($token)
+                    {
+                        parent::__construct($internalToken);
+                        $internalToken = $this->token() . "a";
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function __construct($token)
+                    {
+                        $internalToken = $this->token() . "a";
+                        parent::__construct($internalToken);
+                    }
+                }',
+            ],
         ];
     }
 
