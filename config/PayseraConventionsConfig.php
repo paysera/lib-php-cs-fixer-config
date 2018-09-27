@@ -2,6 +2,7 @@
 
 namespace Paysera\PhpCsFixerConfig\Config;
 
+use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Overwritten\BracesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocNecessityFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CheckingExplicitlyFixer;
@@ -98,6 +99,7 @@ class PayseraConventionsConfig extends Config
                 new VoidResultFixer(),
                 new DocBlockWhitespaceFixer(),
                 new PhpDocNecessityFixer(),
+                new BracesFixer(),
             ]
         );
     }
@@ -247,9 +249,6 @@ class PayseraConventionsConfig extends Config
             'visibility_required' => true,
 
             'binary_operator_spaces' => true,
-            'braces' => [
-                'allow_single_line_closure' => true,
-            ],
             'class_attributes_separation' => ['elements' => ['method']],
             'class_definition' => ['singleLine' => true],
             'declare_equal_normalize' => true,
@@ -336,6 +335,9 @@ class PayseraConventionsConfig extends Config
                 'throw',
                 'use',
             ]],
+            'Paysera/php_basic_braces' => [ // temporary overwritten from "braces" fixer
+                'allow_single_line_closure' => true,
+            ],
 
             // other base rules
             'no_useless_else' => true,
