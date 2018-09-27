@@ -132,7 +132,6 @@ class Parser
 
     /**
      * Regoups internal content items into logical groups by operators and separators depending on precedence order
-     * Ternary operators (? and :) and concatenation (.) are not supported here
      *
      * @param SimpleItemList $itemList
      * @param bool $wrapIntoComplex
@@ -142,7 +141,7 @@ class Parser
     {
         $separators = explode(
             ' ',
-            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ?? || && | ^ & == != === !== <> <=> < <= > >= << >> + - * / % instanceof ** ->'
+            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ?? ? : || && | ^ & == != === !== <> <=> < <= > >= << >> + - . * / % instanceof ** ->'
         );
         foreach ($separators as $separator) {
             $replacedItem = $this->groupSeparatorHelper->regroupListBySeparator($itemList->getItemList(), $separator);
