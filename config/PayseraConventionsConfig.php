@@ -265,14 +265,6 @@ class PayseraConventionsConfig extends Config
             'no_empty_comment' => true,
             'no_empty_phpdoc' => true,
             'no_empty_statement' => true,
-            'no_extra_blank_lines' => ['tokens' => [
-                'curly_brace_block',
-                'extra',
-                'parenthesis_brace_block',
-                'square_brace_block',
-                'throw',
-                'use',
-            ]],
             'no_leading_import_slash' => true,
             'no_leading_namespace_whitespace' => true,
             'no_mixed_echo_print' => ['use' => 'echo'],
@@ -337,6 +329,13 @@ class PayseraConventionsConfig extends Config
             'phpdoc_no_alias_tag' => false,
             'phpdoc_inline_tag' => false,
             'no_unneeded_control_parentheses' => false, // works too aggressively with large structures
+            'no_extra_blank_lines' => ['tokens' => [ // don't use curly_brace_block to allow splitting elseif blocks
+                'extra',
+                'parenthesis_brace_block',
+                'square_brace_block',
+                'throw',
+                'use',
+            ]],
 
             // other base rules
             'no_useless_else' => true,
