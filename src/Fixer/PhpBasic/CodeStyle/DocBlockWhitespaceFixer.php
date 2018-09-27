@@ -54,7 +54,7 @@ final class DocBlockWhitespaceFixer extends AbstractFixer
                 foreach ($lines as $key => $line) {
                     $matches = preg_split('/(?=\*)/', $line);
 
-                    if (isset($matches[1])) {
+                    if (isset($matches[1]) && strpos($matches[1], '@') !== false) {
                         $matches[1] = preg_replace(
                             '/\s{2,}/',
                             ' ',
