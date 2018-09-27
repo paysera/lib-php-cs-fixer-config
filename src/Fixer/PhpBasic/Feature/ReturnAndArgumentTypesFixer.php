@@ -2,13 +2,12 @@
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
+use Doctrine\Common\Inflector\Inflector;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\DocBlock\Line;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
-use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
-use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
@@ -21,7 +20,7 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     const MULTIPLE_ENTITIES = 'TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)';
     const REPOSITORY = 'Repository';
 
-    const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$/';
+    const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$|<.*>/';
 
     /**
      * @var array
@@ -55,33 +54,6 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         ];
     }
 
-    public function configure(array $configuration = null)
-    {
-        parent::configure($configuration);
-
-        if ($this->configuration['exceptions'] === true) {
-            return;
-        }
-        if (isset($this->configuration['exceptions']['whitelist'])) {
-            $this->whitelist = $this->configuration['exceptions']['whitelist'];
-        }
-    }
-
-    protected function createConfigurationDefinition()
-    {
-        $exceptions = new FixerOptionBuilder(
-            'exceptions',
-            'Set Classes which presence in return or parameter definition will not trigger Fixer.'
-        );
-
-        $exceptions = $exceptions
-            ->setAllowedTypes(['array', 'bool'])
-            ->getOption()
-        ;
-
-        return new FixerConfigurationResolverRootless('exceptions', [$exceptions]);
-    }
-
     public function getDefinition()
     {
         return new FixerDefinition(
@@ -100,16 +72,16 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
                         class Sample
                         {
                             /*
-                             * @param int $arg1
-                             * @param string $arg2
-                             * @return string|int
+                             * @param int|MyClass $arg1
+                             * @param OneClass|AnotherClass $arg2
+                             * @return void|int
                              */
                             public function someFunction($arg1, $arg2)
                             {
                                 if ($arg1) {
                                     return $arg1;
                                 } elseif ($arg2) {
-                                    return $arg2;
+                                    return;
                                 }
                             }
                         }
@@ -288,8 +260,14 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         }
 
         // handle array|Collection|Item[] case
-        $arrayTypes = array_filter($types, function(string $type) {
-            return preg_match(self::COLLECTION_TYPE_REGEXP, $type) === 1;
+        $arrayTypes = array_filter($types, function (string $type) {
+            if (preg_match(self::COLLECTION_TYPE_REGEXP, $type) === 1) {
+                return true;
+            }
+
+            $typeWord = trim($type, ' []');
+
+            return $typeWord === Inflector::pluralize($typeWord);
         });
         if (count($arrayTypes) === $typeCount) {
             return null;
@@ -326,13 +304,13 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     /**
      * @param Tokens $tokens
      * @param int $insertIndex
+     * @param string $comment
      */
     private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
-        $comment = '// ' . $comment;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$insertIndex, new Token([T_COMMENT, $comment]));
+            $tokens->insertAt(++$insertIndex, new Token([T_COMMENT, '// ' . $comment]));
         }
     }
 }

@@ -474,6 +474,38 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                     }
                 }',
             ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
+                     * Get tokens
+                     *
+                     * @return Token[]|Tokens
+                     */
+                    public function getTokens()
+                    {
+                        
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
+                     * Get tokens
+                     *
+                     * @return Token[]|Result<Token>
+                     */
+                    public function getTokens()
+                    {
+                        
+                    }
+                }',
+                null,
+            ],
         ];
     }
 
