@@ -35,6 +35,17 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         'resource',
     ];
 
+    /**
+     * @var InheritanceHelper
+     */
+    private $inheritanceHelper;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->inheritanceHelper = new InheritanceHelper();
+    }
+
     public function getDefinition()
     {
         return new FixerDefinition(
@@ -120,7 +131,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
     private function methodImplementedFromInterface($functionTokenIndex, Tokens $tokens)
     {
         $method = $tokens[$tokens->getNextNonWhitespace($functionTokenIndex)];
-        return InheritanceHelper::isMethodFromInterface($method->getContent(), $tokens);
+        return $this->inheritanceHelper->isMethodFromInterface($method->getContent(), $tokens);
     }
 
     /**
@@ -138,7 +149,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
             $varIndex = $tokens->getPrevNonWhitespace($key);
             if ($varIndex !== null && $tokens[$varIndex]->getContent() === '$this') {
                 $property = $tokens[$tokens->getNextNonWhitespace($varIndex + 1)];
-                if (InheritanceHelper::isPropertyInherited($property->getContent(), $tokens)) {
+                if ($this->inheritanceHelper->isPropertyInherited($property->getContent(), $tokens)) {
                     return true;
                 }
             }

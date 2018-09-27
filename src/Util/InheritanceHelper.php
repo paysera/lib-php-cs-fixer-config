@@ -14,10 +14,10 @@ class InheritanceHelper
      * @param Tokens $tokens
      * @return bool
      */
-    public static function isMethodFromInterface($methodName, Tokens $tokens)
+    public function isMethodFromInterface($methodName, Tokens $tokens)
     {
         try {
-            $reflection = static::getReflection($tokens);
+            $reflection = $this->getReflection($tokens);
         } catch (ReflectionException $exception) {
             return false;
         }
@@ -39,10 +39,10 @@ class InheritanceHelper
      * @param Tokens $tokens
      * @return bool
      */
-    public static function isPropertyInherited($propertyName, Tokens $tokens)
+    public function isPropertyInherited($propertyName, Tokens $tokens)
     {
         try {
-            $reflection = static::getReflection($tokens);
+            $reflection = $this->getReflection($tokens);
         } catch (ReflectionException $exception) {
             return false;
         }
@@ -62,7 +62,7 @@ class InheritanceHelper
         return false;
     }
 
-    private static function getReflection(Tokens $tokens)
+    private function getReflection(Tokens $tokens)
     {
         $fqcn = null;
 
