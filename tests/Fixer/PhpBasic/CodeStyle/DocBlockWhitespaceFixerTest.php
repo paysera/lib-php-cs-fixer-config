@@ -23,83 +23,105 @@ final class DocBlockWhitespaceFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param $locationId
-     * @param $location
-     */
-    public function updateLocation($locationId, $location)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param $locationId
+                     * @param $location
+                     */
+                    public function updateLocation($locationId, $location)
+                    {
+                    }
+                }',
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param                                                      $locationId
-     * @param       $location
-     */
-    public function updateLocation($locationId, $location)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param                                                      $locationId
+                     * @param       $location
+                     */
+                    public function updateLocation($locationId, $location)
+                    {
+                    }
+                }',
             ],
             [
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param $locationId
-     * @param Object|null $location
-     */
-    public function updateLocation($locationId, $location)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param $locationId
+                     * @param Object|null $location
+                     */
+                    public function updateLocation($locationId, $location)
+                    {
+                    }
+                }',
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param             $locationId
-     * @param Object|null $location
-     */
-    public function updateLocation($locationId, $location)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param             $locationId
+                     * @param Object|null $location
+                     */
+                    public function updateLocation($locationId, $location)
+                    {
+                    }
+                }',
             ],
             [
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param Object|null $locationId
-     * @param Object $location
-     * @param $city
-     */
-    public function updateLocation($locationId, $location, $city)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param Object|null $locationId
+                     * @param Object $location
+                     * @param $city
+                     */
+                    public function updateLocation($locationId, $location, $city)
+                    {
+                    }
+                }',
                 '<?php
-namespace Some\Entity;
-class Sample
-{
-    /**
-     * @param Object|null $locationId
-     * @param Object      $location
-     * @param             $city
-     */
-    public function updateLocation($locationId, $location, $city)
-    {
-    }
-}',
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * @param Object|null $locationId
+                     * @param Object      $location
+                     * @param             $city
+                     */
+                    public function updateLocation($locationId, $location, $city)
+                    {
+                    }
+                }',
+            ],
+            [
+                '<?php
+                namespace Some\Entity;
+                class Sample
+                {
+                    /**
+                     * This is long description with complex spacing:
+                     *    - some item
+                     *        - some sub-item
+                     *
+                     *              Do not care about descriptions
+                     *
+                     * @param Object|null $locationId
+                     * @param Object $location
+                     * @param $city
+                     */
+                    public function updateLocation($locationId, $location, $city)
+                    {
+                    }
+                }',
+                null,
             ],
         ];
     }
