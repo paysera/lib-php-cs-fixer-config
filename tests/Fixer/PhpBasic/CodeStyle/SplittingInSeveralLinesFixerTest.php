@@ -751,6 +751,27 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     ];',
 
             ],
+            'with comparison and ternary' => [
+                '<?php
+                $list->addPrefixWhitespaceItem(
+                    count($lastWhiteSpace) > 1 ? new SimpleItemList($lastWhiteSpace) : $lastWhiteSpace[0]
+                );',
+                null,
+            ],
+            'with ternary' => [
+                '<?php
+                $tokenForIndent = $prefixItem !== null
+                    ? $prefixItem->firstToken()
+                    : $itemList->firstToken()->previousNonWhitespaceToken();',
+                null,
+            ],
+            'with concatenation' => [
+                '<?php
+                $tokenForIndent = "something"
+                    . "something else"
+                    . "and something else";',
+                null,
+            ],
         ];
     }
 

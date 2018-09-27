@@ -137,6 +137,10 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
                 continue;
             }
 
+            if ($this->isItemListUnsupported($itemList)) {
+                continue;
+            }
+
             $prefixItem = $itemList->getFirstPrefixItem();
             $tokenForIndent = $prefixItem !== null
                 ? $prefixItem->firstToken()
@@ -237,6 +241,7 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     private function fixSeparators(SeparatedItemList $itemList, string $indent)
     {
         $separator = $itemList->getSeparator();
+
         if ($separator === '->') {
             $whitespaceBefore = $indent;
             $whitespaceAfter = null;
@@ -260,6 +265,14 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
         if ($separatorAfterContents !== null) {
             $this->fixWhitespaceBefore($separatorAfterContents, $whitespaceBefore, $forceWhitespace);
         }
+    }
+
+    private function isItemListUnsupported(ComplexItemList $itemList)
+    {
+        return (
+            $itemList instanceof SeparatedItemList
+            && in_array($itemList->getSeparator(), ['.', '?', ':'], true)
+        );
     }
 
     /**
