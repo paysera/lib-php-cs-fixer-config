@@ -19,7 +19,14 @@ use PhpCsFixer\Tokenizer\Tokens;
 
 final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
+    /**
+     * @var Parser
+     */
     private $parser;
+
+    /**
+     * @var ContextualTokenBuilder
+     */
     private $contextualTokenBuilder;
 
     public function __construct()

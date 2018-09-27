@@ -23,17 +23,33 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
-                namespace WebToPay\ApiBundle\Repository;
-                class UserAvatarMapper implements NormalizerInterface
+                namespace My\Data;
+                class MyClass
                 {
                     /**
-                     * @param SomeClass[]|ArrayCollection $something
-                     * @return SomeClass[]|ArrayCollection
+                     * @param SomeClass[]|Generator $something
+                     * @return SomeClass[]|\Generator
                      */
                     private function doSomething($something)
                     {
                     
-                    }                   
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                namespace My\Data;
+                class MyClass
+                {
+                    /**
+                     * @param SomeClass[]|array $something
+                     * @return SomeClass[]|array
+                     */
+                    private function doSomething($something)
+                    {
+                    
+                    }
                 }',
                 null,
             ],
@@ -43,37 +59,73 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 class UserAvatarMapper implements NormalizerInterface
                 {
                     /**
-                     * Finds active allowance for project and wallet
-                     *
-                     * @param Location       $location
-                     * @param Client|integer $client
+                     * @param SomeClass[]|ArrayCollection $something
+                     * @return SomeClass[]|\Doctrine\Collection\ArrayCollection
+                     */
+                    private function doSomething($something)
+                    {
+                    
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                namespace MyNamespace\Repository;
+                class MyRepository
+                {
+                    /**
+                     * @param Location|null  $location
+                     * @param Client|string  $client TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      * @param integer|Wallet $wallet
+                     * @param int|Wallet     $otherWallet
                      * @param bool           $forceClient
                      *
                      * @return \WebToPay\ApiBundle\Entity\Allowance|null
                      */
-                    public function findActiveForWallet(Location $location, $client, $wallet, $forceClient)
+                    public function method1(Location $location, $client, $wallet, $otherWallet, $forceClient)
                     {
-                        $allowance = $this->findActive($location->getProject(), $client, $wallet, $forceClient);
-                        return $allowance !== null && $this->isLocationValid($allowance, $location) ? $allowance : null;
+                    
                     }
                 
                     /**
-                     * Cancels all allowances that are currently active for this project and wallet
+                     * @param string|boolean $flag TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      *
-                     * @param Project|int $project
-                     * @param Client|int  $client
-                     * @param Wallet|int  $wallet
+                     * @return Object|AnotherObject|boolean TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      */
-                    public function cancelActiveAllowances($project, $client, $wallet)
+                    public function method2($flag)
                     {
-                        $allowance = $this->findActive($project, $client, $wallet);
-                        if ($allowance !== null) {
-                            $allowance->markAsInactive();
-                        }
+                    
                     }
                 }',
-                null,
+                '<?php
+                namespace MyNamespace\Repository;
+                class MyRepository
+                {
+                    /**
+                     * @param Location|null  $location
+                     * @param Client|string  $client
+                     * @param integer|Wallet $wallet
+                     * @param int|Wallet     $otherWallet
+                     * @param bool           $forceClient
+                     *
+                     * @return \WebToPay\ApiBundle\Entity\Allowance|null
+                     */
+                    public function method1(Location $location, $client, $wallet, $otherWallet, $forceClient)
+                    {
+                    
+                    }
+                
+                    /**
+                     * @param string|boolean $flag
+                     *
+                     * @return Object|AnotherObject|boolean
+                     */
+                    public function method2($flag)
+                    {
+                    
+                    }
+                }',
             ],
             [
                 '<?php
@@ -81,7 +133,7 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 {
                     /**
                      * @param UserAvatar $entity
-                     * @return mixed|void @TODO: return only void or type with null
+                     * @return mixed|void TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      */
                     public function mapFromEntity($entity)
                     {
@@ -103,12 +155,38 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
             ],
             [
                 '<?php
+                class UserAvatarMapper implements NormalizerInterface
+                {
+                    /**
+                     * @param UserAvatar $entity
+                     * @return mixed|null TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
+                     */
+                    public function mapFromEntity($entity)
+                    {
+                        return array(\'id\' => $entity->getId());
+                    }
+                }',
+                '<?php
+                class UserAvatarMapper implements NormalizerInterface
+                {
+                    /**
+                     * @param UserAvatar $entity
+                     * @return mixed|null
+                     */
+                    public function mapFromEntity($entity)
+                    {
+                        return array(\'id\' => $entity->getId());
+                    }
+                }',
+            ],
+            [
+                '<?php
                 class Sample
                 {
                     /**
-                     * @param int|string $arg1 @TODO: we do not use multiple types
-                     * @param string|bool $arg2 @TODO: we do not use multiple types
-                     * @return string|int @TODO: we do not use multiple types
+                     * @param int|string $arg1 TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
+                     * @param string|bool $arg2 TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
+                     * @return string|int TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      */
                     public function someFunction($arg1, $arg2)
                     {
@@ -122,7 +200,7 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                     /**
                      * @param bool $arg1
                      * @param SomeEntity $arg2
-                     * @return SomeEntity|bool @TODO: we do not use multiple types
+                     * @return SomeEntity|bool TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      */
                     public function anotherFunction($arg1, $arg2)
                     {
@@ -170,9 +248,9 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     /**
-                     * @param SomeEntity|bool $arg1 @TODO: we do not use multiple types
+                     * @param SomeEntity|bool $arg1 TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      * @param SomeSameEntity $arg2
-                     * @return SomeEntity|SomeSameEntity|null @TODO: use single interface or common class instead
+                     * @return SomeEntity|SomeSameEntity|null TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)
                      */
                     public function someFunction($arg1, $arg2)
                     {
@@ -227,9 +305,9 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                         if ($arg1) {
                             return true;
                         } elseif ($arg2) {
-                            return "string"; // TODO: "string" - PhpBasic convention 3.17.1: We always return value of one type
+                            return "string"; // TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                         } else {
-                            return 1; // TODO: 1 - PhpBasic convention 3.17.1: We always return value of one type
+                            return 1; // TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                         }
                     }
                 }',
@@ -252,8 +330,68 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
+                    public function someFunction()
+                    {
+                        if ($arg1) {
+                            return;
+                        } elseif ($arg2) {
+                            return;
+                        } else {
+                            return 1; // TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)
+                        }
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function someFunction()
+                    {
+                        if ($arg1) {
+                            return;
+                        } elseif ($arg2) {
+                            return;
+                        } else {
+                            return 1;
+                        }
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    public function someFunction()
+                    {
+                        if ($arg1) {
+                            return 1;
+                        } elseif ($arg2) {
+                            return; // TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)
+                        } else {
+                            return; // TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)
+                        }
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    public function someFunction()
+                    {
+                        if ($arg1) {
+                            return 1;
+                        } elseif ($arg2) {
+                            return;
+                        } else {
+                            return;
+                        }
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
                     /**
-                     * @param SomeEntity|AnotherEntity|null $arg1 @TODO: use single interface or common class instead
+                     * @param SomeEntity|AnotherEntity|null $arg1 TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)
                      * @param SomeEntity|null $arg2
                      * @return SomeEntity|null
                      */
@@ -287,45 +425,9 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                 class Sample
                 {
                     /**
-                     * @param SomeEntity|bool $arg1 @TODO: we do not use multiple types
-                     * @param SomeSameEntity $arg2
-                     * @return SomeEntity|SomeSameEntity|null @TODO: use single interface or common class instead
-                     */
-                    public function someFunction($arg1, $arg2)
-                    {
-                        if ($arg1) {
-                            return $arg1;
-                        } elseif ($arg2) {
-                            return null;
-                        }
-                    }
-                }',
-                '<?php
-                class Sample
-                {
-                    /**
-                     * @param SomeEntity|bool $arg1
-                     * @param SomeSameEntity $arg2
-                     * @return SomeEntity|SomeSameEntity|null
-                     */
-                    public function someFunction($arg1, $arg2)
-                    {
-                        if ($arg1) {
-                            return $arg1;
-                        } elseif ($arg2) {
-                            return null;
-                        }
-                    }
-                }',
-            ],
-            [
-                '<?php
-                class Sample
-                {
-                    /**
                      * Get payments
                      *
-                     * @return PaymentInterface[]|Collection @TODO: use single interface or common class instead
+                     * @return PaymentInterface[]|Collection
                      */
                     public function getPayments()
                     {
@@ -338,7 +440,7 @@ final class ReturnAndArgumentTypesFixerTest extends AbstractFixerTestCase
                     /**
                      * Gets parameters
                      *
-                     * @return mixed @TODO: we do not use multiple types
+                     * @return mixed TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)
                      */
                     public function getParameters()
                     {
