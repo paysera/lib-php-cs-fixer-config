@@ -16,12 +16,12 @@ use PhpCsFixer\Tokenizer\Tokens;
 
 final class ReturnAndArgumentTypesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const TYPECAST_CONVENTION = 'PhpBasic convention 3.17.1: We always return value of one type';
-    const MULTIPLE_TYPES = '@TODO: we do not use multiple types';
-    const MULTIPLE_ENTITIES = '@TODO: use single interface or common class instead';
-    const RETURN_VOID_CONVENTION = '@TODO: return only void or type with null';
-    const ENTITY = 'Entity';
+    const NO_MIXED_VOID = 'TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)';
+    const MULTIPLE_TYPES = 'TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)';
+    const MULTIPLE_ENTITIES = 'TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)';
     const REPOSITORY = 'Repository';
+
+    const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$/';
 
     /**
      * @var array
@@ -35,13 +35,7 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         'int',
         'integer',
         'string',
-    ];
-
-    /**
-     * @var array
-     */
-    private $whitelist = [
-        'ArrayCollection',
+        'resource',
     ];
 
     /**
@@ -57,7 +51,6 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     private static function getPassingIdNamespaceExclusions()
     {
         return [
-            self::ENTITY,
             self::REPOSITORY,
         ];
     }
@@ -190,11 +183,29 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
 
+        $returnsValue = false;
+        $returnsVoid = false;
         $firstReturnValue = null;
         for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_RETURN)) {
-                $returnValue = $tokens[$tokens->getNextMeaningfulToken($i)];
-                if ($returnValue->getContent() === 'null') {
+                $tokenIndex = $tokens->getNextMeaningfulToken($i);
+                $returnValue = $tokens[$tokenIndex];
+                $voidReturn = $returnValue->getContent() === ';';
+
+                if ($voidReturn) {
+                    $returnsVoid = true;
+                    $semicolonIndex = $tokenIndex;
+                } else {
+                    $returnsValue = true;
+                    $firstReturnValue = $firstReturnValue ?? $returnValue->getId();
+                    $semicolonIndex = $tokens->getNextTokenOfKind($tokenIndex, [';']);
+                }
+
+                if ($voidReturn && $returnsValue) {
+                    $this->insertComment($tokens, $semicolonIndex, self::NO_MIXED_VOID);
+                    continue;
+                } elseif (!$voidReturn && $returnsVoid) {
+                    $this->insertComment($tokens, $semicolonIndex, self::NO_MIXED_VOID);
                     continue;
                 }
 
@@ -203,20 +214,11 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
                     && $returnValue->getContent() !== 'true'
                     && $returnValue->getContent() !== 'false'
                 ) {
-                    break;
-                }
-
-                if ($firstReturnValue === null) {
-                    $firstReturnValue = $returnValue->getId();
                     continue;
                 }
 
                 if ($returnValue->getId() !== $firstReturnValue) {
-                    $this->insertComment(
-                        $tokens,
-                        $tokens->getNextTokenOfKind($i, [';']),
-                        $returnValue->getContent()
-                    );
+                    $this->insertComment($tokens, $semicolonIndex, self::MULTIPLE_TYPES);
                 }
             }
         }
@@ -232,84 +234,72 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $annotations = $docBlock->getAnnotationsOfType(['return', 'param']);
 
-        if (!isset($annotations)) {
-            return;
-        }
-
         foreach ($annotations as $annotation) {
-            if (preg_match(
-                '#' . self::MULTIPLE_TYPES . '|' . self::MULTIPLE_ENTITIES . '|' . self::RETURN_VOID_CONVENTION . '#',
-                $annotation->getContent()
-            )) {
+            if (
+                strpos($annotation->getContent(), self::MULTIPLE_TYPES) !== false
+                || strpos($annotation->getContent(), self::MULTIPLE_ENTITIES) !== false
+                || strpos($annotation->getContent(), self::NO_MIXED_VOID) !== false
+            ) {
                 continue;
             }
 
-            $types = $annotation->getTypes();
-            $typeCount = count($types);
-
-            $scalarTypesFound = array_intersect($types, $this->scalarTypes);
-            $scalarTypesCount = count($scalarTypesFound);
-
-            $objectTypesFound = array_diff(
-                $types,
-                array_merge($this->scalarTypes, ['null', 'void', 'self', '$this', 'mixed'])
-            );
-            $objectTypesCount = count($objectTypesFound);
-
-            $nullFound = in_array('null', $types, true);
-            $voidFound = in_array('void', $types, true);
-            $selfFound = in_array('self', $types, true);
-            $thisFound = in_array('$this', $types, true);
-            $mixedFound = in_array('mixed', $types, true);
-            $whitelisted = count(array_intersect($this->whitelist, $types)) > 0;
-            $intFound = (bool)array_intersect(['int', 'integer'], $scalarTypesFound);
-
-            if (
-                $scalarTypesCount > 1
-                || $mixedFound
-                || ($typeCount > 1 && $scalarTypesCount === 1 && $objectTypesCount > 1 && !$nullFound)
-                || (
-                    $typeCount > 1
-                    && $scalarTypesCount === 1
-                    && $objectTypesCount === 1
-                    && (
-                        !$intFound
-                        || ($intFound && !in_array($classNamespace, self::getPassingIdNamespaceExclusions(), true))
-                    )
-                )
-            ) {
+            $types = array_values(array_diff($annotation->getTypes(), ['null', '$this', 'self']));
+            $warning = $this->getTypeUsageWarning($types, $classNamespace);
+            if ($warning !== null) {
                 $this->insertReturnAnnotationWarning(
                     $tokens,
                     $docBlockIndex,
                     $annotation,
-                    self::MULTIPLE_TYPES
-                );
-            }
-
-            if ($voidFound && ($scalarTypesCount > 0 || $nullFound || $selfFound || $thisFound || $mixedFound)) {
-                $this->insertReturnAnnotationWarning(
-                    $tokens,
-                    $docBlockIndex,
-                    $annotation,
-                    self::RETURN_VOID_CONVENTION
-                );
-            }
-
-            if (
-                $scalarTypesCount === 0
-                && (
-                    ($typeCount > 1 && !$nullFound && !$selfFound && !$thisFound && !$mixedFound && !$whitelisted)
-                    || ($typeCount > 2 && ($nullFound || $selfFound || $thisFound || $mixedFound || $whitelisted))
-                )
-            ) {
-                $this->insertReturnAnnotationWarning(
-                    $tokens,
-                    $docBlockIndex,
-                    $annotation,
-                    self::MULTIPLE_ENTITIES
+                    $warning
                 );
             }
         }
+    }
+
+    private function getTypeUsageWarning(array $types, $classNamespace)
+    {
+        if (in_array('mixed', $types, true)) {
+            return self::MULTIPLE_TYPES;
+        }
+
+        if (count($types) <= 1) {
+            return null;
+        }
+
+        if (in_array('void', $types, true)) {
+            return self::NO_MIXED_VOID;
+        }
+
+        $typeCount = count($types);
+
+        $scalarTypesFound = array_intersect($types, $this->scalarTypes);
+        $intFound = count(array_intersect(['int', 'integer'], $scalarTypesFound)) > 0;
+        $scalarTypesCount = count($scalarTypesFound);
+        $otherTypesCount = $typeCount - $scalarTypesCount;
+
+        // handle exception with int|Entity passing to Repositories
+        if (
+            $otherTypesCount === 1
+            && $scalarTypesCount === 1
+            && $intFound
+            && in_array($classNamespace, self::getPassingIdNamespaceExclusions(), true)
+        ) {
+            return null;
+        }
+
+        // handle array|Collection|Item[] case
+        $arrayTypes = array_filter($types, function(string $type) {
+            return preg_match(self::COLLECTION_TYPE_REGEXP, $type) === 1;
+        });
+        if (count($arrayTypes) === $typeCount) {
+            return null;
+        }
+
+        if ($scalarTypesCount > 0) {
+            return self::MULTIPLE_TYPES;
+        }
+
+        return self::MULTIPLE_ENTITIES;
     }
 
     /**
@@ -336,11 +326,10 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     /**
      * @param Tokens $tokens
      * @param int $insertIndex
-     * @param string $returnValue
      */
-    private function insertComment(Tokens $tokens, $insertIndex, $returnValue)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
-        $comment = '// TODO: ' . $returnValue . ' - ' . self::TYPECAST_CONVENTION;
+        $comment = '// ' . $comment;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
             $tokens->insertAt(++$insertIndex, new Token([T_COMMENT, $comment]));
