@@ -10,6 +10,8 @@ use PhpCsFixer\Tokenizer\Tokens;
 
 final class ComparingToNullFixer extends AbstractFixer
 {
+    const NON_OBJECT_TYPES = ['bool', 'int', 'float', 'string', 'array', 'callable', 'iterable'];
+
     public function getDefinition()
     {
         return new FixerDefinition(
@@ -54,7 +56,10 @@ final class ComparingToNullFixer extends AbstractFixer
         // Collect all object variables
         $objectVariables = [];
         foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_STRING)) {
+            if (
+                $token->isGivenKind(T_STRING)
+                && !in_array($token->getContent(), self::NON_OBJECT_TYPES, true)
+            ) {
                 $objectVariableIndex = $tokens->getNextMeaningfulToken($key);
                 if ($tokens[$objectVariableIndex]->isGivenKind(T_VARIABLE)) {
                     $objectVariables[] = $tokens[$objectVariableIndex]->getContent();

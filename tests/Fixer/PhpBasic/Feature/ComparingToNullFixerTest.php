@@ -25,7 +25,7 @@ final class ComparingToNullFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
-                    private function sampleFunction(Something $something)
+                    private function sampleFunction(Something $something = null)
                     {
                         if ($a || $b && $c && $something === null || ($a && $b)) {
                     
@@ -35,7 +35,7 @@ final class ComparingToNullFixerTest extends AbstractFixerTestCase
                 '<?php
                 class Sample
                 {
-                    private function sampleFunction(Something $something)
+                    private function sampleFunction(Something $something = null)
                     {
                         if ($a || $b && $c && !$something || ($a && $b)) {
                     
@@ -121,6 +121,59 @@ final class ComparingToNullFixerTest extends AbstractFixerTestCase
                         return $value ? $value->getSomething() : null;
                     }
                 }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    private function func(bool $value = null)
+                    {
+                        return ($value && func());
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample extends B
+                {
+                    private function func(bool $value)
+                    {
+                        if ($value && $this->whitespaceAfter !== null) {
+                            $this->doStuff();
+                        }
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample extends B
+                {
+                    private function func($value)
+                    {
+                        if ($value && $this->whitespaceAfter !== null) {
+                            $this->doStuff();
+                        }
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample extends B
+                {
+                    /**
+                     * @param Entity $value
+                     */
+                    private function func($value)
+                    {
+                        if ($value && $this->whitespaceAfter !== null) {
+                            $this->doStuff();
+                        }
+                    }
+                }',
+                null,
             ],
         ];
     }
