@@ -1,12 +1,4 @@
 <?php
 declare(strict_types=1);
 
-$autoload = __DIR__ . '/vendor/autoload.php';
-if (file_exists($autoload)) {
-    include $autoload;
-}
-
-return Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig::create()
-    ->setDefaultFinder(['src'], ['Overwritten'])
-    ->setRiskyRules()
-;
+return (require __DIR__ . '/.php_cs')->setRiskyRules();

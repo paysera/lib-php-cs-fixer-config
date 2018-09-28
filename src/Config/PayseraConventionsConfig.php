@@ -45,12 +45,17 @@ use Paysera\PhpCsFixerConfig\Fixer\PSR1\ClassNameStudlyCapsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FileSideEffectsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FunctionNameCamelCaseFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
-
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
+use RuntimeException;
 
 class PayseraConventionsConfig extends Config
 {
+    /**
+     * @var null|array
+     */
+    private $migrationModeRules = null;
+
     public function __construct()
     {
         parent::__construct('paysera_conventions');
@@ -116,6 +121,45 @@ class PayseraConventionsConfig extends Config
         $this->setFinder($finder);
 
         return $this;
+    }
+
+    public function enableMigrationMode(array $rules)
+    {
+        $this->migrationModeRules = $rules;
+
+        return $this;
+    }
+
+    public function getRules()
+    {
+        $rules = parent::getRules();
+        if ($this->migrationModeRules === null) {
+            return $rules;
+        }
+
+        $this->validateMigrationMode($rules);
+
+        $disabledRules = array_keys(array_filter($this->migrationModeRules, function($item) {
+            return $item === false;
+        }));
+
+        return array_merge(
+            $rules,
+            array_combine($disabledRules, array_fill(0, count($disabledRules), false))
+        );
+    }
+
+    private function validateMigrationMode(array $rules)
+    {
+        $enabledRules = array_keys(array_filter($rules));
+        $rulesUnconfigured = array_diff($enabledRules, array_keys($this->migrationModeRules));
+        if (count($rulesUnconfigured) > 0) {
+            $configuration = "    '" . implode("' => false,\n    '", $rulesUnconfigured) . "' => false,\n";
+            throw new RuntimeException(sprintf(
+                "You have to configure all rules for migration, please configure these:\n\n%s",
+                $configuration
+            ));
+        }
     }
 
     public function setSafeRules(array $rules = [])
