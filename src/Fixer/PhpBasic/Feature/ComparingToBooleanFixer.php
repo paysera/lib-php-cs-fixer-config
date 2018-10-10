@@ -15,6 +15,7 @@ use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use RuntimeException;
 
 final class ComparingToBooleanFixer extends AbstractFixer
 {
@@ -134,7 +135,7 @@ final class ComparingToBooleanFixer extends AbstractFixer
             /** @var ItemInterface[] $contentItems */
             $contentItems = iterator_to_array($complexItemList->getContentItems());
             if (count($contentItems) !== 2) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf('Expected 2 content items for comparison, got %s', count($contentItems))
                 );
             }
@@ -195,7 +196,6 @@ final class ComparingToBooleanFixer extends AbstractFixer
 
         return $variableNames;
     }
-
 
     /**
      * @param ContextualToken $functionToken
