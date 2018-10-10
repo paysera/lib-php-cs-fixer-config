@@ -4,10 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+Semantic Versioning is maintained only for the following:
+- available fixer IDs and their configuration;
+- any classes or methods with `@api` annotation.
+
+The fixers themselves can change their behavior on any update.
+New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
+
+## 2.0.0
+
+### Added
+- Migration mode was added for enabling only some of the rules. This allows to change the code style gradually
+rule-by-rule.
 
 ### Changed
 
+- `Paysera/php_basic_feature_return_and_argument_types` does not allow to pass any configuration options.
+- Default configuration files were refactored to be based on single file (`.php_cs`) and to follow the style guide.
+- API is changed for semantic versioning - only the fixer configuration will be maintained for backward compatibility,
+you should not extend or use any of the fixers (or other classes) directly.
+If you do, please test after every update of this library.
+
+### Removed
+- `Paysera/php_basic_comment_php_doc_on_methods` fixer (with `PhpDocOnMethodsFixer` class) was removed.
+The fixer did not perform the fixes needed and performed some that were not intended.
+
+### Fixed
+
+- `Paysera/php_basic_code_style_namespaces_and_use_statements` was fixed for cases where comma is after the class name,
+like when implementing a few interfaces.
 - `Paysera/php_basic_feature_unnecessary_variables` now is not so aggressive as previously and handles only
 some of previous cases. Previous behavior in many cases made the code less readable and/or changed the execution
 order of function calls etc.
@@ -15,11 +40,25 @@ order of function calls etc.
 functions it's required to return boolean. If we're not sure of the return type, don't add the warning. Also
 entity function prefix checks were removed, as conventions does not state that Entity cannot have any other
 function than with defined prefixes.
-
-### Fixed
-
-- `Paysera/php_basic_code_style_namespaces_and_use_statements` was fixed for cases where comma is after the class name,
-like when implementing a few interfaces.
+- `Paysera/php_basic_code_style_splitting_in_several_lines` was completely refactored and remade to follow current
+conventions and to handle much more cases.
+- `no_unneeded_control_parentheses` was disabled as it works too aggressively in some cases.
+- `self_accessor` rule disabled.
+- `Paysera/psr_2_line_length` allows lines with long constant tokens (like strings),
+also adds comments before the line that's too long;
+- `Paysera/php_basic_feature_return_and_argument_types` was improved to handle cases with iterables and generators.
+- `Paysera/php_basic_feature_comparing_to_null` was improved to allow checking boolean values that can also be null.
+- `Paysera/php_basic_code_style_doc_block_whitespace` allows DocBlock to have indentation in description.
+- `curly_bbrace_block` in `no_extra_blank_lines` was disabled in default configuration to allow empty lines between
+`elseif` statements.
+- `Paysera/php_basic_feature_calling_parent_constructor` allows statements before calling parent constructor
+if they do not modify the state of the object. This could be needed for readability or modifying constructor
+parameters beforehand.
+- `braces` fixer was exchanged for patched version in `Paysera/php_basic_braces` which fixes cases with `elseif`
+statements.
+- `Paysera/php_basic_feature_comparing_to_boolean` now only fixes variables which are defined as boolean-only
+in function arguments with type-hint or in DocBlock. It's also marked as risky.
+- Disabled risky fixers from `.php_cs_safe` to be able to run it.
 
 ## 1.7.4
 

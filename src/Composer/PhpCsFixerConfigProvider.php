@@ -6,6 +6,9 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class PhpCsFixerConfigProvider
 {
+    /**
+     * @api
+     */
     public static function copyPhpCs()
     {
         $fileSystem = new Filesystem();
