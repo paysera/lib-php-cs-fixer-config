@@ -8,7 +8,7 @@
     },
     "require-dev": {
         "gecko-packages/gecko-php-unit": "^2.0",
-        "phpunit/phpunit": "^5.0",
+        "phpunit/phpunit": "^6.0",
         "friendsofphp/php-cs-fixer": "2.11.1"
     },
     "conflict": {
