@@ -772,6 +772,38 @@ final class SplittingInSeveralLinesFixerTest extends AbstractFixerTestCase
                     . "and something else";',
                 null,
             ],
+            'with array and comment in beginning' => [
+                '<?php
+                return [ // comment
+                    "key" => "value",
+                ];',
+                null,
+            ],
+            'with sub-array and comment in beginning' => [
+                '<?php
+                return [
+                    \'no_unneeded_control_parentheses\' => false, // works too aggressively with large structures
+                    \'no_extra_blank_lines\' => [\'tokens\' => [ // don\'t use curly_brace_block to allow splitting elseif blocks
+                        \'extra\',
+                        \'parenthesis_brace_block\',
+                        \'square_brace_block\',
+                        \'throw\',
+                        \'use\',
+                    ]],
+                ];',
+                null,
+            ],
+            'allow empty lines in array for grouping' => [
+                '<?php
+                return [
+                    "item1.1" => "value",
+                    "item1.2" => "value",
+                    
+                    "item2.1" => "value",
+                    "item2.2" => "value",
+                ];',
+                null,
+            ],
         ];
     }
 

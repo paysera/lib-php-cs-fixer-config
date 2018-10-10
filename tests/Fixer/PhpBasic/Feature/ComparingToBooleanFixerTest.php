@@ -23,29 +23,63 @@ final class ComparingToBooleanFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
-                if(!$valid) {
+                if ($valid === false) {
                     return $valid;
-                }','<?php
-                if($valid === false) {
+                }',
+                null,
+            ],
+            [
+                '<?php
+                if ($valid === true) {
                     return $valid;
+                }',
+                null,
+            ],
+            [
+                '<?php return $valid === false || $something !== true;',
+                null,
+            ],
+            [
+                '<?php return $valid === true && $something === false;',
+                null,
+            ],
+            'Corrects when type is known from method arguments' => [
+                '<?php
+                function a(bool $valid, bool $something) {
+                    return $valid && !$something;
+                }',
+                '<?php
+                function a(bool $valid, bool $something) {
+                    return $valid === true && $something === false;
+                }',
+            ],
+            'Corrects with not identical operators' => [
+                '<?php
+                function a(bool $valid, bool $something) {
+                    return !$valid && $something;
+                }',
+                '<?php
+                function a(bool $valid, bool $something) {
+                    return $valid !== true && $something !== false;
                 }',
             ],
             [
                 '<?php
-                if((bool)$valid) {
-                    return $valid;
-                }','<?php
-                if($valid === true) {
-                    return $valid;
+                /**
+                 * @param bool $valid
+                 * @param bool|null $something
+                 */
+                function a($valid, $something) {
+                    return !$valid && $something !== false;
                 }',
-            ],
-            [
-                '<?php return !$valid || !$something;',
-                '<?php return $valid === false || $something !== true;',
-            ],
-            [
-                '<?php return (bool)$valid && !$something;',
-                '<?php return $valid === true && $something === false;',
+                '<?php
+                /**
+                 * @param bool $valid
+                 * @param bool|null $something
+                 */
+                function a($valid, $something) {
+                    return $valid !== true && $something !== false;
+                }',
             ],
         ];
     }

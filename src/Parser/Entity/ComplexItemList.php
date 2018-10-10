@@ -155,7 +155,7 @@ class ComplexItemList implements ItemInterface
     }
 
     /**
-     * @return ItemInterface[]
+     * @return ItemInterface[]|Generator
      */
     public function getContentItems()
     {

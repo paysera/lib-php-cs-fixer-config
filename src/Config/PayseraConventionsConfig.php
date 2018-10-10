@@ -139,7 +139,7 @@ class PayseraConventionsConfig extends Config
 
         $this->validateMigrationMode($rules);
 
-        $disabledRules = array_keys(array_filter($this->migrationModeRules, function($item) {
+        $disabledRules = array_keys(array_filter($this->migrationModeRules, function ($item) {
             return $item === false;
         }));
 
@@ -268,7 +268,7 @@ class PayseraConventionsConfig extends Config
 
     private function getSafeRules()
     {
-        $rules = [
+        return [
             // PSR1, PSR2 and Symfony
             'encoding' => true,
             'full_opening_tag' => true,
@@ -386,7 +386,7 @@ class PayseraConventionsConfig extends Config
             // other base rules
             'no_useless_else' => true,
             'blank_line_before_return' => false,
-            'is_null' => array('use_yoda_style' => false),
+            'is_null' => ['use_yoda_style' => false],
             'phpdoc_order' => false,
             'phpdoc_add_missing_param_annotation' => [
                 'only_untyped' => false,
@@ -426,7 +426,5 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_code_style_doc_block_whitespace' => true,
             'Paysera/php_basic_comment_php_doc_necessity' => true,
         ];
-
-        return $rules;
     }
 }

@@ -202,10 +202,20 @@ class Parser
         $postfixWhitespace = null;
 
         $contents = $contentList->getItemList();
-        $firstToken = $contents[0];
+        $firstToken = reset($contents);
         if ($firstToken instanceof ContextualToken && $firstToken->isWhitespace()) {
             $prefixWhitespace = $firstToken;
             array_shift($contents);
+
+            $firstToken = reset($contents);
+            if ($firstToken instanceof ContextualToken && $firstToken->isComment()) {
+                array_shift($contents);
+                $firstToken = reset($contents);
+                if ($firstToken instanceof ContextualToken && $firstToken->isWhitespace()) {
+                    $prefixWhitespace = $firstToken;
+                    array_shift($contents);
+                }
+            }
         }
         $lastToken = end($contents);
         if ($lastToken instanceof ContextualToken && $lastToken->isWhitespace()) {
@@ -217,7 +227,9 @@ class Parser
         if ($prefixWhitespace !== null) {
             $regroupedItem->addPrefixWhitespaceItem($prefixWhitespace);
         }
-        $regroupedItem->addContentItemGroup($contents);
+        if (count($contents) > 0) {
+            $regroupedItem->addContentItemGroup($contents);
+        }
         if ($postfixWhitespace !== null) {
             $regroupedItem->addPostfixWhitespaceItem($postfixWhitespace);
         }

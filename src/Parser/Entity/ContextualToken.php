@@ -81,6 +81,24 @@ class ContextualToken extends Token implements ItemInterface
         return $this->nextContextualToken;
     }
 
+    public function nextNonWhitespaceToken(): ContextualToken
+    {
+        $nextToken = $this->nextToken();
+        while ($nextToken->isWhitespace()) {
+            $nextToken = $nextToken->nextToken();
+        }
+        return $nextToken;
+    }
+
+    public function nextTokenWithContent(string $content): ContextualToken
+    {
+        $nextToken = $this->nextToken();
+        while ($nextToken->getContent() !== $content) {
+            $nextToken = $nextToken->nextToken();
+        }
+        return $nextToken;
+    }
+
     public function previousToken(): ContextualToken
     {
         if ($this->previousContextualToken === null) {
