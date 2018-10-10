@@ -3,13 +3,14 @@
 namespace Paysera\PhpCsFixerConfig\Parser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 
 class ContextualTokenBuilder
 {
     /**
-     * @param Token[] $tokens
+     * @param Token[]|Tokens $tokens
      * @return ContextualToken
      */
     public function buildFromTokens($tokens): ContextualToken
@@ -44,5 +45,11 @@ class ContextualTokenBuilder
         } while ($token !== null);
 
         $tokens->overrideRange(0, count($tokens) - 1, $allTokens);
+    }
+
+    public function replaceItem(ItemInterface $itemToReplace, ItemInterface $replaceWith)
+    {
+        $itemToReplace->firstToken()->previousToken()->setNextContextualToken($replaceWith->firstToken());
+        $replaceWith->lastToken()->setNextContextualToken($itemToReplace->lastToken()->nextToken());
     }
 }

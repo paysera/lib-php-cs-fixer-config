@@ -176,7 +176,7 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
         }
 
         if ($prefixWhitespaceToken !== null) {
-            if ($prefixWhitespaceToken->getContent() !== $content) {
+            if ($prefixWhitespaceItem->lastToken()->getContent() !== $content) {
                 $prefixWhitespaceToken->replaceWith(new ContextualToken($content));
             }
             return;
@@ -284,7 +284,7 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     {
         $firstToken = $item->firstToken();
         if ($firstToken->isWhitespace()) {
-            $this->replaceWith($firstToken, $whitespaceBefore);
+            $this->replaceWithIfNeeded($firstToken, $whitespaceBefore);
         } elseif ($forceWhitespace && $whitespaceBefore !== null) {
             $firstToken->insertBefore(new ContextualToken($whitespaceBefore));
         }
@@ -299,18 +299,32 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     {
         $lastToken = $item->lastToken();
         if ($lastToken->isWhitespace()) {
-            $this->replaceWith($lastToken, $whitespaceAfter);
+            $this->replaceWithIfNeeded($lastToken, $whitespaceAfter);
         } elseif ($forceWhitespace && $whitespaceAfter !== null) {
             $lastToken->insertAfter(new ContextualToken($whitespaceAfter));
         }
     }
 
-    private function replaceWith(ContextualToken $token, string $replacement = null)
+    private function replaceWithIfNeeded(ContextualToken $token, string $replacement = null)
     {
         if ($replacement === null) {
             $token->previousToken()->setNextContextualToken($token->getNextToken());
-        } else {
-            $token->replaceWith(new ContextualToken($replacement));
+            return;
         }
+
+        if ($this->hasExtraLinesWithCorrectEnding($token->getContent(), $replacement)) {
+            return;
+        }
+
+        $token->replaceWith(new ContextualToken($replacement));
+    }
+
+    private function hasExtraLinesWithCorrectEnding(string $current, string $replacement): bool
+    {
+        return (
+            substr($replacement, 0, 1) === "\n"
+            && substr($current, 0, 1) === "\n"
+            && substr($current, -strlen($replacement)) === $replacement
+        );
     }
 }
