@@ -49,6 +49,9 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 use RuntimeException;
 
+/**
+ * @api
+ */
 class PayseraConventionsConfig extends Config
 {
     /**
@@ -263,6 +266,7 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_logical_operators' => true,
             'Paysera/php_basic_feature_type_hinting_arguments' => true,
             'Paysera/php_basic_feature_unnecessary_variables' => true,
+            'Paysera/php_basic_feature_comparing_to_boolean' => true,
         ];
     }
 
@@ -386,7 +390,6 @@ class PayseraConventionsConfig extends Config
             // other base rules
             'no_useless_else' => true,
             'blank_line_before_return' => false,
-            'is_null' => ['use_yoda_style' => false],
             'phpdoc_order' => false,
             'phpdoc_add_missing_param_annotation' => [
                 'only_untyped' => false,
@@ -401,7 +404,6 @@ class PayseraConventionsConfig extends Config
             'linebreak_after_opening_tag' => true,
             'no_useless_return' => true,
             'strict_comparison' => false,
-            'no_alias_functions' => true,
             'strict_param' => false,
             'ordered_class_elements' => [
                 'use_trait',
@@ -420,7 +422,6 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
             'Paysera/php_basic_comment_comment_styles' => true,
             'Paysera/php_basic_comment_fluid_interface' => true,
-            'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_feature_comparing_to_null' => true,
             'Paysera/php_basic_feature_condition_results' => true,
             'Paysera/php_basic_code_style_doc_block_whitespace' => true,
