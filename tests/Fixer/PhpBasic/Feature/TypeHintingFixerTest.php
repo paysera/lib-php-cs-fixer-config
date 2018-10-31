@@ -23,6 +23,15 @@ final class TypeHintingFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+                class ClassWithConstructorWithoutParameters
+                {
+                    public function __construct()
+                    {
+                    }
+                }',
+            ],
+            [
+                '<?php
                 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
                 use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext;
                 

@@ -23,6 +23,16 @@ final class PhpDocOnPropertiesFixerTest extends AbstractFixerTestCase
         return [
             [
                 '<?php
+class ClassWithPropertyButWithoutConstructor
+{
+    /**
+     * @var string
+     */
+    private $foo;
+}'
+            ],
+            [
+                '<?php
 class SomeClass
 {
     private $someProp;
