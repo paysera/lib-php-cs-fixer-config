@@ -239,7 +239,7 @@ final class TypeHintingFixer extends AbstractFixer
      * @param Tokens $tokens
      * @param int $startIndex
      * @param int $endIndex
-     * @return array|null
+     * @return array
      */
     private function getConstructArgumentClassesAndAssignedProperties(Tokens $tokens, $startIndex, $endIndex)
     {
@@ -257,7 +257,7 @@ final class TypeHintingFixer extends AbstractFixer
 
         $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($endIndex);
         if (!$tokens[$curlyBraceStartIndex]->equals('{') || count($constructClassProperties) === 0) {
-            return null;
+            return [];
         }
 
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
