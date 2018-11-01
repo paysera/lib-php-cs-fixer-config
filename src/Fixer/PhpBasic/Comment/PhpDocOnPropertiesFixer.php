@@ -64,7 +64,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
 
     public function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        $constructFunction = null;
+        $constructFunction = [];
         // Collecting __construct function info
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
@@ -170,7 +170,10 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     private function isPropertyDefinedInArguments($property, $constructFunction)
     {
         return
-            count($constructFunction['ConstructArguments']) > 0
+            (
+                isset($constructFunction['ConstructArguments'])
+                && count($constructFunction['ConstructArguments']) > 0
+            )
             && isset($property['Variable'])
             && in_array($property['Variable'], $constructFunction['ConstructArguments'], true)
         ;
