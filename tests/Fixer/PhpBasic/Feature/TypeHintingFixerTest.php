@@ -133,23 +133,6 @@ final class TypeHintingFixerTest extends AbstractFixerTestCase
                     public function __construct(ResultNormalizer $arg1)
                     {
                         $this->arg1 = $arg1;
-                    } /* TODO: Class(Narrowest Interface): "ResultNormalizer(NormalizerInterface)" - PhpBasic convention 3.18: We always type hint narrowest possible interface */
-                    
-                    private function someFunction()
-                    {
-                        $this->arg1->methodA();
-                    }
-                }',
-                '<?php
-                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
-                use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\ResultNormalizer;
-                class Sample
-                {
-                    private $arg1;
-                
-                    public function __construct(ResultNormalizer $arg1)
-                    {
-                        $this->arg1 = $arg1;
                     }
                     
                     private function someFunction()
@@ -157,6 +140,7 @@ final class TypeHintingFixerTest extends AbstractFixerTestCase
                         $this->arg1->methodA();
                     }
                 }',
+                null,
             ],
         ];
     }

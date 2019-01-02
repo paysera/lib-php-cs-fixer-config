@@ -20,7 +20,7 @@ final class TypeHintingFixer extends AbstractFixer
     /**
      * @var array
      */
-    private $exceptions = ['EntityManager', 'Repository'];
+    private $exceptions = ['EntityManager', 'Repository', 'Normalizer', 'Denormalizer'];
 
     public function getDefinition()
     {
@@ -182,17 +182,16 @@ final class TypeHintingFixer extends AbstractFixer
             foreach ($constructClassProperties as $key => $constructClassProperty) {
                 foreach ($this->exceptions as $exception) {
                     if (strpos($key, $exception) !== false) {
-                        continue;
+                        continue 2;
                     }
                 }
+
                 if (!preg_match('#' . $key . '$#', $useStatement)) {
                     continue;
                 }
-
                 if (!is_array($constructClassProperty)) {
                     continue;
                 }
-
                 if (!isset($constructClassProperty['Methods'])) {
                     continue;
                 }
