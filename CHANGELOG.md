@@ -11,6 +11,36 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.0.3
+
+### Changed
+- Allow multi-line implements according to [PSR-2 Coding Style Guide][1], which will make the following code acceptable:
+```php
+use ArrayAccess;
+use Countable;
+use Serializable;
+
+class ClassName extends ParentClass implements
+    ArrayAccess,
+    Countable,
+    Serializable
+{
+    // constants, properties, methods
+}
+```
+[1]: https://www.php-fig.org/psr/psr-2/#41-extends-and-implements
+
+## 2.0.2
+
+### Fixed
+- `TypeHintingFixer` validation exceptions
+- Updates exceptions list
+
+## 2.0.1
+
+### Fixed
+- Count of null on PHP 7.2 (#5)
+
 ## 2.0.0
 
 ### Added

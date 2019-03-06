@@ -298,7 +298,10 @@ class PayseraConventionsConfig extends Config
 
             'binary_operator_spaces' => true,
             'class_attributes_separation' => ['elements' => ['method']],
-            'class_definition' => ['singleLine' => true],
+            'class_definition' => [
+                'multiLineExtendsEachSingleLine' => true,
+                'singleItemSingleLine' => true,
+            ],
             'declare_equal_normalize' => true,
             'function_typehint_space' => true,
             'include' => true,
