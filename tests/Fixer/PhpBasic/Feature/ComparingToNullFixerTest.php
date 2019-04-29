@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ComparingToNullFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class ComparingToNullFixerTest extends AbstractFixerTestCase
+final class ComparingToNullFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

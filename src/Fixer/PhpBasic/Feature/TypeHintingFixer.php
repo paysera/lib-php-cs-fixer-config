@@ -112,7 +112,7 @@ final class TypeHintingFixer extends AbstractFixer
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('exceptions', [$options]);
+        return new FixerConfigurationResolverRootless('exceptions', [$options], $this->getName());
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR1;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\ClassConstantUpperCaseFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class ClassConstantUpperCaseFixerTest extends AbstractFixerTestCase
+final class ClassConstantUpperCaseFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

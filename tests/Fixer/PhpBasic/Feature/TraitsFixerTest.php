@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TraitsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class TraitsFixerTest extends AbstractFixerTestCase
+final class TraitsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CheckingExplicitlyFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class CheckingExplicitlyFixerTest extends AbstractFixerTestCase
+final class CheckingExplicitlyFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

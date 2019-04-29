@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ChainedMethodCallsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class ChainedMethodCallsFixerTest extends AbstractFixerTestCase
+final class ChainedMethodCallsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\LogicalOperatorsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class LogicalOperatorsFixerTest extends AbstractFixerTestCase
+final class LogicalOperatorsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

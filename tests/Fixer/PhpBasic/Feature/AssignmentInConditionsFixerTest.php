@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\AssignmentsInConditionsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class AssignmentInConditionsFixerTest extends AbstractFixerTestCase
+final class AssignmentInConditionsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Comment;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\CommentStylesFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class CommentStylesFixerTest extends AbstractFixerTestCase
+final class CommentStylesFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

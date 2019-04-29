@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Basic;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Basic\GlobalsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class GlobalsFixerTest extends AbstractFixerTestCase
+final class GlobalsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

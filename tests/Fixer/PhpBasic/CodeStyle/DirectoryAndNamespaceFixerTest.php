@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DirectoryAndNamespaceFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class DirectoryAndNamespaceFixerTest extends AbstractFixerTestCase
+final class DirectoryAndNamespaceFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

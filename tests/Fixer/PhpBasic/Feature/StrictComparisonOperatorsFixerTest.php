@@ -2,9 +2,9 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class StrictComparisonOperatorsFixerTest extends AbstractFixerTestCase
+final class StrictComparisonOperatorsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

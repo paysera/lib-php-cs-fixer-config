@@ -2,10 +2,10 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
 
-final class DocBlockWhitespaceFixerTest extends AbstractFixerTestCase
+final class DocBlockWhitespaceFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

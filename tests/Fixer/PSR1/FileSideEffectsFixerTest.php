@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR1;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FileSideEffectsFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class FileSideEffectsFixerTest extends AbstractFixerTestCase
+final class FileSideEffectsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

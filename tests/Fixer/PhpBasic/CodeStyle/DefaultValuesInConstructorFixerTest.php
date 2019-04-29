@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DefaultValuesInConstructorFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class DefaultValuesInConstructorFixerTest extends AbstractFixerTestCase
+final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected
@@ -284,7 +284,6 @@ final class DefaultValuesInConstructorFixerTest extends AbstractFixerTestCase
 
         return $fixerFactory;
     }
-
 
     protected function getFixerName()
     {

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\VisibilityPropertiesFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class VisibilityPropertiesFixerTest extends AbstractFixerTestCase
+final class VisibilityPropertiesFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

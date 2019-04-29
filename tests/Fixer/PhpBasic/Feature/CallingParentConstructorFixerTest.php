@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CallingParentConstructorFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class CallingParentConstructorFixerTest extends AbstractFixerTestCase
+final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

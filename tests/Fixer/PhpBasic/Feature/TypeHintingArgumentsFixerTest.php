@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingArgumentsFixer;
-use PhpCsFixer\Tests\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class TypeHintingArgumentsFixerTest extends AbstractFixerTestCase
+final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

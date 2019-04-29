@@ -2,9 +2,9 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class FunctionIsNullFixerTest extends AbstractFixerTestCase
+final class FunctionIsNullFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

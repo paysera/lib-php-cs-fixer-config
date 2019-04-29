@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\DateTimeFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class DateTimeFixerTest extends AbstractFixerTestCase
+final class DateTimeFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

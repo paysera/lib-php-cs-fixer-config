@@ -118,7 +118,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('excluded_parents', [$options]);
+        return new FixerConfigurationResolverRootless('excluded_parents', [$options], $this->getName());
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)

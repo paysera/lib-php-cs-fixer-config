@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ThrowBaseExceptionFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class ThrowBaseExceptionFixerTest extends AbstractFixerTestCase
+final class ThrowBaseExceptionFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

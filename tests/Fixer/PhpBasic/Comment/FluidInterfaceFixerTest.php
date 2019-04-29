@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Comment;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\FluidInterfaceFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class FluidInterfaceFixerTest extends AbstractFixerTestCase
+final class FluidInterfaceFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

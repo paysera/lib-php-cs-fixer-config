@@ -163,6 +163,6 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('limits', [$limits]);
+        return new FixerConfigurationResolverRootless('limits', [$limits], $this->getName());
     }
 }

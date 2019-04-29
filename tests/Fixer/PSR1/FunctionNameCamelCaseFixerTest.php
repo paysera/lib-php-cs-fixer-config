@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR1;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FunctionNameCamelCaseFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class FunctionNameCamelCaseFixerTest extends AbstractFixerTestCase
+final class FunctionNameCamelCaseFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ReusingVariablesFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class ReusingVariablesFixerTest extends AbstractFixerTestCase
+final class ReusingVariablesFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

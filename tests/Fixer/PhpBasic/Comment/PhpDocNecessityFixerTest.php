@@ -2,10 +2,10 @@
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Comment;
 
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocNecessityFixer;
 
-final class PhpDocNecessityFixerTest extends AbstractFixerTestCase
+final class PhpDocNecessityFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

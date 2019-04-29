@@ -106,7 +106,7 @@ final class ClassNamingFixer extends AbstractFixer
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('service_suffixes', [$suffixes]);
+        return new FixerConfigurationResolverRootless('service_suffixes', [$suffixes], $this->getName());
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)

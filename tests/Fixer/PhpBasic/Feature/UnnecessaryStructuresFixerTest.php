@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\UnnecessaryStructuresFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class UnnecessaryStructuresFixerTest extends AbstractFixerTestCase
+final class UnnecessaryStructuresFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

@@ -2,8 +2,8 @@
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
+use PhpCsFixer\Preg;
 use SplFileInfo;
-use PhpCsFixer\Utils;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\FixerDefinition\CodeSample;
@@ -49,7 +49,8 @@ final class DocBlockWhitespaceFixer extends AbstractFixer
     {
         foreach ($tokens as $token) {
             if ($token->isGivenKind(T_DOC_COMMENT)) {
-                $lines = Utils::splitLines($token->getContent());
+                Preg::matchAll("/[^\n\r]+[\r\n]*/", $token->getContent(), $matches);
+                $lines = $matches[0];
 
                 foreach ($lines as $key => $line) {
                     $matches = preg_split('/(?=\*)/', $line);

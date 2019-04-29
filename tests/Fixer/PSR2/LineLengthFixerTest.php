@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR2;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class LineLengthFixerTest extends AbstractFixerTestCase
+final class LineLengthFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

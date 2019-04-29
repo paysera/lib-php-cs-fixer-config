@@ -3,9 +3,9 @@
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Comment;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocOnPropertiesFixer;
-use PhpCsFixer\Test\AbstractFixerTestCase;
+use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 
-final class PhpDocOnPropertiesFixerTest extends AbstractFixerTestCase
+final class PhpDocOnPropertiesFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected

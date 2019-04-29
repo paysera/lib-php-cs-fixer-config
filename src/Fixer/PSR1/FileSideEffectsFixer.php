@@ -101,7 +101,7 @@ final class FileSideEffectsFixer extends AbstractFixer
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('side_effects', [$sideEffects]);
+        return new FixerConfigurationResolverRootless('side_effects', [$sideEffects], $this->getName());
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
