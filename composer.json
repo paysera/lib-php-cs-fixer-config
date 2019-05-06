@@ -28,5 +28,13 @@
     },
     "config": {
         "bin-dir": "bin"
-    }
+    },
+    "scripts" : {
+        "download-phar": [
+            "./download-phar.sh"
+        ]
+    },
+    "bin": [
+        "paysera-php-cs-fixer"
+    ]
 }
