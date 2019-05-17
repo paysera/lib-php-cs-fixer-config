@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
 
@@ -9,6 +10,7 @@ use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class PhpDocOnPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -62,7 +64,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         return $tokens->isAnyTokenKindsFound([T_PUBLIC, T_PROTECTED, T_PRIVATE]);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $constructFunction = [];
         // Collecting __construct function info
@@ -90,38 +92,44 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         // Inserting warning or removing Property DocBlock according to __construct
         foreach ($tokens as $key => $token) {
             $property = $this->getProperty($tokens, $key);
+            if ($property === null) {
+                continue;
+            }
+            
             // Missing DocBlock
-            if ($property !== null && isset($property['DocBlockInsertIndex'])) {
+            if (isset($property['DocBlockInsertIndex'])) {
                 if ($constructFunction === null) {
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
-                    continue;
                 } elseif (
                     $constructFunction !== null
-                    && !$this->isPropertyDefinedInDocBlock($property, $constructFunction)
-                    && !$this->isPropertyDefinedInArguments($property, $constructFunction)
-                    && !$this->isPropertyAssignedInConstructor($property, $constructFunction)
+                    && !$this->isPropertyTypeKnown($property, $constructFunction)
                 ) {
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
-                    continue;
                 }
-                // Existing DocBlock
-            } elseif (
-                $property !== null
-                && isset($property['DocBlockIndex'])
-                && (
-                    $this->isPropertyDefinedInDocBlock($property, $constructFunction)
-                    || $this->isPropertyDefinedInArguments($property, $constructFunction)
-                    || $this->isPropertyAssignedInConstructor($property, $constructFunction)
-                )
-                && $tokens[$property['DocBlockIndex'] - 1]->isWhitespace()
-            ) {
-                $docBlockRemovals[] = $property['DocBlockIndex'];
-                $tokens->clearRange($property['DocBlockIndex'] - 1, $property['DocBlockIndex']);
+            
                 continue;
             }
+
+            // Existing DocBlock
+            if (
+                isset($property['DocBlockIndex'])
+                && $this->isPropertyTypeKnown($property, $constructFunction)
+                && $tokens[$property['DocBlockIndex'] - 1]->isWhitespace()
+            ) {
+                $tokens->clearRange($property['DocBlockIndex'] - 1, $property['DocBlockIndex']);
+            }
         }
+    }
+    
+    private function isPropertyTypeKnown(array $property, array $constructFunction)
+    {
+        return (
+            $this->isPropertyDefinedInDocBlock($property, $constructFunction)
+            || $this->isPropertyAssignedFromArgument($property, $constructFunction)
+            || $this->isPropertyInstantiatedInConstructor($property, $constructFunction)
+        );
     }
 
     /**
@@ -143,14 +151,9 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
      * @param array $constructFunction
      * @return bool
      */
-    private function isPropertyAssignedInConstructor($property, $constructFunction)
+    private function isPropertyAssignedFromArgument($property, $constructFunction)
     {
-        $propertyAssignedInConstructor =
-            isset($constructFunction['Assignments'])
-            && isset($constructFunction['Assignments'][$property['Variable']])
-        ;
-
-        $propertyHasTypehint =
+        return
             isset($constructFunction['Assignments'][$property['Variable']])
             && in_array(
                 $constructFunction['Assignments'][$property['Variable']],
@@ -158,24 +161,13 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                 true
             )
         ;
-
-        return $propertyAssignedInConstructor && $propertyHasTypehint;
     }
 
-    /**
-     * @param array $property
-     * @param array $constructFunction
-     * @return bool
-     */
-    private function isPropertyDefinedInArguments($property, $constructFunction)
+    private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction)
     {
         return
-            (
-                isset($constructFunction['ConstructArguments'])
-                && count($constructFunction['ConstructArguments']) > 0
-            )
-            && isset($property['Variable'])
-            && in_array($property['Variable'], $constructFunction['ConstructArguments'], true)
+            isset($constructFunction['Assignments'][$property['Variable']])
+            && $constructFunction['Assignments'][$property['Variable']] === 'new'
         ;
     }
 
@@ -196,12 +188,19 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                 && $tokens[$i]->getContent() === '$this'
                 && $tokens[$i + 1]->isGivenKind(T_OBJECT_OPERATOR)
             ) {
-                $property = $tokens[$i + 2]->getContent();
+                $property = '$' . $tokens[$i + 2]->getContent();
+                $equalsIndex = $tokens->getNextNonWhitespace($i + 2);
+                $i = $tokens->getNextNonWhitespace($equalsIndex);
+                if ($tokens[$i]->getContent() === 'new') {
+                    $assignments[$property] = 'new';
+                    continue;
+                }
+                
                 while ($tokens[$i]->getContent() !== ';') {
                     $i++;
                 }
                 $value = $tokens[$tokens->getPrevMeaningfulToken($i)]->getContent();
-                $assignments['$' . $property] = $value;
+                $assignments[$property] = $value;
             }
         }
 

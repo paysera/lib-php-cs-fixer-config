@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Comment;
 
@@ -279,6 +280,46 @@ class ApiController
         $this->permissionManager = $permissionManager;
     }
     
+}',
+            ],
+            [
+                '<?php
+class MyClass
+{
+    private $property;
+    
+    public function __construct()
+    {
+        $this->property = new stdClass();
+    }
+}',
+                '<?php
+class MyClass
+{
+    /**
+     * @var stdClass
+     */
+    private $property;
+    
+    public function __construct()
+    {
+        $this->property = new stdClass();
+    }
+}',
+            ],
+            [
+                '<?php
+class MyClass extends TestCase
+{
+    /**
+     * @var SomeClass|SomeOtherClass
+     */
+    private $property;
+    
+    public function __construct()
+    {
+        $this->property = $this->createMock();
+    }
 }',
             ],
         ];
