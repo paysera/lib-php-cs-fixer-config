@@ -9,6 +9,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class DefaultValuesInConstructorFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -50,10 +51,10 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
 
     public function isCandidate(Tokens $tokens)
     {
-        return $tokens->isAnyTokenKindsFound([T_PUBLIC, T_PROTECTED, T_PRIVATE]);
+        return $tokens->isAnyTokenKindsFound([T_CLASS]);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $parentConstructNeeded = false;
         $isConstructorPresent = false;
@@ -61,11 +62,18 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
         $endOfPropertyDeclarationSemicolon = 0;
 
         foreach ($tokens as $key => $token) {
-            if ($this->constructExists($key, $tokens, $token)) {
+            if ($this->isConstructor($key, $tokens, $token)) {
                 $isConstructorPresent = true;
             }
         }
+
+        $classFound = false;
         foreach ($tokens as $key => $token) {
+            if (!$classFound) {
+                $classFound = $token->isGivenKind([T_CLASS]);
+                continue;
+            }
+
             $extends = $token->isGivenKind([T_EXTENDS]);
             if ($extends !== false) {
                 $parentConstructNeeded = true;
@@ -79,46 +87,53 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
                 $propertyNameIndex = $tokens->getNextNonWhitespace($key);
                 $endOfPropertyDeclarationSemicolon = $tokens->getNextTokenOfKind($key, [';']);
 
-                if ($tokens[$tokens->getNextMeaningfulToken($propertyNameIndex)]->equals(';')){
+                if ($tokens[$tokens->getNextMeaningfulToken($propertyNameIndex)]->equals(';')) {
                     continue;
                 }
 
-                for ($i = $propertyNameIndex + 1; $i < $endOfPropertyDeclarationSemicolon; ++$i) {
+                for ($i = $propertyNameIndex + 1; $i < $endOfPropertyDeclarationSemicolon; $i++) {
                     $propertiesWithDefaultValues[$tokens[$propertyNameIndex]->getContent()][] = $tokens[$i];
                 }
                 $tokens->clearRange($propertyNameIndex + 1, $endOfPropertyDeclarationSemicolon - 1);
             }
 
-            if ($this->constructExists($key, $tokens, $token)) {
+            if ($this->isConstructor($key, $tokens, $token)) {
                 $curlyBracesStartIndex = $tokens->getNextTokenOfKind($key, ['{']);
-                $indentationToken = $tokens[$curlyBracesStartIndex + 1];
+                $indentation = $tokens[$curlyBracesStartIndex + 1]->getContent();
                 $curlyBracesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBracesStartIndex);
 
                 $previousMeaningfulToken = $tokens->getPrevMeaningfulToken($curlyBracesEndIndex);
 
                 if ($tokens[$previousMeaningfulToken]->equals('{')) {
-                    $indentationToken = $this->prolongByOneIndentation($indentationToken);
+                    $indentation .= $this->whitespacesConfig->getIndent();
                 }
 
                 $this->insertDefaultPropertiesInConstruct(
                     $tokens,
                     $previousMeaningfulToken,
-                    $indentationToken,
+                    $indentation,
                     $propertiesWithDefaultValues
                 );
             }
 
-            if ($this->isEndOfPropertiesDeclaration($key, $tokens, $token) && !$isConstructorPresent) {
-
+            if (
+                $this->isEndOfPropertiesDeclaration($key, $tokens, $token)
+                && !$isConstructorPresent
+                && count($propertiesWithDefaultValues) > 0
+            ) {
                 $endOfDeclarationNewLine = $tokens[$endOfPropertyDeclarationSemicolon + 1];
 
                 $closingCurlyBrace = $tokens->getNextTokenOfKind($key, ['}']);
-                $indentation = $tokens[$closingCurlyBrace - 1];
-                $index = $this->insertConstructTokensAndReturnOpeningBraceIndex($tokens, $endOfPropertyDeclarationSemicolon + 1, $indentation);
+                $indentation = $tokens[$closingCurlyBrace - 1]->getContent();
+                $index = $this->insertConstructTokensAndReturnOpeningBraceIndex(
+                    $tokens,
+                    $endOfPropertyDeclarationSemicolon + 1,
+                    $indentation
+                );
                 $tokens->insertAt($index + 3, new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()]));
 
                 if ($tokens[$index]->equals('{')) {
-                    $indentation = $this->prolongByOneIndentation($indentation);
+                    $indentation .= $this->whitespacesConfig->getIndent();
                 }
                 if ($parentConstructNeeded) {
                     $index = $this->insertParentConstructAndReturnIndex($tokens, $index, $indentation);
@@ -134,11 +149,11 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
     private function insertDefaultPropertiesInConstruct(
         Tokens $tokens,
         int $index,
-        Token $indentationToken,
+        string $indentation,
         array $propertiesWithDefaultValues
     ) {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
-            $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentationToken->getContent()]));
+            $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
             $tokens->insertAt(++$index, new Token([T_VARIABLE, '$this']));
             $tokens->insertAt(++$index, new Token([T_OBJECT_OPERATOR, '->']));
             $tokens->insertAt(++$index, new Token([T_STRING, str_replace('$', '', $name)]));
@@ -146,10 +161,10 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
             /** @var Token $item */
             foreach ($propertyTokens as $item) {
                 if (false !== strpos($item->getContent(), "\n")) {
-                    $indentationToken = $this->prolongByOneIndentation($item);
-                    $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentationToken->getContent()]));
+                    $itemIndentation = $item->getContent() . $this->whitespacesConfig->getIndent();
+                    $tokens->insertAt(++$index, new Token([T_WHITESPACE, $itemIndentation]));
                 } else {
-                   $tokens->insertAt(++$index, $item);
+                    $tokens->insertAt(++$index, $item);
                 }
             }
             $tokens->insertAt(++$index, new Token(';'));
@@ -163,67 +178,49 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
         $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
         $subsequentToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
 
-        if (
-            $token->equals(';')
-            && $tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            && !$tokens[$subsequentToken]->isGivenKind(T_VARIABLE)
+        return (
+                $token->equals(';')
+                && $tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                && !$tokens[$subsequentToken]->isGivenKind(T_VARIABLE)
             || (
                 $token->equals(';')
                 && !$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             )
-        ) {
-            return true;
-        }
-
-        return false;
+        );
     }
 
-    private function constructExists(int $key, Tokens $tokens, Token $token)
+    private function isConstructor(int $key, Tokens $tokens, Token $token)
     {
         $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-        if (
+        return
             $tokens[$key]->isGivenKind(T_STRING)
             && $token->getContent() === self::CONSTRUCT
             && $tokens[$key + 1]->equals('(')
             && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-        ) {
-            return true;
-        }
-
-        return false;
+        ;
     }
 
-    private function prolongByOneIndentation(Token $indentationToken)
-    {
-        $indentation = $indentationToken->getContent();
-        $indentation .= $this->whitespacesConfig->getIndent();
-        $indentationToken = new Token($indentationToken->getPrototype());
-        $indentationToken->setContent($indentation);
-
-        return $indentationToken;
-    }
-
-    private function insertConstructTokensAndReturnOpeningBraceIndex(Tokens $tokens, int $index, Token $indentationToken)
+    private function insertConstructTokensAndReturnOpeningBraceIndex(Tokens $tokens, int $index, string $indentation)
     {
         $tokens->insertAt(++$index, new Token([T_PUBLIC, 'public']));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, " "]));
-        $tokens->insertAt(++$index, new Token([T_FUNCTION , 'function']));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, " "]));
+        $tokens->insertAt(++$index, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertAt(++$index, new Token([T_FUNCTION, 'function']));
+        $tokens->insertAt(++$index, new Token([T_WHITESPACE, ' ']));
         $tokens->insertAt(++$index, new Token([T_STRING, self::CONSTRUCT]));
         $tokens->insertAt(++$index, new Token('('));
         $tokens->insertAt(++$index, new Token(')'));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentationToken->getContent()]));
+        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
         $tokens->insertAt(++$index, new Token('{'));
         $openingCurlyBrace = $index;
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentationToken->getContent()]));
+        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
         $tokens->insertAt(++$index, new Token('}'));
 
         return $openingCurlyBrace;
     }
 
-    private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, Token $indentation)
+    private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation)
     {
-        $tokens->insertAt(++$index, new Token($indentation->getPrototype()));
+        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
         $tokens->insertAt(++$index, new Token([T_STRING, 'parent']));
         $tokens->insertAt(++$index, new Token([T_DOUBLE_COLON, '::']));
         $tokens->insertAt(++$index, new Token([T_STRING, self::CONSTRUCT]));

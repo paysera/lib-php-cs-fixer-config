@@ -175,6 +175,51 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
             ],
             [
                 '<?php
+                declare(strict_types=1);
+                
+                namespace App;
+                
+                use App\Service;
+                
+                class Sample
+                {
+                    private $defaultArray;
+                
+                    public function __construct()
+                    {
+                        $this->defaultArray = [];
+                    }
+                
+                    /**
+                     * @var Something $something
+                     */
+                    public function doSomething(Something $something)
+                    {
+                        $something->do();
+                    }
+                }',
+                '<?php
+                declare(strict_types=1);
+                
+                namespace App;
+                
+                use App\Service;
+                
+                class Sample
+                {
+                    private $defaultArray = [];
+                
+                    /**
+                     * @var Something $something
+                     */
+                    public function doSomething(Something $something)
+                    {
+                        $something->do();
+                    }
+                }',
+            ],
+            [
+                '<?php
                 class Sample
                 {
                     private $defaultArray;
@@ -271,6 +316,30 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                     {
                     }
                 }',
+            ],
+            [
+                '<?php
+                trait MyTrait
+                {
+                    private $text = \'abc\';
+                    
+                    private function getText()
+                    {
+                        return $this->text;
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    const CONSTANT = \'value\';
+                }
+                ',
+                null,
             ],
         ];
     }
