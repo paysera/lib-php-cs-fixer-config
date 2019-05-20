@@ -103,7 +103,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
                 } elseif (
                     $constructFunction !== null
-                    && !$this->isPropertyTypeKnown($property, $constructFunction)
+                    && !$this->canPropertyTypeBeGuessed($property, $constructFunction)
                 ) {
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
@@ -115,7 +115,8 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             // Existing DocBlock
             if (
                 isset($property['DocBlockIndex'])
-                && $this->isPropertyTypeKnown($property, $constructFunction)
+                && !$this->hasCommentAdditionalData($tokens[$property['DocBlockIndex']])
+                && $this->isPropertyTypeKnownExactly($property, $constructFunction)
                 && $tokens[$property['DocBlockIndex'] - 1]->isWhitespace()
             ) {
                 $tokens->clearRange($property['DocBlockIndex'] - 1, $property['DocBlockIndex']);
@@ -123,7 +124,16 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         }
     }
     
-    private function isPropertyTypeKnown(array $property, array $constructFunction)
+    private function canPropertyTypeBeGuessed(array $property, array $constructFunction)
+    {
+        return (
+            $this->isPropertyDefinedInDocBlock($property, $constructFunction)
+            || $this->isPropertyAssignedFromArgument($property, $constructFunction)
+            || $this->isPropertyAssignedInConstructor($property, $constructFunction)
+        );
+    }
+    
+    private function isPropertyTypeKnownExactly(array $property, array $constructFunction)
     {
         return (
             $this->isPropertyDefinedInDocBlock($property, $constructFunction)
@@ -163,11 +173,19 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
         ;
     }
 
-    private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction)
+    private function isPropertyAssignedInConstructor(array $property, array $constructFunction)
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
             && in_array($constructFunction['Assignments'][$property['Variable']],  ['new', 'array'], true)
+        ;
+    }
+
+    private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction)
+    {
+        return
+            isset($constructFunction['Assignments'][$property['Variable']])
+            && in_array($constructFunction['Assignments'][$property['Variable']],  ['new'], true)
         ;
     }
 
@@ -296,5 +314,10 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             T_WHITESPACE,
             $this->whitespacesConfig->getLineEnding() . $this->whitespacesConfig->getIndent(),
         ]));
+    }
+
+    private function hasCommentAdditionalData(Token $docBlockToken)
+    {
+        return preg_match('/[^\s\*\/].*@var|@var.*\n[^\s\*\/]/s', $docBlockToken->getContent()) === 1;
     }
 }

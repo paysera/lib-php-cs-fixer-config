@@ -338,6 +338,38 @@ final class MyClass
     }
 }',
             ],
+            [
+                '<?php
+class MyClass
+{
+    /**
+     * @var array|Something[]
+     */
+    private $config;
+    
+    public function __construct()
+    {
+        $this->config = [];
+    }
+}',
+            ],
+            [
+                '<?php
+class MyClass
+{
+    /**
+     * Some very important note about the property
+     * 
+     * @var Something
+     */
+    private $property;
+    
+    public function __construct(Something $property)
+    {
+        $this->property = $property;
+    }
+}',
+            ],
         ];
     }
 
