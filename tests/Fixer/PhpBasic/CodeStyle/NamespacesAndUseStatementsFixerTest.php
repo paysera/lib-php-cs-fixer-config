@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
@@ -24,8 +25,9 @@ final class NamespacesAndUseStatementsFixerTest extends AbstractPayseraFixerTest
             [
                 '<?php
 namespace MyNamespace;
-use IteratorAggregate;
+
 use ArrayAccess;
+use IteratorAggregate;
 
 class A implements ArrayAccess, IteratorAggregate
 {
@@ -44,8 +46,8 @@ class A implements \ArrayAccess, \IteratorAggregate
             [
                 '<?php
 namespace Evp\DebugPenaltyBundle\Service;
-use InvalidArgumentException;
 use Evp\UserSurveillanceBundle\Scenarios;
+use InvalidArgumentException;
 class ActivityScenarioSubjectMapper
 {
     private $map = [
@@ -94,13 +96,70 @@ class ActivityScenarioSubjectMapper
             ],
             [
                 '<?php
+namespace Evp\DebugPenaltyBundle\Service;
+
+use Evp\UserSurveillanceBundle\Scenarios;
+use InvalidArgumentException;
+
+class ActivityScenarioSubjectMapper
+{
+    private $map = [
+        Scenarios::SCENARIO_CREDENTIALS_BRUTE_FORCE_VERY_STRONG_LINK => \'[Login Bruteforce][Very Strong]\',
+    ];
+
+    /**
+     * @param string $activity
+     * @return string
+     *
+     * @throws InvalidArgumentException
+     */
+    public function resolve($activity)
+    {
+        if (!isset($this->map[$activity])) {
+            throw new InvalidArgumentException(sprintf(\'Unknown activity %s\', $activity));
+        }
+
+        return $this->map[$activity];
+    }
+}',
+                '<?php
+namespace Evp\DebugPenaltyBundle\Service;
+
+use Evp\UserSurveillanceBundle\Scenarios;
+
+class ActivityScenarioSubjectMapper
+{
+    private $map = [
+        Scenarios::SCENARIO_CREDENTIALS_BRUTE_FORCE_VERY_STRONG_LINK => \'[Login Bruteforce][Very Strong]\',
+    ];
+
+    /**
+     * @param string $activity
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function resolve($activity)
+    {
+        if (!isset($this->map[$activity])) {
+            throw new \InvalidArgumentException(sprintf(\'Unknown activity %s\', $activity));
+        }
+
+        return $this->map[$activity];
+    }
+}'
+            ],
+            [
+                '<?php
 namespace Evp\UserSurveillanceBundle\Service;
-use DateTime;
+
 use Evp\UserSurveillanceBundle\Entity\AuditEvent;
 use Evp\UserSurveillanceBundle\Entity\Relation;
 use Evp\UserSurveillanceBundle\Entity\WebSession;
 use Evp\UserSurveillanceBundle\Repository\AuditEventRepository;
 use Evp\UserSurveillanceBundle\Repository\RelationRepository;
+use DateTime;
+
 class RelatedEventsProvider
 {
     private $relationRepository;
@@ -163,11 +222,13 @@ class RelatedEventsProvider
 }',
                 '<?php
 namespace Evp\UserSurveillanceBundle\Service;
+
 use Evp\UserSurveillanceBundle\Entity\AuditEvent;
 use Evp\UserSurveillanceBundle\Entity\Relation;
 use Evp\UserSurveillanceBundle\Entity\WebSession;
 use Evp\UserSurveillanceBundle\Repository\AuditEventRepository;
 use Evp\UserSurveillanceBundle\Repository\RelationRepository;
+
 class RelatedEventsProvider
 {
     private $relationRepository;
@@ -233,6 +294,7 @@ class RelatedEventsProvider
                 '<?php
 
 namespace Evp\UserSurveillanceBundle\Entity;
+
 use DateTime;
 class Action
 {
@@ -247,29 +309,9 @@ class Action
     private $id;
 
     /**
-     * @var WebSession
-     */
-    private $webSession;
-
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $status;
-
-    /**
      * @var DateTime
      */
     private $createdAt;
-
-    /**
-     * @var string
-     */
-    private $processorKey;
 
     /**
      * @return int
@@ -277,78 +319,6 @@ class Action
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return WebSession
-     */
-    public function getWebSession()
-    {
-        return $this->webSession;
-    }
-
-    /**
-     * @param WebSession $webSession
-     *
-     * @return $this
-     */
-    public function setWebSession($webSession)
-    {
-        $this->webSession = $webSession;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param string $type
-     *
-     * @return $this
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     *
-     * @return $this
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-
-        return $this;
     }
 
     /**
@@ -370,26 +340,6 @@ class Action
 
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getProcessorKey()
-    {
-        return $this->processorKey;
-    }
-
-    /**
-     * @param string $processorKey
-     *
-     * @return $this
-     */
-    public function setProcessorKey($processorKey)
-    {
-        $this->processorKey = $processorKey;
-
-        return $this;
-    }
 }',
                 '<?php
 
@@ -407,29 +357,9 @@ class Action
     private $id;
 
     /**
-     * @var WebSession
-     */
-    private $webSession;
-
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $status;
-
-    /**
      * @var \DateTime
      */
     private $createdAt;
-
-    /**
-     * @var string
-     */
-    private $processorKey;
 
     /**
      * @return int
@@ -437,78 +367,6 @@ class Action
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return WebSession
-     */
-    public function getWebSession()
-    {
-        return $this->webSession;
-    }
-
-    /**
-     * @param WebSession $webSession
-     *
-     * @return $this
-     */
-    public function setWebSession($webSession)
-    {
-        $this->webSession = $webSession;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param string $type
-     *
-     * @return $this
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     *
-     * @return $this
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-
-        return $this;
     }
 
     /**
@@ -530,31 +388,12 @@ class Action
 
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getProcessorKey()
-    {
-        return $this->processorKey;
-    }
-
-    /**
-     * @param string $processorKey
-     *
-     * @return $this
-     */
-    public function setProcessorKey($processorKey)
-    {
-        $this->processorKey = $processorKey;
-
-        return $this;
-    }
 }'
             ],
             [
                 '<?php
 namespace My\Super\Feature;
+
 use DateTime;
 class Sample
 {
@@ -578,6 +417,7 @@ class Sample
             [
                 '<?php
 namespace My\Super\Feature;
+
 use DateTime;
 use My\Other\Cool\Space;
 class Sample
@@ -649,18 +489,21 @@ class Sample
         /** @var Event\UserPositionEventData $positionData */
         $positionData = $this->positionDataRepository->findOneByEventData($eventData);
     }
-}', null
+}',
             ],
             [
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
 use Wallet\AccountInfo\Sample as BaseSample;
+
 class Sample extends BaseSample
 {
 
 }',
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
 class Sample extends \Wallet\AccountInfo\Sample
 {
 
@@ -669,7 +512,9 @@ class Sample extends \Wallet\AccountInfo\Sample
             [
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
 use WebToPay\ApiBundle\Entity\Wallet\AccountInfo;
+
 class Sample
 {
     /**
@@ -693,6 +538,7 @@ class Sample
 }',
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
 class Sample
 {
     /**
@@ -718,12 +564,15 @@ class Sample
             [
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
-use Some\Another\Custom\Exception\SomeException;
+
+use Evp\Component\TextFilter\Exception;
 use Some\Custom\Exception\InvalidArgumentException;
+use Some\Another\Custom\Exception\SomeException;
+
 class Sample
 {
     /**
-     * @throws \Evp\Component\TextFilter\Exception
+     * @throws Exception
      * @throws \Exception
      * @throws InvalidArgumentException
      * @throws SomeException
@@ -731,7 +580,7 @@ class Sample
     public function sampleFunction()
     {
         if (true) {
-            throw new \Evp\Component\TextFilter\Exception();
+            throw new Exception();
         } else {
             throw new \Exception("Some exception");
         }
@@ -740,6 +589,7 @@ class Sample
 }',
                 '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
 class Sample
 {
     /**
@@ -761,17 +611,74 @@ class Sample
             ],
             [
                 '<?php
-namespace Paysera\RestrictionBundle\Exception;
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
 
-class RestrictionException extends \Exception
+use Exception;
+use Some\Custom\Exception\InvalidArgumentException;
+use Some\Another\Custom\Exception\SomeException;
+
+class Sample
 {
+    /**
+     * @throws Exception
+     * @throws \Evp\Component\TextFilter\Exception
+     * @throws InvalidArgumentException
+     * @throws SomeException
+     */
+    public function sampleFunction()
+    {
+        if (true) {
+            throw new \Evp\Component\TextFilter\Exception();
+        } else {
+            throw new Exception("Some exception");
+        }
+        throw new InvalidArgumentException("Some exception");
+    }
+}',
+                '<?php
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasics;
+
+class Sample
+{
+    /**
+     * @throws \Exception
+     * @throws \Evp\Component\TextFilter\Exception
+     * @throws \Some\Custom\Exception\InvalidArgumentException
+     * @throws \Some\Another\Custom\Exception\SomeException
+     */
+    public function sampleFunction()
+    {
+        if (true) {
+            throw new \Evp\Component\TextFilter\Exception();
+        } else {
+            throw new \Exception("Some exception");
+        }
+        throw new \Some\Custom\Exception\InvalidArgumentException("Some exception");
+    }
 }'
             ],
             [
                 '<?php
+namespace Paysera\RestrictionBundle\Exception;
+
+use Exception;
+
+class RestrictionException extends Exception
+{
+}',
+                '<?php
+namespace Paysera\RestrictionBundle\Exception;
+
+class RestrictionException extends \Exception
+{
+}',
+            ],
+            [
+                '<?php
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\NamespacesAndUseStatementsFixer;
+
 use Evp\Component\TextFilter\TextFilter;
+use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\NamespacesAndUseStatementsFixer;
 
 class Sample
 {
@@ -818,17 +725,16 @@ namespace WebToPay\ApiBundle\Entity\PendingPayment;
 /**
  * PasswordPendingPayment
  *
- * @author Vytautas Gimbutas <vytautas@gimbutas.net>
  * @package WebToPay\ApiBundle\Entity\PendingPayment
  */
 class PasswordPendingPayment extends PendingPayment
 {
 }',
-null
             ],
             [
                 '<?php
 namespace WebToPay\ApiBundle\Entity\PendingPayment;
+
 use WebToPay\ApiBundle\Entity\PendingPayment;
 
 class PasswordPendingPayment extends PendingPayment
@@ -849,6 +755,84 @@ class PasswordPendingPayment extends PendingPayment
      * @param \WebToPay\ApiBundle\Entity\PendingPayment $a
      */
     public function asdasd($a)
+    {
+    }
+}'
+            ],
+            [
+                '<?php
+namespace App;
+
+use App\Exception\Exception;
+
+function something()
+{
+    throw new \Exception();
+}
+
+throw new Exception();
+'
+            ],
+            [
+                '<?php
+namespace App;
+
+use App\Entity\Payment;
+
+class Service
+{
+    /**
+     * @param Payment $a
+     * @return Payment
+     */
+    public function something(Payment $a)
+    {
+    }
+}',
+                '<?php
+namespace App;
+
+use App\Entity\Payment;
+
+class Service
+{
+    /**
+     * @param Payment $a
+     * @return \App\Entity\Payment
+     */
+    public function something(\App\Entity\Payment $a)
+    {
+    }
+}'
+            ],
+            [
+                '<?php
+namespace App;
+
+use App\Entity\Payment as RenamedPayment;
+
+class Service
+{
+    /**
+     * @param RenamedPayment $a
+     * @return RenamedPayment
+     */
+    public function something(RenamedPayment $a)
+    {
+    }
+}',
+                '<?php
+namespace App;
+
+use App\Entity\Payment as RenamedPayment;
+
+class Service
+{
+    /**
+     * @param RenamedPayment $a
+     * @return \App\Entity\Payment
+     */
+    public function something(\App\Entity\Payment $a)
     {
     }
 }'

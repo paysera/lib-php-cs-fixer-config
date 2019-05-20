@@ -1,24 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
+use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
+use Paysera\PhpCsFixerConfig\Parser\Entity\EmptyToken;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ImportedClasses;
+use Paysera\PhpCsFixerConfig\Parser\Exception\NoMoreTokensException;
+use Paysera\PhpCsFixerConfig\Parser\ImportedClassesParser;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class NamespacesAndUseStatementsFixer extends AbstractFixer
 {
-    /**
-     * @var array
-     */
-    private $classNameExceptions = [
-        'Exception',
-        'Controller',
-        'SplFileInfo',
-    ];
-
     /**
      * @var array
      */
@@ -29,6 +27,16 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         '@param',
         '@var',
     ];
+    
+    private $importedClassesParser;
+    private $contextualTokenBuilder;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->contextualTokenBuilder = new ContextualTokenBuilder();
+        $this->importedClassesParser = new ImportedClassesParser($this->contextualTokenBuilder);
+    }
 
     public function getDefinition()
     {
@@ -37,7 +45,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             This applies to php-doc comments, too.
             
             Does not process namespace without root. Example: Some\Entity\Operation.
-            Risky, because of possible duplicate class name like: \Exception and \Some\Namespace\Http\Exception
+            Risky as class can be imported or aliased with same name as another class inside that namespace.
             ',
             [
                 new CodeSample('
@@ -80,127 +88,63 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_NAMESPACE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
-        $endOfUseStatements = [];
-
-        foreach ($tokens as $key => $token) {
+        $importedClasses = $this->importedClassesParser->parseImportedClasses($tokens);
+        
+        $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
+        $firstToken = (new EmptyToken())->setNextContextualToken($token);
+        $lastNamespaceToken = null;
+        
+        while ($token !== null) {
             if ($token->isGivenKind(T_NAMESPACE)) {
-                $namespaceIndex = $key;
+                $lastNamespaceToken = $token->nextTokenWithContent(';');
             }
+            
+            $this->processToken($token, $importedClasses, $lastNamespaceToken);
 
-            if ($token->isGivenKind(T_USE)) {
-                $endOfUseStatement = strtolower($tokens[$tokens->getNextTokenOfKind($key, [';']) - 1]->getContent());
-                if (!in_array($endOfUseStatement, $endOfUseStatements, true)) {
-                    $endOfUseStatements[] = $endOfUseStatement;
-                }
-            }
-
-            if ($token->isGivenKind(T_DOC_COMMENT) && isset($namespaceIndex)) {
-                $endOfUseStatements = $docBlockNamespace = $this->fixDocBlockContent(
-                    $tokens,
-                    $key,
-                    $namespaceIndex,
-                    $endOfUseStatements,
-                    $this->classNameExceptions
-                );
-            }
-
-            if (!$token->isGivenKind(T_NS_SEPARATOR)) {
-                continue;
-            }
-
-            if (
-                !$tokens[$key - 1]->isGivenKind(T_STRING)
-                && !$tokens[$key - 2]->isGivenKind(T_USE)
-                && isset($namespaceIndex)
-            ) {
-                $classNameEndIndex = $this->findNamespaceEndIndex($tokens, $key);
-
-                // Saving that namespace as string
-                $useStatementContent = '\\';
-                for ($i = $key + 1; $i <= $classNameEndIndex; $i++) {
-                    $useStatementContent .= $tokens[$i]->getContent();
-                }
-
-                if (in_array($tokens[$classNameEndIndex]->getContent(), $this->classNameExceptions, true)) {
-                    continue;
-                }
-
-                preg_match('#\\\?[\w\\\]*\\\(\w*)#', $useStatementContent, $endOfNamespace);
-                if (!isset($endOfNamespace[1])) {
-                    continue;
-                }
-
-                $inserted = false;
-                if (!in_array(strtolower($endOfNamespace[1]), $endOfUseStatements, true)) {
-                    $this->insertUseStatement($tokens, $namespaceIndex, $useStatementContent);
-                    $endOfUseStatements[] = strtolower($endOfNamespace[1]);
-                    $inserted = true;
-                }
-
-                if (!$inserted) {
-                    $tokens->clearRange($key, $classNameEndIndex - 1);
-                }
-            }
+            $token = $token->getNextToken();
         }
 
-        $this->clearDuplicatedImports($tokens);
+        $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
-
-    private function clearDuplicatedImports(Tokens $tokens)
+    
+    private function processToken(ContextualToken $token, ImportedClasses $importedClasses, ContextualToken $lastNamespaceToken = null)
     {
-        $duplicatedImports = $this->getImportedClasses($tokens);
-        $imports = array_unique($duplicatedImports);
-        $useStartIndex = null;
-        $useEndIndex = null;
+        if ($token->isGivenKind(T_DOC_COMMENT) && $lastNamespaceToken !== null) {
+            $this->fixDocBlockContent(
+                $token,
+                $lastNamespaceToken,
+                $importedClasses
+            );
+        }
 
-        if ($duplicatedImports === $imports) {
+        if (!$token->isGivenKind(T_NS_SEPARATOR)) {
             return;
         }
 
-        foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_NAMESPACE)) {
-                $useStartIndex = $tokens->getNextTokenOfKind($key, [new Token([T_USE, 'use'])]);
-            }
-            if ($token->isGivenKind(T_CLASS)) {
-                $useEndIndex = $tokens->getPrevMeaningfulToken($key);
-            }
-        }
-
-        if ($useStartIndex === null || $useEndIndex === null) {
+        if (
+            $lastNamespaceToken === null
+            || $token->previousToken()->isGivenKind(T_STRING)
+            || $token->previousToken()->previousToken()->isGivenKind(T_USE)
+        ) {
             return;
         }
 
-        $tokens->clearRange($useStartIndex - 1, $useEndIndex);
+        $fullyQualifiedClassName = $this->gatherFullClassName($token);
 
-        $importIndex = $useStartIndex;
-        foreach ($imports as $import) {
-            $importAs = null;
-            if (strpos($import, ' as ') !== false) {
-                $importAs = end(explode(' as ', $import));
-            }
-            $importIndex = $this->insertImport($tokens, $importIndex, $import, $importAs);
-            $importIndex++;
+        $importAs = $this->importClass($lastNamespaceToken, $importedClasses, $fullyQualifiedClassName);
+        if ($importAs !== null) {
+            $this->replaceFullClassName($token, $importAs);
         }
     }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param int $namespaceIndex
-     * @param array $endOfUseStatements
-     * @param array $exceptionClassNames
-     * @return array
-     */
+    
     private function fixDocBlockContent(
-        Tokens $tokens,
-        $key,
-        $namespaceIndex,
-        $endOfUseStatements,
-        $exceptionClassNames
+        ContextualToken $phpDocToken,
+        ContextualToken $lastNamespaceToken,
+        ImportedClasses $importedClasses
     ) {
-        $content = $tokens[$key]->getContent();
+        $content = $phpDocToken->getContent();
         preg_match_all(
             '#(?<=' . implode('|', $this->docBlockAnnotations) . ')\s(\\\[\w\\\]*\\\?(\w*))\s#',
             $content,
@@ -208,130 +152,122 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             PREG_SET_ORDER
         );
         if (count($matches) === 0) {
-            return [];
+            return;
         }
 
         foreach ($matches as $match) {
             if (isset($match[1])) {
-                $nsParts = explode('\\', $match[1]);
-                $className = ltrim(end($nsParts), '\\');
-                if (
-                    in_array($className, $exceptionClassNames, true)
-                    || in_array(strtolower($className), $endOfUseStatements, true)
-                ) {
+                $fullClassName = $match[1];
+
+                $importedAs = $this->importClass($lastNamespaceToken, $importedClasses, $fullClassName);
+                if ($importedAs === null) {
                     continue;
                 }
-                $tokens[$key]->setContent(strtr($tokens[$key]->getContent(), [$match[1] => $className]));
-                $namespaces[] = ltrim($match[1], '\\');
-                $endOfUseStatements[] = strtolower(ltrim($className, '\\'));
+                
+                $phpDocToken->setContent(preg_replace(
+                    '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
+                    '$1' . $importedAs . '$2',
+                    $phpDocToken->getContent()
+                ));
             }
         }
-
-        if (isset($namespaces)) {
-            foreach ($namespaces as $namespace) {
-                $this->insertUseStatement($tokens, $namespaceIndex, $namespace);
-            }
-        }
-
-        return $endOfUseStatements;
     }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $namespaceIndex
-     * @param string $useStatementContent
-     */
-    private function insertUseStatement(Tokens $tokens, $namespaceIndex, $useStatementContent)
-    {
-        $classIndex = $tokens->getNextTokenOfKind(0, [new Token([T_CLASS, 'class'])]);
-        $className = $tokens[$tokens->getNextMeaningfulToken($classIndex)]->getContent();
-
-        $insertIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']) + 1;
+    
+    private function importClass(
+        ContextualToken $lastNamespaceToken,
+        ImportedClasses $importedClasses,
+        string $fullClassName
+    ) {
+        $nsParts = explode('\\', $fullClassName);
+        $className = end($nsParts);
+        
+        $importedAs = $importedClasses->getImportedAs($fullClassName);
+        if ($importedAs !== null) {
+            return $importedAs;
+        }
 
         $importAs = null;
-        $useStatement = array_values(array_filter(explode('\\', $useStatementContent)));
-        if (end($useStatement) === $className) {
-            $extendsIndex = $tokens->getNextTokenOfKind(0, [new Token([T_EXTENDS, 'extends'])]);
-            $tokens->clearRange($extendsIndex + 1, $extendsIndex + count($useStatement) * 2 + 1);
-            $importAs = 'Base' . $className;
-            $tokens->insertAt(++$extendsIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$extendsIndex, new Token([T_STRING, $importAs]));
+        try {
+            $classToken = $lastNamespaceToken->firstToken()->nextTokenWithContent('class');
+            $currentClassName = $classToken->nextNonWhitespaceToken()->getContent();
+        } catch (NoMoreTokensException $exception) {
+            $currentClassName = null;
+        }
+        
+        if ($currentClassName !== null && $currentClassName === $className) {
+            $className = 'Base' . $className;
+            $importAs = $className;
         }
 
-        $this->insertImport($tokens, $insertIndex, $useStatementContent, $importAs);
+        if ($importedClasses->isNameTaken($className)) {
+            return null;
+        }
+        $this->insertUseStatement($lastNamespaceToken, $fullClassName, $importAs);
+        $importedClasses->registerImport($className, $fullClassName);
+        return $className;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $position
-     * @param string $import
-     * @param null|string $importAs
-     * @return int
-     */
-    private function insertImport(Tokens $tokens, $position, $import, $importAs = null)
+    private function insertUseStatement(
+        ContextualToken $lastNamespaceToken, 
+        string $useStatementContent, 
+        string $importAs = null
+    ) {
+        $possibleUseToken = $lastNamespaceToken->nextNonWhitespaceToken();
+        if ($possibleUseToken->isGivenKind(T_USE)) {
+            $insertAtToken = $possibleUseToken->nextTokenWithContent('class')->previousToken();
+            $insertAtToken->insertBefore(new ContextualToken("\n"));
+        } else {
+            $insertAtToken = $lastNamespaceToken->nextToken();
+            $insertAtToken->insertBefore(new ContextualToken("\n\n"));
+        }
+
+        $this->insertImport($insertAtToken, $useStatementContent, $importAs);
+    }
+
+    private function insertImport(ContextualToken $insertAtToken, string $import, string $importAs = null)
     {
-        $tokens->insertAt($position, new Token([T_WHITESPACE, "\n"]));
-        $tokens->insertAt(++$position, new Token([T_USE, 'use']));
-        $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
+        $tokens = [];
+        $tokens[] = new ContextualToken([T_USE, 'use']);
+        $tokens[] = new ContextualToken(' ');
 
         $useStatement = array_values(array_filter(explode('\\', $import)));
         foreach ($useStatement as $key => $item) {
-            $tokens->insertAt(++$position, new Token([T_STRING, $item]));
+            $tokens[] = new ContextualToken([T_STRING, $item]);
             if ($key !== count($useStatement) - 1) {
-                $tokens->insertAt(++$position, new Token([T_NS_SEPARATOR, '\\']));
+                $tokens[] = new ContextualToken([T_NS_SEPARATOR, '\\']);
             }
         }
 
         if ($importAs !== null) {
-            $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$position, new Token([T_AS, 'as']));
-            $tokens->insertAt(++$position, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$position, new Token([T_STRING, $importAs]));
+            $tokens[] = new ContextualToken(' ');
+            $tokens[] = new ContextualToken([T_AS, 'as']);
+            $tokens[] = new ContextualToken(' ');
+            $tokens[] = new ContextualToken([T_STRING, $importAs]);
         }
-        $tokens->insertAt(++$position, new Token(';'));
+        $tokens[] = new ContextualToken(';');
 
-        return $position;
+        $insertAtToken->insertSequenceBefore($tokens);
     }
 
-    private function getImportedClasses(Tokens $tokens)
+    private function gatherFullClassName(ContextualToken $startToken): string
     {
-        $copy = clone $tokens;
-        $usages = [];
-        for ($i = 0; $i < count($copy); $i++) {
-            if ($copy[$i]->isGivenKind(T_USE)) {
-                $namespace = '';
-                while ($copy[$i]->getContent() !== ';') {
-                    if (
-                        $copy[$i]->isGivenKind(T_NS_SEPARATOR)
-                        || $copy[$i]->isGivenKind(T_STRING)
-                    ) {
-                        $namespace .= $copy[$i]->getContent();
-                    }
-                    $i++;
-                }
-                $usages[] = $namespace;
-            }
+        $token = $startToken;
+        $className = '';
+        while ($token->isGivenKind(T_STRING) || $token->isGivenKind(T_NS_SEPARATOR)) {
+            $className .= $token->getContent();
+            $token = $token->nextToken();
         }
-
-        return array_filter($usages);
+        
+        return $className;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @return int|null
-     */
-    private function findNamespaceEndIndex(Tokens $tokens, $startIndex)
+    private function replaceFullClassName(ContextualToken $startToken, string $className)
     {
-        for ($i = $startIndex + 1; $i < $tokens->count(); $i++) {
-            $token = $tokens[$i];
-            if (
-                !$token->isGivenKind(T_STRING)
-                && !$token->isGivenKind(T_NS_SEPARATOR)
-            ) {
-                return $i - 1;
-            }
+        $startToken->replaceWithTokens([new ContextualToken([T_STRING, $className])]);
+        $token = $startToken->nextToken();
+        while ($token->isGivenKind(T_STRING) || $token->isGivenKind(T_NS_SEPARATOR)) {
+            $token->replaceWithTokens([]);
+            $token = $token->nextToken();
         }
-        return $i;
     }
 }

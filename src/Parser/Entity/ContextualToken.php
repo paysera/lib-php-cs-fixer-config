@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
 
+use Paysera\PhpCsFixerConfig\Parser\Exception\NoMoreTokensException;
 use RuntimeException;
 use PhpCsFixer\Tokenizer\Token;
 
@@ -75,7 +77,7 @@ class ContextualToken extends Token implements ItemInterface
     public function nextToken(): ContextualToken
     {
         if ($this->nextContextualToken === null) {
-            throw new RuntimeException('No more tokens');
+            throw new NoMoreTokensException('No more tokens');
         }
 
         return $this->nextContextualToken;
@@ -171,5 +173,14 @@ class ContextualToken extends Token implements ItemInterface
             $lastToken = $token;
         }
         $lastToken->setNextContextualToken($this->nextToken());
+    }
+
+    public function insertSequenceBefore(array $tokens)
+    {
+        $insertAfterThis = $this->previousToken();
+        foreach ($tokens as $token) {
+            $insertAfterThis->insertAfter($token);
+            $insertAfterThis = $token;
+        }
     }
 }
