@@ -322,6 +322,22 @@ class MyClass extends TestCase
     }
 }',
             ],
+            [
+                '<?php
+final class MyClass
+{
+    private $config;
+    private $innerService;
+    private $service;
+    
+    public function __construct()
+    {
+        $this->config = [];
+        $this->innerService = new InnerService();
+        $this->service = new Service($this->innerService);
+    }
+}',
+            ],
         ];
     }
 

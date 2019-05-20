@@ -167,7 +167,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && $constructFunction['Assignments'][$property['Variable']] === 'new'
+            && in_array($constructFunction['Assignments'][$property['Variable']],  ['new', 'array'], true)
         ;
     }
 
@@ -190,9 +190,16 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             ) {
                 $property = '$' . $tokens[$i + 2]->getContent();
                 $equalsIndex = $tokens->getNextNonWhitespace($i + 2);
+                if ($tokens[$equalsIndex]->getContent() !== '=') {
+                    continue;
+                }
+                
                 $i = $tokens->getNextNonWhitespace($equalsIndex);
                 if ($tokens[$i]->getContent() === 'new') {
                     $assignments[$property] = 'new';
+                    continue;
+                } elseif ($tokens[$i]->getContent() === '[' || $tokens[$i]->getContent() === 'array') {
+                    $assignments[$property] = 'array';
                     continue;
                 }
                 
