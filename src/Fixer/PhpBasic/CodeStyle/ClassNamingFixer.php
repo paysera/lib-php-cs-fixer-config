@@ -9,31 +9,32 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ClassNamingFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 2.5.2: For services suffix has to represent the job of that service';
     const SERVICE = 'Service';
 
-    /**
-     * @var array
-     */
-    private $validServiceSuffixes = [
-        'Registry',
-        'Factory',
-        'Client',
-        'Plugin',
-        'Proxy',
-        'Interface',
-        'Repository',
-    ];
+    private $validServiceSuffixes;
+    private $invalidSuffixes;
 
-    /**
-     * @var array
-     */
-    private $invalidSuffixes = [
-        'Service',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->validServiceSuffixes = [
+            'Registry',
+            'Factory',
+            'Client',
+            'Plugin',
+            'Proxy',
+            'Interface',
+            'Repository',
+        ];
+        $this->invalidSuffixes = [
+            'Service',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -109,7 +110,7 @@ final class ClassNamingFixer extends AbstractFixer
         return new FixerConfigurationResolverRootless('service_suffixes', [$suffixes], $this->getName());
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $classNamespace = null;
         $valid = true;

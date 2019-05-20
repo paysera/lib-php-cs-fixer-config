@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class FullNamesFixer extends AbstractFixer
 {
@@ -14,14 +15,20 @@ final class FullNamesFixer extends AbstractFixer
     /**
      * @var array
      */
-    private $scalarTypes = [
-        'array',
-        'string',
-        'int',
-        'float',
-        'bool',
-        'callable',
-    ];
+    private $scalarTypes;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->scalarTypes = [
+            'array',
+            'string',
+            'int',
+            'float',
+            'bool',
+            'callable',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -60,7 +67,7 @@ final class FullNamesFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $invalidVariableNames = [];
         // First cycle for collecting Invalid Variable Names

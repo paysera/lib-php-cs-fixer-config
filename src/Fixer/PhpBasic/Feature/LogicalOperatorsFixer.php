@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class LogicalOperatorsFixer extends AbstractFixer
 {
@@ -52,7 +53,7 @@ final class LogicalOperatorsFixer extends AbstractFixer
         return true;
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_LOGICAL_AND)) {

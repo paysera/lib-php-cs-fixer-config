@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class UnnecessaryVariablesFixer extends AbstractFixer
 {
@@ -51,7 +52,7 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_VARIABLE) && $tokens->isTokenKindFound(T_RETURN);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $searchFrom = 0;
         do {

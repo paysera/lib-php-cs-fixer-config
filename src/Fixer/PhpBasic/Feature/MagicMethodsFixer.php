@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class MagicMethodsFixer extends AbstractFixer
 {
@@ -14,25 +15,28 @@ final class MagicMethodsFixer extends AbstractFixer
     const MAGIC_METHODS_CONVENTION = 'PhpBasic convention 3.14.1: We avoid magic methods';
     const STRING_CONVENTION = 'PhpBasic convention 3.12: We do not use __toString method for main functionality';
 
-    /**
-     * @var array
-     */
-    private $magicMethods = [
-        self::TO_STRING,
-        '__destruct',
-        '__call',
-        '__callStatic',
-        '__get',
-        '__set',
-        '__isset',
-        '__unset',
-        '__sleep',
-        '__wakeup',
-        '__invoke',
-        '__set_state',
-        '__clone',
-        '__debugInfo',
-    ];
+    private $magicMethods;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->magicMethods = [
+            self::TO_STRING,
+            '__destruct',
+            '__call',
+            '__callStatic',
+            '__get',
+            '__set',
+            '__isset',
+            '__unset',
+            '__sleep',
+            '__wakeup',
+            '__invoke',
+            '__set_state',
+            '__clone',
+            '__debugInfo',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -84,7 +88,7 @@ final class MagicMethodsFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             $methodName = $token->getContent();

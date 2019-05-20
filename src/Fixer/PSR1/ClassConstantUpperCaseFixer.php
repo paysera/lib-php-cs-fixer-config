@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ClassConstantUpperCaseFixer extends AbstractFixer
 {
@@ -41,7 +42,7 @@ final class ClassConstantUpperCaseFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $invalidConstantNames = [];
         foreach ($tokens as $key => $token) {

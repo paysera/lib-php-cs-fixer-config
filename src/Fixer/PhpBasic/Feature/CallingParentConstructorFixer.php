@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class CallingParentConstructorFixer extends AbstractFixer
 {
@@ -48,7 +49,7 @@ final class CallingParentConstructorFixer extends AbstractFixer
         return true;
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (

@@ -8,6 +8,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ChainedMethodCallsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -44,7 +45,7 @@ final class ChainedMethodCallsFixer extends AbstractFixer implements Whitespaces
         return $tokens->isTokenKindFound(T_OBJECT_OPERATOR);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
             if (!$tokens[$key]->isGivenKind(T_OBJECT_OPERATOR)) {

@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ThrowBaseExceptionFixer extends AbstractFixer
 {
@@ -49,7 +50,7 @@ final class ThrowBaseExceptionFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_THROW);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_THROW)) {

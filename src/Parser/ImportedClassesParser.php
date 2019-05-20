@@ -10,7 +10,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 class ImportedClassesParser
 {
     private $builder;
-    
+
     public function __construct(ContextualTokenBuilder $builder)
     {
         $this->builder = $builder;
@@ -58,7 +58,7 @@ class ImportedClassesParser
         }
 
         $importedClasses->registerImport($importName, $className);
-        
+
         return $token;
     }
 }

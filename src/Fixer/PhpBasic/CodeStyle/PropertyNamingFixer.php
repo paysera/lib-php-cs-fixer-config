@@ -7,36 +7,34 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class PropertyNamingFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 2.5.4: We do not use verbs or questions for property names';
 
-    /**
-     * @var array
-     */
-    private $invalidPropertyVerbs = [
-        'check',
-    ];
+    private $invalidPropertyVerbs;
+    private $invalidPropertyPrefixes;
+    private $invalidPropertySuffixes;
 
-    /**
-     * @var array
-     */
-    private $invalidPropertyPrefixes = [
-        'is',
-        'can',
-        'has',
-        'will',
-        'would',
-    ];
-
-    /**
-     * @var array
-     */
-    private $invalidPropertySuffixes = [
-        'ing',
-        'ded',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->invalidPropertyVerbs = [
+            'check',
+        ];
+        $this->invalidPropertyPrefixes = [
+            'is',
+            'can',
+            'has',
+            'will',
+            'would',
+        ];
+        $this->invalidPropertySuffixes = [
+            'ing',
+            'ded',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -75,7 +73,7 @@ final class PropertyNamingFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($tokens[$key]->isGivenKind(T_VARIABLE)) {

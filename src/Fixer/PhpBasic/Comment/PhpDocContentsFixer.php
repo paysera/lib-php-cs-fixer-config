@@ -9,6 +9,7 @@ use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -19,14 +20,20 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
     /**
      * @var array
      */
-    private $scalarTypes = [
-        'array',
-        'string',
-        'int',
-        'float',
-        'bool',
-        'callable',
-    ];
+    private $scalarTypes;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->scalarTypes = [
+            'array',
+            'string',
+            'int',
+            'float',
+            'bool',
+            'callable',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -83,7 +90,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);

@@ -58,7 +58,7 @@ class PayseraConventionsConfig extends Config
     /**
      * @var null|array
      */
-    private $migrationModeRules = null;
+    private $migrationModeRules;
 
     public function __construct()
     {

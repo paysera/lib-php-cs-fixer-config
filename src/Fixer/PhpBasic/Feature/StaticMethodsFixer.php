@@ -7,24 +7,28 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class StaticMethodsFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 3.11: Static function must return only "self" or "static" constants';
 
-    /**
-     * @var array
-     */
-    private $validTokens = [
-        T_COMMENT,
-        T_STATIC,
-        T_STRING,
-        T_DOUBLE_COLON,
-        T_RETURN,
-        T_DOUBLE_ARROW,
-        T_WHITESPACE,
-        T_VARIABLE,
-    ];
+    private $validTokens;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->validTokens = [
+            T_COMMENT,
+            T_STATIC,
+            T_STRING,
+            T_DOUBLE_COLON,
+            T_RETURN,
+            T_DOUBLE_ARROW,
+            T_WHITESPACE,
+            T_VARIABLE,
+        ];
+    }
 
     public function getDefinition()
     {
@@ -71,7 +75,7 @@ final class StaticMethodsFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound([T_STATIC, T_FUNCTION]);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             $functionIndex = $tokens->getNextMeaningfulToken($key);

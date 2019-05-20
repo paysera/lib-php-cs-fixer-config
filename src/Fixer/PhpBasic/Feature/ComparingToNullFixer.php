@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ComparingToNullFixer extends AbstractFixer
 {
@@ -51,7 +52,7 @@ final class ComparingToNullFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         // Collect all object variables
         $objectVariables = [];

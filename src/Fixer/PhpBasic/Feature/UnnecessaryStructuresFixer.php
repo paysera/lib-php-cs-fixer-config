@@ -8,6 +8,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class UnnecessaryStructuresFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -16,10 +17,16 @@ final class UnnecessaryStructuresFixer extends AbstractFixer implements Whitespa
     /**
      * @var array
      */
-    private $conditionalStatements = [
-        T_IF,
-        T_ELSEIF,
-    ];
+    private $conditionalStatements;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->conditionalStatements = [
+            T_IF,
+            T_ELSEIF,
+        ];
+    }
 
     public function getDefinition()
     {
@@ -56,7 +63,7 @@ final class UnnecessaryStructuresFixer extends AbstractFixer implements Whitespa
         return $tokens->isAnyTokenKindsFound($this->conditionalStatements);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$tokens[$key]->isGivenKind($this->conditionalStatements)) {

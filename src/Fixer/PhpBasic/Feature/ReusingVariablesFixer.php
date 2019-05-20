@@ -7,40 +7,41 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ReusingVariablesFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 3.9: We do not change argument type or value';
 
-    /**
-     * @var array
-     */
-    private $assignmentOperators = [
-        T_CONCAT_EQUAL,
-        T_AND_EQUAL,
-        T_DIV_EQUAL,
-        T_MINUS_EQUAL,
-        T_MOD_EQUAL,
-        T_MUL_EQUAL,
-        T_OR_EQUAL,
-        T_PLUS_EQUAL,
-        T_SL_EQUAL,
-        T_SR_EQUAL,
-        T_XOR_EQUAL,
-    ];
+    private $assignmentOperators;
+    private $typeCasters;
 
-    /**
-     * @var array
-     */
-    private $typeCasters = [
-        T_ARRAY_CAST,
-        T_BOOL_CAST,
-        T_DOUBLE_CAST,
-        T_INT_CAST,
-        T_OBJECT_CAST,
-        T_STRING_CAST,
-        T_UNSET_CAST,
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->assignmentOperators = [
+            T_CONCAT_EQUAL,
+            T_AND_EQUAL,
+            T_DIV_EQUAL,
+            T_MINUS_EQUAL,
+            T_MOD_EQUAL,
+            T_MUL_EQUAL,
+            T_OR_EQUAL,
+            T_PLUS_EQUAL,
+            T_SL_EQUAL,
+            T_SR_EQUAL,
+            T_XOR_EQUAL,
+        ];
+        $this->typeCasters = [
+            T_ARRAY_CAST,
+            T_BOOL_CAST,
+            T_DOUBLE_CAST,
+            T_INT_CAST,
+            T_OBJECT_CAST,
+            T_STRING_CAST,
+            T_UNSET_CAST,
+        ];
+    }
 
     public function getDefinition()
     {
@@ -83,7 +84,7 @@ final class ReusingVariablesFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_STRING)) {

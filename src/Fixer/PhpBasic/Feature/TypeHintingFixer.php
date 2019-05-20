@@ -10,6 +10,8 @@ use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
+use SplFileInfo;
+use Exception;
 
 final class TypeHintingFixer extends AbstractFixer
 {
@@ -20,7 +22,13 @@ final class TypeHintingFixer extends AbstractFixer
     /**
      * @var array
      */
-    private $exceptions = ['EntityManager', 'Repository', 'Normalizer', 'Denormalizer'];
+    private $exceptions;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->exceptions = ['EntityManager', 'Repository', 'Normalizer', 'Denormalizer'];
+    }
 
     public function getDefinition()
     {
@@ -115,7 +123,7 @@ final class TypeHintingFixer extends AbstractFixer
         return new FixerConfigurationResolverRootless('exceptions', [$options], $this->getName());
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $useStatements = [];
         $constructClassProperties = [];
@@ -220,7 +228,7 @@ final class TypeHintingFixer extends AbstractFixer
                             break;
                         }
                     }
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                 }
             }
         }

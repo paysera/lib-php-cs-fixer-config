@@ -9,21 +9,22 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class FileSideEffectsFixer extends AbstractFixer
 {
     const CONVENTION = '/* TODO: A file should declare new symbols (classes, functions, constants, etc.)
     and cause no other side effects, or it should execute logic with side effects, but should not do both. */';
 
-    /**
-     * @var array
-     */
-    private $forbiddenFunctions = ['print_r', 'var_dump', 'ini_set'];
+    private $forbiddenFunctions;
+    private $forbiddenTokens;
 
-    /**
-     * @var array
-     */
-    private $forbiddenTokens = [T_INCLUDE, T_ECHO];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->forbiddenFunctions = ['print_r', 'var_dump', 'ini_set'];
+        $this->forbiddenTokens = [T_INCLUDE, T_ECHO];
+    }
 
     public function getDefinition()
     {
@@ -104,7 +105,7 @@ final class FileSideEffectsFixer extends AbstractFixer
         return new FixerConfigurationResolverRootless('side_effects', [$sideEffects], $this->getName());
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $sideEffects = 0;
         $symbols = 0;

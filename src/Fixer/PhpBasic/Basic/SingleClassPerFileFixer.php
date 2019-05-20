@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class SingleClassPerFileFixer extends AbstractFixer
 {
@@ -46,7 +47,7 @@ final class SingleClassPerFileFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound(Token::getClassyTokenKinds());
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $tokenCount = $tokens->count();
         $classCount = 0;

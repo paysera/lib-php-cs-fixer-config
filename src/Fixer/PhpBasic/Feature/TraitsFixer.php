@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class TraitsFixer extends AbstractFixer
 {
@@ -43,7 +44,7 @@ final class TraitsFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_TRAIT);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_TRAIT)) {

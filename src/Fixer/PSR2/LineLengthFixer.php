@@ -13,6 +13,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class LineLengthFixer extends AbstractFixer implements ConfigurationDefinitionFixerInterface
 {
@@ -83,10 +84,10 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
     }
 
     /**
-     * @param \SplFileInfo $file
+     * @param SplFileInfo $file
      * @param Tokens|Token[] $tokens
      */
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $contextualTokenBuilder = new ContextualTokenBuilder();
         $token = $contextualTokenBuilder->buildFromTokens($tokens);

@@ -12,6 +12,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ReturnAndArgumentTypesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -22,29 +23,29 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
 
     const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$|<.*>/';
 
-    /**
-     * @var array
-     */
-    private $scalarTypes = [
-        'array',
-        'callable',
-        'bool',
-        'boolean',
-        'float',
-        'int',
-        'integer',
-        'string',
-        'resource',
-    ];
+    private $scalarTypes;
+    private $strictValues;
 
-    /**
-     * @var array
-     */
-    private $strictValues = [
-        T_CONSTANT_ENCAPSED_STRING,
-        T_DNUMBER,
-        T_LNUMBER,
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->scalarTypes = [
+            'array',
+            'callable',
+            'bool',
+            'boolean',
+            'float',
+            'int',
+            'integer',
+            'string',
+            'resource',
+        ];
+        $this->strictValues = [
+            T_CONSTANT_ENCAPSED_STRING,
+            T_DNUMBER,
+            T_LNUMBER,
+        ];
+    }
 
     // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
     private static function getPassingIdNamespaceExclusions()
@@ -107,7 +108,7 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $classNamespace = null;
         foreach ($tokens as $key => $token) {

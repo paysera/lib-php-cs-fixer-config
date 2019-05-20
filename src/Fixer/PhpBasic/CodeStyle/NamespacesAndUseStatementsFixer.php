@@ -17,17 +17,7 @@ use SplFileInfo;
 
 final class NamespacesAndUseStatementsFixer extends AbstractFixer
 {
-    /**
-     * @var array
-     */
-    private $docBlockAnnotations = [
-        '@throws',
-        '@return',
-        '@returns',
-        '@param',
-        '@var',
-    ];
-    
+    private $docBlockAnnotations;
     private $importedClassesParser;
     private $contextualTokenBuilder;
 
@@ -36,6 +26,13 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         parent::__construct();
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
         $this->importedClassesParser = new ImportedClassesParser($this->contextualTokenBuilder);
+        $this->docBlockAnnotations = [
+            '@throws',
+            '@return',
+            '@returns',
+            '@param',
+            '@var',
+        ];
     }
 
     public function getDefinition()
@@ -91,16 +88,16 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $importedClasses = $this->importedClassesParser->parseImportedClasses($tokens);
-        
+
         $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
         $firstToken = (new EmptyToken())->setNextContextualToken($token);
         $lastNamespaceToken = null;
-        
+
         while ($token !== null) {
             if ($token->isGivenKind(T_NAMESPACE)) {
                 $lastNamespaceToken = $token->nextTokenWithContent(';');
             }
-            
+
             $this->processToken($token, $importedClasses, $lastNamespaceToken);
 
             $token = $token->getNextToken();
@@ -108,7 +105,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
 
         $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
-    
+
     private function processToken(ContextualToken $token, ImportedClasses $importedClasses, ContextualToken $lastNamespaceToken = null)
     {
         if ($token->isGivenKind(T_DOC_COMMENT) && $lastNamespaceToken !== null) {
@@ -138,7 +135,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             $this->replaceFullClassName($token, $importAs);
         }
     }
-    
+
     private function fixDocBlockContent(
         ContextualToken $phpDocToken,
         ContextualToken $lastNamespaceToken,
@@ -163,7 +160,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
                 if ($importedAs === null) {
                     continue;
                 }
-                
+
                 $phpDocToken->setContent(preg_replace(
                     '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
                     '$1' . $importedAs . '$2',
@@ -172,7 +169,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             }
         }
     }
-    
+
     private function importClass(
         ContextualToken $lastNamespaceToken,
         ImportedClasses $importedClasses,
@@ -180,7 +177,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     ) {
         $nsParts = explode('\\', $fullClassName);
         $className = end($nsParts);
-        
+
         $importedAs = $importedClasses->getImportedAs($fullClassName);
         if ($importedAs !== null) {
             return $importedAs;
@@ -193,7 +190,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         } catch (NoMoreTokensException $exception) {
             $currentClassName = null;
         }
-        
+
         if ($currentClassName !== null && $currentClassName === $className) {
             $className = 'Base' . $className;
             $importAs = $className;
@@ -208,8 +205,8 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     }
 
     private function insertUseStatement(
-        ContextualToken $lastNamespaceToken, 
-        string $useStatementContent, 
+        ContextualToken $lastNamespaceToken,
+        string $useStatementContent,
         string $importAs = null
     ) {
         $possibleUseToken = $lastNamespaceToken->nextNonWhitespaceToken();
@@ -257,7 +254,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             $className .= $token->getContent();
             $token = $token->nextToken();
         }
-        
+
         return $className;
     }
 

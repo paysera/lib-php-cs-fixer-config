@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ClassNameStudlyCapsFixer extends AbstractFixer
 {
@@ -37,7 +38,7 @@ final class ClassNameStudlyCapsFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $invalidClassNames = [];
         foreach ($tokens as $key => $token) {

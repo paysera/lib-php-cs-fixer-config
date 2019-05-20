@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class ConditionResultsFixer extends AbstractFixer
 {
@@ -16,10 +17,16 @@ final class ConditionResultsFixer extends AbstractFixer
     /**
      * @var array
      */
-    private $strictValues = [
-        'true',
-        'false',
-    ];
+    private $strictValues;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->strictValues = [
+            'true',
+            'false',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -56,7 +63,7 @@ final class ConditionResultsFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound([T_IF, T_RETURN, T_VARIABLE]);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             // Validate long if statement

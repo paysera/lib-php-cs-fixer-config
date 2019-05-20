@@ -16,6 +16,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
 use RuntimeException;
+use SplFileInfo;
 
 final class ComparingToBooleanFixer extends AbstractFixer
 {
@@ -26,15 +27,7 @@ final class ComparingToBooleanFixer extends AbstractFixer
         'true',
         'false',
     ];
-
-    /**
-     * @var Parser
-     */
     private $parser;
-
-    /**
-     * @var ContextualTokenBuilder
-     */
     private $contextualTokenBuilder;
 
     public function __construct()
@@ -97,7 +90,7 @@ final class ComparingToBooleanFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound([T_IS_IDENTICAL, T_IS_NOT_IDENTICAL]);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
         $firstToken = (new EmptyToken())->setNextContextualToken($token);

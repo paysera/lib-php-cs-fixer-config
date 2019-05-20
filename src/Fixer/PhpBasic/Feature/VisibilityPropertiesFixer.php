@@ -11,6 +11,8 @@ use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
+use SplFileInfo;
+use Exception;
 
 final class VisibilityPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -23,9 +25,15 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     /**
      * @var array
      */
-    private $excludedParents = [
-        'Constraint',
-    ];
+    private $excludedParents;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->excludedParents = [
+            'Constraint',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -121,7 +129,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
         return new FixerConfigurationResolverRootless('excluded_parents', [$options], $this->getName());
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $propertyExclusion = false;
         $propertyVariables = [];
@@ -243,7 +251,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
                         return true;
                     }
                 }
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
             }
         }
 

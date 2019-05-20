@@ -8,6 +8,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class CommentStylesFixer extends AbstractFixer
 {
@@ -52,7 +53,7 @@ final class CommentStylesFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound([T_COMMENT, T_DOC_COMMENT]);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (

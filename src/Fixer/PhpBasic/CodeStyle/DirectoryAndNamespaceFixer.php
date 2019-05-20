@@ -8,6 +8,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class DirectoryAndNamespaceFixer extends AbstractFixer
 {
@@ -16,28 +17,28 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
     const INTERFACE_CONVENTION = 'PhpBasic convention 2.7.2: We do not make directories just for interfaces';
     const ABSTRACTION_CONVENTION = 'PhpBasic convention 2.7.3: We use abstractions for namespaces';
 
-    /**
-     * @var array
-     */
-    private $exclusions = [
-        'Tests',
-        'Data',
-        'Sonata',
-        'XLS',
-    ];
+    private $exclusions;
+    private $serviceNames;
 
-    /**
-     * @var array
-     */
-    private $serviceNames = [
-        'Manager',
-        'Normalizer',
-        'Provider',
-        'Updater',
-        'Registry',
-        'Resolver',
-        'Parser',
-    ];
+    public function __construct()
+    {
+        parent::__construct();
+        $this->exclusions = [
+            'Tests',
+            'Data',
+            'Sonata',
+            'XLS',
+        ];
+        $this->serviceNames = [
+            'Manager',
+            'Normalizer',
+            'Provider',
+            'Updater',
+            'Registry',
+            'Resolver',
+            'Parser',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -87,7 +88,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_NAMESPACE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_NAMESPACE)) {

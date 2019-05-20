@@ -11,6 +11,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class TypeHintingArgumentsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -19,31 +20,28 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
      *
      * @var array
      */
-    private $unavailableTypeHints = [
-        'array',
-        'void',
-        'self',
-        '$this',
-        'mixed',
-        'callable',
-        'bool',
-        'boolean',
-        'float',
-        'int',
-        'integer',
-        'string',
-        'resource',
-    ];
-
-    /**
-     * @var InheritanceHelper
-     */
+    private $unavailableTypeHints;
     private $inheritanceHelper;
 
     public function __construct()
     {
         parent::__construct();
         $this->inheritanceHelper = new InheritanceHelper();
+        $this->unavailableTypeHints = [
+            'array',
+            'void',
+            'self',
+            '$this',
+            'mixed',
+            'callable',
+            'bool',
+            'boolean',
+            'float',
+            'int',
+            'integer',
+            'string',
+            'resource',
+        ];
     }
 
     public function getDefinition()
@@ -92,7 +90,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);

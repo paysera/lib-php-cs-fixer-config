@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class FunctionNameCamelCaseFixer extends AbstractFixer
 {
@@ -40,7 +41,7 @@ final class FunctionNameCamelCaseFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $invalidFunctionNames = [];
         foreach ($tokens as $key => $token) {

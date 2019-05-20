@@ -8,21 +8,25 @@ use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class MethodNamingFixer extends AbstractFixer
 {
     const BOOL_FUNCTION_COMMENT = 'Question-type functions always return boolean (https://bit.ly/psg-methods)';
 
-    /**
-     * @var array
-     */
-    private $boolFunctionPrefixes = [
-        'is',
-        'are',
-        'has',
-        'can',
-        'does',
-    ];
+    private $boolFunctionPrefixes;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->boolFunctionPrefixes = [
+            'is',
+            'are',
+            'has',
+            'can',
+            'does',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -75,7 +79,7 @@ final class MethodNamingFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);

@@ -7,6 +7,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class CheckingExplicitlyFixer extends AbstractFixer
 {
@@ -63,7 +64,7 @@ final class CheckingExplicitlyFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_STRING) && $token->getContent() === self::STRLEN) {

@@ -16,17 +16,11 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    /**
-     * @var Parser
-     */
     private $parser;
-
-    /**
-     * @var ContextualTokenBuilder
-     */
     private $contextualTokenBuilder;
 
     public function __construct()
@@ -96,10 +90,10 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     }
 
     /**
-     * @param \SplFileInfo $file
+     * @param SplFileInfo $file
      * @param Tokens|Token[] $tokens
      */
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         $startEndTokens = [
             '=' => ';',

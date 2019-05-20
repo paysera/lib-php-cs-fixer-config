@@ -9,6 +9,7 @@ use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
@@ -51,7 +52,7 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_NAMESPACE)) {

@@ -6,6 +6,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class InterfaceNamingFixer extends AbstractFixer
 {
@@ -45,7 +46,7 @@ final class InterfaceNamingFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_INTERFACE);
     }
 
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_INTERFACE)) {

@@ -95,7 +95,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             if ($property === null) {
                 continue;
             }
-            
+
             // Missing DocBlock
             if (isset($property['DocBlockInsertIndex'])) {
                 if ($constructFunction === null) {
@@ -108,7 +108,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                     $commentInsertions[$property['Variable']] = $property['DocBlockInsertIndex'];
                     $this->insertComment($tokens, $property['DocBlockInsertIndex'], $property['Variable']);
                 }
-            
+
                 continue;
             }
 
@@ -123,7 +123,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             }
         }
     }
-    
+
     private function canPropertyTypeBeGuessed(array $property, array $constructFunction)
     {
         return (
@@ -132,7 +132,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
             || $this->isPropertyAssignedInConstructor($property, $constructFunction)
         );
     }
-    
+
     private function isPropertyTypeKnownExactly(array $property, array $constructFunction)
     {
         return (
@@ -177,7 +177,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']],  ['new', 'array'], true)
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new', 'array'], true)
         ;
     }
 
@@ -185,7 +185,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']],  ['new'], true)
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new'], true)
         ;
     }
 
@@ -211,7 +211,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                 if ($tokens[$equalsIndex]->getContent() !== '=') {
                     continue;
                 }
-                
+
                 $i = $tokens->getNextNonWhitespace($equalsIndex);
                 if ($tokens[$i]->getContent() === 'new') {
                     $assignments[$property] = 'new';
@@ -220,7 +220,7 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
                     $assignments[$property] = 'array';
                     continue;
                 }
-                
+
                 while ($tokens[$i]->getContent() !== ';') {
                     $i++;
                 }

@@ -7,65 +7,69 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use SplFileInfo;
 
 final class DateTimeFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 3.19: Use \DateTime object instead';
 
-    /**
-     * @var array
-     */
-    private $dateFunctions = [
-        'checkdate',
-        'date_add',
-        'date_create_from_format',
-        'date_create',
-        'date_date_set',
-        'date_default_timezone_get',
-        'date_default_timezone_set',
-        'date_diff',
-        'date_format',
-        'date_get_last_errors',
-        'date_interval_create_from_date_string',
-        'date_interval_format',
-        'date_isodate_set',
-        'date_modify',
-        'date_offset_get',
-        'date_parse_from_format',
-        'date_parse',
-        'date_sub',
-        'date_sun_info',
-        'date_sunrise',
-        'date_sunset',
-        'date_time_set',
-        'date_timestamp_get',
-        'date_timestamp_set',
-        'date_timezone_get',
-        'date_timezone_set',
-        'date',
-        'getdate',
-        'gettimeofday',
-        'gmdate',
-        'gmmktime',
-        'gmstrftime',
-        'idate',
-        'localtime',
-        'microtime',
-        'mktime',
-        'strftime',
-        'strptime',
-        'strtotime',
-        'time',
-        'timezone_abbreviations_list',
-        'timezone_identifiers_list',
-        'timezone_location_get',
-        'timezone_name_from_ abbr',
-        'timezone_name_get',
-        'timezone_offset_get',
-        'timezone_open',
-        'timezone_transitions_get',
-        'timezone_version_get',
-    ];
+    private $dateFunctions;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->dateFunctions = [
+            'checkdate',
+            'date_add',
+            'date_create_from_format',
+            'date_create',
+            'date_date_set',
+            'date_default_timezone_get',
+            'date_default_timezone_set',
+            'date_diff',
+            'date_format',
+            'date_get_last_errors',
+            'date_interval_create_from_date_string',
+            'date_interval_format',
+            'date_isodate_set',
+            'date_modify',
+            'date_offset_get',
+            'date_parse_from_format',
+            'date_parse',
+            'date_sub',
+            'date_sun_info',
+            'date_sunrise',
+            'date_sunset',
+            'date_time_set',
+            'date_timestamp_get',
+            'date_timestamp_set',
+            'date_timezone_get',
+            'date_timezone_set',
+            'date',
+            'getdate',
+            'gettimeofday',
+            'gmdate',
+            'gmmktime',
+            'gmstrftime',
+            'idate',
+            'localtime',
+            'microtime',
+            'mktime',
+            'strftime',
+            'strptime',
+            'strtotime',
+            'time',
+            'timezone_abbreviations_list',
+            'timezone_identifiers_list',
+            'timezone_location_get',
+            'timezone_name_from_ abbr',
+            'timezone_name_get',
+            'timezone_offset_get',
+            'timezone_open',
+            'timezone_transitions_get',
+            'timezone_version_get',
+        ];
+    }
 
     public function getDefinition()
     {
@@ -105,7 +109,7 @@ final class DateTimeFixer extends AbstractFixer
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    public function applyFix(\SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens)
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_STRING)) {
