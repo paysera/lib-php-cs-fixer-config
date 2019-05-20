@@ -837,6 +837,50 @@ class Service
     }
 }'
             ],
+            [
+                '<?php
+namespace App;
+
+use Exception;
+use App\Entity\Payment;
+
+final class Service
+{
+    public function something(Payment $a)
+    {
+    }
+}',
+                '<?php
+namespace App;
+
+use Exception;
+
+final class Service
+{
+    public function something(\App\Entity\Payment $a)
+    {
+    }
+}'
+            ],
+            [
+                '<?php
+namespace App;
+
+use Exception;
+use App\Entity\Payment;
+
+function something(Payment $a)
+{
+}',
+                '<?php
+namespace App;
+
+use Exception;
+
+function something(\App\Entity\Payment $a)
+{
+}'
+            ],
         ];
     }
 

@@ -214,7 +214,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     ) {
         $possibleUseToken = $lastNamespaceToken->nextNonWhitespaceToken();
         if ($possibleUseToken->isGivenKind(T_USE)) {
-            $insertAtToken = $possibleUseToken->nextTokenWithContent('class')->previousToken();
+            $insertAtToken = $this->findWhitespaceTokenAfterLastUseStatement($possibleUseToken);
             $insertAtToken->insertBefore(new ContextualToken("\n"));
         } else {
             $insertAtToken = $lastNamespaceToken->nextToken();
@@ -269,5 +269,20 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             $token->replaceWithTokens([]);
             $token = $token->nextToken();
         }
+    }
+
+    private function findWhitespaceTokenAfterLastUseStatement(ContextualToken $possibleUseToken)
+    {
+        $token = $possibleUseToken->nextToken();
+        while (
+            $token->isGivenKind(T_USE)
+            || $token->isGivenKind(T_STRING)
+            || $token->getContent() === '\\'
+            || $token->isWhitespace()
+            || $token->getContent() === ';'
+        ) {
+            $token = $token->nextToken();
+        }
+        return $token->previousToken();
     }
 }
