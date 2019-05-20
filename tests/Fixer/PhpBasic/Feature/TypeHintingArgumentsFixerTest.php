@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingArgumentsFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use SplFileInfo;
 
 final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
 {
@@ -20,11 +22,11 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
 
     /**
      * @param string $expected
-     * @param \SplFileInfo $file
+     * @param SplFileInfo $file
      *
      * @dataProvider provideFileCases
      */
-    public function testFixFiles($expected, \SplFileInfo $file)
+    public function testFixFiles($expected, SplFileInfo $file)
     {
         $this->doTest($expected, null, $file);
     }
@@ -220,7 +222,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
                         $this->application = $application;
                     }
                 }',
-                new \SplFileInfo(__DIR__ . '/Fixtures/DummyChild.php')
+                new SplFileInfo(__DIR__ . '/Fixtures/DummyChild.php')
             ],
             [
                 '<?php
@@ -237,7 +239,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
                         $something->getType();
                     }
                 }',
-                new \SplFileInfo(__DIR__ . '/Fixtures/ImplementingClass.php')
+                new SplFileInfo(__DIR__ . '/Fixtures/ImplementingClass.php')
             ],
         ];
     }

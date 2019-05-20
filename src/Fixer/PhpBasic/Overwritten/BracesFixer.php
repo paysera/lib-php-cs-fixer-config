@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
  * This file was copied from PHP CS Fixer core.

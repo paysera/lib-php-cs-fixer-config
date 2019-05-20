@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
 
@@ -176,7 +177,10 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
             foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                 // If object is optional and does not have null in docBlock - add it
                 if (
-                    preg_match('#^[^$]+@param\s([^$].*?)\s\\' . $parameter['Variable'] . '#m', $annotation)
+                    preg_match(
+                        '#^[^$]+@param\s([^$].*?)\s\\' . $parameter['Variable'] . '#m',
+                        $annotation->getContent()
+                    )
                     && !in_array('null', $annotation->getTypes(), true)
                     && $parameter['Nullable']
                 ) {
@@ -186,7 +190,10 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
                 }
 
                 // Add missing parameter typecast
-                if (preg_match('#^[^$]+@param+.(\\' . $parameter['Variable'] . ').*$#m', $annotation)) {
+                if (preg_match(
+                    '#^[^$]+@param+.(\\' . $parameter['Variable'] . ').*$#m',
+                    $annotation->getContent()
+                )) {
                     $annotationContent = $annotation->getContent();
                     if (isset($parameter['Typecast'])) {
                         if ($parameter['Nullable']) {

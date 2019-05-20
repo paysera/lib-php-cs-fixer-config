@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
@@ -180,8 +181,14 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
                 foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                     $variable = $tokens[$i]->getContent();
                     if (
-                        !preg_match('#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m', $annotation)
-                        || preg_match('#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m', $annotation)
+                        !preg_match(
+                            '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
+                            $annotation->getContent()
+                        )
+                        || preg_match(
+                            '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
+                            $annotation->getContent()
+                        )
                     ) {
                         continue;
                     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Parser;
 
@@ -12,7 +13,7 @@ class GroupSeparatorHelperTest extends TestCase
 {
 
     /**
-     * @param ItemInterface $expected
+     * @param ItemInterface|null $expected
      * @param ItemInterface[] $itemList
      * @param string $separator
      *

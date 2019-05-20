@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
 
@@ -93,7 +94,7 @@ final class PhpDocNecessityFixer extends AbstractFixer
         return preg_match(
             '/(?<=@)\S+(?=\()/',
             $token->getContent()
-        );
+        ) === 1;
     }
 
     private function validatePassedArguments(Tokens $tokens, int $key): bool
