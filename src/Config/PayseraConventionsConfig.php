@@ -405,7 +405,7 @@ class PayseraConventionsConfig extends Config
             'no_multiline_whitespace_before_semicolons' => false,
             'ordered_imports' => false,
             'array_syntax' => ['syntax' => 'short'],
-            'general_phpdoc_annotation_remove' => ['author', 'namespace', 'date', 'inheritdoc'],
+            'general_phpdoc_annotation_remove' => ['author', 'namespace', 'date', 'inheritdoc', 'package'],
             'header_comment' => ['header' => ''],
             'heredoc_to_nowdoc' => true,
             'linebreak_after_opening_tag' => true,
