@@ -318,6 +318,6 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
 
     private function hasCommentAdditionalData(Token $docBlockToken)
     {
-        return preg_match('/[^\s\*\/].*@var|@var.*\n[^\s\*\/]/s', $docBlockToken->getContent()) === 1;
+        return preg_match('/[^\s\*\/].*@var|@var.*\n[^\s\*\/]|@var.*\|/s', $docBlockToken->getContent()) === 1;
     }
 }

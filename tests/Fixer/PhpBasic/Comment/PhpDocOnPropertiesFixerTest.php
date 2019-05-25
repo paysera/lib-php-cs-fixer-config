@@ -309,6 +309,21 @@ class MyClass
             ],
             [
                 '<?php
+class MyClass
+{
+    /**
+     * @var Collection|Something[]
+     */
+    private $property;
+    
+    public function __construct()
+    {
+        $this->property = new ArrayCollection();
+    }
+}',
+            ],
+            [
+                '<?php
 class MyClass extends TestCase
 {
     /**
