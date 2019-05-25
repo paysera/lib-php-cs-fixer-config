@@ -6,7 +6,6 @@ namespace Paysera\PhpCsFixerConfig\Config;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DefaultValuesInConstructorFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Overwritten\BracesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
-use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\PhpDocNecessityFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CheckingExplicitlyFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\LogicalOperatorsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment\FluidInterfaceFixer;
@@ -108,7 +107,6 @@ class PayseraConventionsConfig extends Config
                 new LogicalOperatorsFixer(),
                 new VoidResultFixer(),
                 new DocBlockWhitespaceFixer(),
-                new PhpDocNecessityFixer(),
                 new BracesFixer(),
                 new DefaultValuesInConstructorFixer(),
             ]
@@ -432,7 +430,6 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_comparing_to_null' => true,
             'Paysera/php_basic_feature_condition_results' => true,
             'Paysera/php_basic_code_style_doc_block_whitespace' => true,
-            'Paysera/php_basic_comment_php_doc_necessity' => true,
         ];
     }
 }
