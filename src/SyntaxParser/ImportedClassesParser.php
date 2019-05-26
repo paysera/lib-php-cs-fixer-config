@@ -1,28 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Paysera\PhpCsFixerConfig\Parser;
+namespace Paysera\PhpCsFixerConfig\SyntaxParser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
-use Paysera\PhpCsFixerConfig\Parser\Entity\ImportedClasses;
-use PhpCsFixer\Tokenizer\Tokens;
+use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\ImportedClasses;
 
 class ImportedClassesParser
 {
-    private $builder;
-
-    public function __construct(ContextualTokenBuilder $builder)
+    public function parseImportedClasses(ContextualToken $firstToken)
     {
-        $this->builder = $builder;
-    }
-
-    public function parseImportedClasses(Tokens $tokens)
-    {
-        $token = $this->builder->buildFromTokens($tokens);
-
         $importedClasses = new ImportedClasses();
+        $token = $firstToken;
         while ($token !== null) {
-            if ($token->isGivenKind(T_USE)) {
+            if ($token->isGivenKind(T_NAMESPACE)) {
+                $token = $this->parseNamespaceStatement($token, $importedClasses);
+            } elseif ($token->isGivenKind(T_USE)) {
                 $token = $this->parseUseStatement($token, $importedClasses);
             }
 
@@ -58,6 +51,22 @@ class ImportedClassesParser
         }
 
         $importedClasses->registerImport($importName, $className);
+
+        return $token;
+    }
+
+    private function parseNamespaceStatement(
+        ContextualToken $namespaceToken,
+        ImportedClasses $importedClasses
+    ): ContextualToken {
+        $token = $namespaceToken->nextNonWhitespaceToken();
+        $namespace = '';
+        while ($token->getContent() !== ';' && !$token->isWhitespace()) {
+            $namespace .= $token->getContent();
+            $token = $token->getNextToken();
+        }
+
+        $importedClasses->setCurrentNamespace($namespace);
 
         return $token;
     }

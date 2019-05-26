@@ -6,9 +6,9 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use Paysera\PhpCsFixerConfig\Parser\Entity\EmptyToken;
-use Paysera\PhpCsFixerConfig\Parser\Entity\ImportedClasses;
+use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\ImportedClasses;
 use Paysera\PhpCsFixerConfig\Parser\Exception\NoMoreTokensException;
-use Paysera\PhpCsFixerConfig\Parser\ImportedClassesParser;
+use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
@@ -25,7 +25,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
     {
         parent::__construct();
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
-        $this->importedClassesParser = new ImportedClassesParser($this->contextualTokenBuilder);
+        $this->importedClassesParser = new ImportedClassesParser();
         $this->docBlockAnnotations = [
             '@throws',
             '@return',
@@ -87,9 +87,10 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens)
     {
-        $importedClasses = $this->importedClassesParser->parseImportedClasses($tokens);
-
         $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
+
+        $importedClasses = $this->importedClassesParser->parseImportedClasses($token);
+
         $firstToken = (new EmptyToken())->setNextContextualToken($token);
         $lastNamespaceToken = null;
 
@@ -196,7 +197,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
             $importAs = $className;
         }
 
-        if ($importedClasses->isNameTaken($className)) {
+        if ($importedClasses->isImported($className)) {
             return null;
         }
         $this->insertUseStatement($lastNamespaceToken, $fullClassName, $importAs);

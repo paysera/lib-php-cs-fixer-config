@@ -3,23 +3,22 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
-use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
+use Paysera\PhpCsFixerConfig\Fixer\AbstractContextualTokenFixer;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
-use Paysera\PhpCsFixerConfig\Parser\Entity\EmptyToken;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 use Paysera\PhpCsFixerConfig\Parser\Entity\SeparatedItemList;
 use Paysera\PhpCsFixerConfig\Parser\Entity\SimpleItemList;
 use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
 use Paysera\PhpCsFixerConfig\Parser\Parser;
-use PhpCsFixer\AbstractFixer;
-use PhpCsFixer\DocBlock\DocBlock;
+use Paysera\PhpCsFixerConfig\SyntaxParser\ClassStructureParser;
+use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\FunctionStructure;
+use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
 use RuntimeException;
-use SplFileInfo;
 
-final class ComparingToBooleanFixer extends AbstractFixer
+final class ComparingToBooleanFixer extends AbstractContextualTokenFixer
 {
     /**
      * @var array
@@ -28,14 +27,18 @@ final class ComparingToBooleanFixer extends AbstractFixer
         'true',
         'false',
     ];
+
     private $parser;
-    private $contextualTokenBuilder;
+    private $classStructureParser;
 
     public function __construct()
     {
         parent::__construct();
         $this->parser = new Parser(new GroupSeparatorHelper());
-        $this->contextualTokenBuilder = new ContextualTokenBuilder();
+        $this->classStructureParser = new ClassStructureParser(
+            new Parser(new GroupSeparatorHelper()),
+            new ImportedClassesParser()
+        );
     }
 
     public function getDefinition()
@@ -91,29 +94,18 @@ final class ComparingToBooleanFixer extends AbstractFixer
         return $tokens->isAnyTokenKindsFound([T_IS_IDENTICAL, T_IS_NOT_IDENTICAL]);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFixOnContextualToken(ContextualToken $token)
     {
-        $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
-        $firstToken = (new EmptyToken())->setNextContextualToken($token);
+        $functionStructures = $this->classStructureParser->parseFunctionStructures($token);
 
-        while ($token !== null) {
-            if ($token->isGivenKind(T_FUNCTION)) {
-                $boolVariables = array_unique(array_merge(
-                    $this->getBoolVariablesFromPhpDoc($token),
-                    $this->getBoolVariablesFromArguments($token)
-                ));
+        foreach ($functionStructures as $function) {
+            $boolVariables = array_unique(array_merge(
+                $this->getBoolVariablesFromPhpDoc($function),
+                $this->getBoolVariablesFromArguments($function)
+            ));
 
-                $groupedItem = $this->parser->parseUntil($token->nextTokenWithContent('{'), '}');
-
-                $this->fixBooleanComparisons($groupedItem, $boolVariables);
-
-                $token = $groupedItem->lastToken();
-            }
-
-            $token = $token->getNextToken();
+            $this->fixBooleanComparisons($function->getContentsItem(), $boolVariables);
         }
-
-        $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
 
     private function fixBooleanComparisons(ItemInterface $functionItem, array $boolVariables)
@@ -171,9 +163,9 @@ final class ComparingToBooleanFixer extends AbstractFixer
         }
     }
 
-    private function getBoolVariablesFromPhpDoc(ContextualToken $functionToken): array
+    private function getBoolVariablesFromPhpDoc(FunctionStructure $method): array
     {
-        $docBlock = $this->getDocBlockForFunctionToken($functionToken);
+        $docBlock = $method->getPhpDoc();
         $paramAnnotations = $docBlock !== null ? $docBlock->getAnnotationsOfType('param') : [];
 
         $variableNames = [];
@@ -191,40 +183,14 @@ final class ComparingToBooleanFixer extends AbstractFixer
         return $variableNames;
     }
 
-    /**
-     * @param ContextualToken $functionToken
-     * @return null|DocBlock
-     */
-    private function getDocBlockForFunctionToken(ContextualToken $functionToken)
+    private function getBoolVariablesFromArguments(FunctionStructure $method): array
     {
-        $token = $functionToken->previousNonWhitespaceToken();
-        while ($token->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE, T_FINAL, T_ABSTRACT, T_STATIC])) {
-            $token = $token->previousNonWhitespaceToken();
-        }
-        if ($token->isGivenKind(T_DOC_COMMENT)) {
-            return new DocBlock($token->getContent());
-        }
-
-        return null;
-    }
-
-    private function getBoolVariablesFromArguments(ContextualToken $functionToken): array
-    {
-        $token = $functionToken->nextTokenWithContent('(');
-
         $variableNames = [];
-        $currentGroup = [];
-        do {
-            $token = $token->nextToken();
-            if (in_array($token->getContent(), [',', ')'], true)) {
-                if (count($currentGroup) === 2 && $currentGroup[0] === 'bool') {
-                    $variableNames[] = $currentGroup[1];
-                }
-                $currentGroup = [];
-            } elseif (!$token->isWhitespace()) {
-                $currentGroup[] = $token->getContent();
+        foreach ($method->getParameters() as $parameter) {
+            if ($parameter->getTypeHintContent() === 'bool') {
+                $variableNames[] = $parameter->getName();
             }
-        } while ($token->getContent() !== ')');
+        }
 
         return $variableNames;
     }
