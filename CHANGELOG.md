@@ -11,6 +11,57 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## Unreleased
+
+### Added
+
+- `@php-cs-fixer-ignore` annotation to ignore fixer for specific file
+- Abstraction layer added for parsing specific parts of classes and methods. Also
+abstract fixer added to ease fixing – uses linked list of tokens instead of index-based array
+
+### Changed
+
+- `Paysera/php_basic_comment_php_doc_on_properties` does not require PhpDoc on properties
+that are assigned a new instance of some class inside the constructor. Leaves the comment
+if it contains description of the property.
+- `Paysera/php_basic_code_style_namespaces_and_use_statements` imports all classes with
+still unused short class name. Previously used black-list was removed (for example, current
+fixer correctly imports `\Exception` class). Also supports classes with import aliases.
+- `Paysera/php_basic_feature_type_hinting` supports more use-cases with aliased imports
+or without them. It changes the type-hint to the suggested one. Fixer moved from recommendation
+to risky fixers group.
+
+### Removed
+
+- `Paysera/php_basic_comment_php_doc_necessity` was completely removed as it clears descriptions
+of classes and/or methods, additional annotations and is not defined by any style guide rule.
+
+### Fixed
+
+- `Paysera/php_basic_code_style_default_values_in_constructor` was producing invalid PHP code
+with some cases, most importantly when using `strict_types` declaration.
+
+## 2.2.1
+
+### Added
+
+- This library now brings php-cs-fixer binary with itself named `paysera-php-cs-fixer`.
+This binary is kept compatible with current version of fixer config and is installed with
+this library – no need to install php-cs-fixer separately as a library or globally.
+
+## 2.2.0
+
+### Changed
+
+- Requirement of PHP CS Fixer was raised to 2.14.2
+
+## 2.1.0
+
+### Added
+
+- `Paysera/php_basic_code_style_default_values_in_constructor` to move default property
+values initialization to contructor.
+
 ## 2.0.3
 
 ### Changed
