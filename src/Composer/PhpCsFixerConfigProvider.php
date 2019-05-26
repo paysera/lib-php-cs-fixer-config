@@ -5,6 +5,9 @@ namespace Paysera\PhpCsFixerConfig\Composer;
 
 use Symfony\Component\Filesystem\Filesystem;
 
+/**
+ * @php-cs-fixer-ignore Paysera/php_basic_feature_static_methods
+ */
 class PhpCsFixerConfigProvider
 {
     /**

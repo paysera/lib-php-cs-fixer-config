@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Config;
 
+use Paysera\PhpCsFixerConfig\Fixer\IgnorableFixerDecorator;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DefaultValuesInConstructorFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Overwritten\BracesFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DocBlockWhitespaceFixer;
@@ -48,6 +49,7 @@ use Paysera\PhpCsFixerConfig\Fixer\PSR1\FunctionNameCamelCaseFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
+use PhpCsFixer\Fixer\FixerInterface;
 use RuntimeException;
 
 /**
@@ -64,53 +66,58 @@ class PayseraConventionsConfig extends Config
     {
         parent::__construct('paysera_conventions');
         $this->setUsingCache(false);
-        $this->registerCustomFixers(
-            [
-                new LineLengthFixer(),
-                new ClassConstantUpperCaseFixer(),
-                new ClassNameStudlyCapsFixer(),
-                new FunctionNameCamelCaseFixer(),
-                new FileSideEffectsFixer(),
-                new GlobalsFixer(),
-                new SingleClassPerFileFixer(),
-                new ChainedMethodCallsFixer(),
-                new ClassNamingFixer(),
-                new DirectoryAndNamespaceFixer(),
-                new FullNamesFixer(),
-                new InterfaceNamingFixer(),
-                new MethodNamingFixer(),
-                new NamespacesAndUseStatementsFixer(),
-                new PropertyNamingFixer(),
-                new SplittingInSeveralLinesFixer(),
-                new CommentStylesFixer(),
-                new FluidInterfaceFixer(),
-                new PhpDocContentsFixer(),
-                new PhpDocOnPropertiesFixer(),
-                new AssignmentsInConditionsFixer(),
-                new CallingParentConstructorFixer(),
-                new CheckingExplicitlyFixer(),
-                new ComparingToBooleanFixer(),
-                new ComparingToNullFixer(),
-                new ConditionResultsFixer(),
-                new DateTimeFixer(),
-                new MagicMethodsFixer(),
-                new ReturnAndArgumentTypesFixer(),
-                new ReusingVariablesFixer(),
-                new StaticMethodsFixer(),
-                new ThrowBaseExceptionFixer(),
-                new TraitsFixer(),
-                new TypeHintingArgumentsFixer(),
-                new TypeHintingFixer(),
-                new UnnecessaryStructuresFixer(),
-                new UnnecessaryVariablesFixer(),
-                new VisibilityPropertiesFixer(),
-                new LogicalOperatorsFixer(),
-                new VoidResultFixer(),
-                new DocBlockWhitespaceFixer(),
-                new BracesFixer(),
-                new DefaultValuesInConstructorFixer(),
-            ]
-        );
+        $this->registerCustomFixers($this->decorateWithIgnorable([
+            new LineLengthFixer(),
+            new ClassConstantUpperCaseFixer(),
+            new ClassNameStudlyCapsFixer(),
+            new FunctionNameCamelCaseFixer(),
+            new FileSideEffectsFixer(),
+            new GlobalsFixer(),
+            new SingleClassPerFileFixer(),
+            new ChainedMethodCallsFixer(),
+            new ClassNamingFixer(),
+            new DirectoryAndNamespaceFixer(),
+            new FullNamesFixer(),
+            new InterfaceNamingFixer(),
+            new MethodNamingFixer(),
+            new NamespacesAndUseStatementsFixer(),
+            new PropertyNamingFixer(),
+            new SplittingInSeveralLinesFixer(),
+            new CommentStylesFixer(),
+            new FluidInterfaceFixer(),
+            new PhpDocContentsFixer(),
+            new PhpDocOnPropertiesFixer(),
+            new AssignmentsInConditionsFixer(),
+            new CallingParentConstructorFixer(),
+            new CheckingExplicitlyFixer(),
+            new ComparingToBooleanFixer(),
+            new ComparingToNullFixer(),
+            new ConditionResultsFixer(),
+            new DateTimeFixer(),
+            new MagicMethodsFixer(),
+            new ReturnAndArgumentTypesFixer(),
+            new ReusingVariablesFixer(),
+            new StaticMethodsFixer(),
+            new ThrowBaseExceptionFixer(),
+            new TraitsFixer(),
+            new TypeHintingArgumentsFixer(),
+            new TypeHintingFixer(),
+            new UnnecessaryStructuresFixer(),
+            new UnnecessaryVariablesFixer(),
+            new VisibilityPropertiesFixer(),
+            new LogicalOperatorsFixer(),
+            new VoidResultFixer(),
+            new DocBlockWhitespaceFixer(),
+            new BracesFixer(),
+            new DefaultValuesInConstructorFixer(),
+        ]));
+    }
+
+    private function decorateWithIgnorable(array $fixers)
+    {
+        return array_map(function (FixerInterface $fixer) {
+            return new IgnorableFixerDecorator($fixer);
+        }, $fixers);
     }
 
     public function setDefaultFinder(

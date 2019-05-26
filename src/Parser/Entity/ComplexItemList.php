@@ -5,6 +5,9 @@ namespace Paysera\PhpCsFixerConfig\Parser\Entity;
 
 use Generator;
 
+/**
+ * @php-cs-fixer-ignore Paysera/php_basic_feature_visibility_properties
+ */
 class ComplexItemList implements ItemInterface
 {
     /**
