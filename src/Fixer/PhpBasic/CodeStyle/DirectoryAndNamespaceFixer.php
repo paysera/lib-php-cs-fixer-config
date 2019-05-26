@@ -32,12 +32,6 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
         ];
         $this->serviceNames = [
             'Manager',
-            'Normalizer',
-            'Provider',
-            'Updater',
-            'Registry',
-            'Resolver',
-            'Parser',
         ];
     }
 
