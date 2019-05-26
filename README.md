@@ -1,5 +1,5 @@
 # lib-php-cs-fixer-config ![](https://travis-ci.org/paysera/lib-php-cs-fixer-config.svg?branch=master)
-Library helps to fix PHP code to conform Paysera coding standards.
+Library helps to fix PHP code to conform [Paysera PHP style guide](https://github.com/paysera/php-style-guide).
 
 ## Installation
 
@@ -11,6 +11,11 @@ Library helps to fix PHP code to conform Paysera coding standards.
 ### Install and check
 * `composer require --dev paysera/lib-php-cs-fixer-config`.
 * Make sure `.php_cs` file is in project directory.
+
+No need to install php-cs-fixer itself as this library comes with binary version of the fixer.
+This avoids requiring it's dependencies inside your project, which could clash with existing ones.
+
+To avoid duplication with php-cs-fixer library, it's named `paysera-php-cs-fixer`.
 
 ##### .php_cs files
 * `.php_cs` - all Paysera recommended fixers.
