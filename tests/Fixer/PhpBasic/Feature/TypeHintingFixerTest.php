@@ -38,19 +38,12 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
                 
                 class OAuthApiWalletListener
                 {
-                    /**
-                     * @var SecurityContext
-                     */
-                    protected $securityContext;
+                    private $securityContext;
                 
-                    /**
-                     * OAuthApiWalletListener constructor.
-                     * @param SecurityContext $securityContext
-                     */
-                    public function __construct(SecurityContext $securityContext)
+                    public function __construct(\Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\TokenStorageInterface $securityContext)
                     {
                         $this->securityContext = $securityContext;
-                    } /* TODO: Class(Narrowest Interface): "SecurityContext(TokenStorageInterface)" - PhpBasic convention 3.18: We always type hint narrowest possible interface */
+                    }
                 
                     public function onKernelController()
                     {
@@ -63,16 +56,83 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
                 
                 class OAuthApiWalletListener
                 {
-                    /**
-                     * @var SecurityContext
-                     */
-                    protected $securityContext;
+                    private $securityContext;
                 
-                    /**
-                     * OAuthApiWalletListener constructor.
-                     * @param SecurityContext $securityContext
-                     */
                     public function __construct(SecurityContext $securityContext)
+                    {
+                        $this->securityContext = $securityContext;
+                    }
+                
+                    public function onKernelController()
+                    {
+                        $this->securityContext->getToken();
+                    }
+                }',
+            ],
+            [
+                '<?php
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+                use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext as Context;
+                
+                class OAuthApiWalletListener
+                {
+                    private $securityContext;
+                
+                    public function __construct(\Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\TokenStorageInterface $securityContext)
+                    {
+                        $this->securityContext = $securityContext;
+                    }
+                
+                    public function onKernelController()
+                    {
+                        $this->securityContext->getToken();
+                    }
+                }',
+                '<?php
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+                use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext as Context;
+                
+                class OAuthApiWalletListener
+                {
+                    private $securityContext;
+                
+                    public function __construct(Context $securityContext)
+                    {
+                        $this->securityContext = $securityContext;
+                    }
+                
+                    public function onKernelController()
+                    {
+                        $this->securityContext->getToken();
+                    }
+                }',
+            ],
+            [
+                '<?php
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+                
+                class OAuthApiWalletListener
+                {
+                    private $securityContext;
+                
+                    public function __construct(\Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\TokenStorageInterface $securityContext)
+                    {
+                        $this->securityContext = $securityContext;
+                    }
+                
+                    public function onKernelController()
+                    {
+                        $this->securityContext->getToken();
+                    }
+                }',
+                '<?php
+                namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+                
+                class OAuthApiWalletListener
+                {
+                    private $securityContext;
+                
+                    public function __construct(\Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext $securityContext)
                     {
                         $this->securityContext = $securityContext;
                     }
@@ -101,7 +161,6 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
                         $this->arg1->methodC();
                     }
                 }',
-                null,
             ],
             [
                 '<?php
@@ -121,7 +180,6 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
                         $this->arg1->methodC();
                     }
                 }',
-                null,
             ],
             [
                 '<?php
@@ -141,7 +199,22 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
                         $this->arg1->methodA();
                     }
                 }',
-                null,
+            ],
+            [
+                '<?php
+                namespace App;
+                use PhpCsFixer\Fixer\ConfigurableFixerInterface;
+                use PhpCsFixer\Fixer\DefinedFixerInterface;
+                use PhpCsFixer\Fixer\FixerInterface;
+                class Sample
+                {
+                    private $innerFixer;
+                
+                    public function __construct(FixerInterface $innerFixer)
+                    {
+                        $this->innerFixer = $innerFixer;
+                    }
+                }',
             ],
         ];
     }

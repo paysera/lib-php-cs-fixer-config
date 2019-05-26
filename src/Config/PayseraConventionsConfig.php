@@ -224,7 +224,6 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_throw_base_exception' => true,
             'Paysera/php_basic_feature_traits' => true,
             'Paysera/php_basic_feature_unnecessary_structures' => true,
-            'Paysera/php_basic_feature_type_hinting' => true,
             'Paysera/php_basic_feature_visibility_properties' => true,
             'Paysera/php_basic_feature_void_result' => true,
         ];
@@ -269,6 +268,7 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_unnecessary_variables' => true,
             'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_code_style_default_values_in_constructor' => true,
+            'Paysera/php_basic_feature_type_hinting' => true,
         ];
     }
 

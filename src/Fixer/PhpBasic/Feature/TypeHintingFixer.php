@@ -3,32 +3,37 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
-use PhpCsFixer\AbstractFixer;
+use Paysera\PhpCsFixerConfig\Fixer\AbstractContextualTokenFixer;
+use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
+use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
+use Paysera\PhpCsFixerConfig\Parser\Parser;
+use Paysera\PhpCsFixerConfig\SyntaxParser\ClassStructureParser;
+use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
 use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
-use SplFileInfo;
 use Exception;
 
-final class TypeHintingFixer extends AbstractFixer
+final class TypeHintingFixer extends AbstractContextualTokenFixer
 {
     const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
     const CONSTRUCT = '__construct';
     const THIS = '$this';
 
-    /**
-     * @var array
-     */
     private $exceptions;
+    private $classStructureParser;
 
     public function __construct()
     {
         parent::__construct();
         $this->exceptions = ['EntityManager', 'Repository', 'Normalizer', 'Denormalizer'];
+        $this->classStructureParser = new ClassStructureParser(
+            new Parser(new GroupSeparatorHelper()),
+            new ImportedClassesParser()
+        );
     }
 
     public function getDefinition()
@@ -88,8 +93,13 @@ final class TypeHintingFixer extends AbstractFixer
 
     public function isRisky()
     {
-        // Paysera Recommendation
         return true;
+    }
+
+    public function getPriority()
+    {
+        // before NamespacesAndUseStatementsFixer as it does not import classes themselves
+        return 75;
     }
 
     public function isCandidate(Tokens $tokens)
@@ -124,225 +134,112 @@ final class TypeHintingFixer extends AbstractFixer
         return new FixerConfigurationResolverRootless('exceptions', [$options], $this->getName());
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFixOnContextualToken(ContextualToken $token)
     {
-        $useStatements = [];
-        $constructClassProperties = [];
+        $classStructure = $this->classStructureParser->parseClassStructure($token);
+        if ($classStructure === null) {
+            return;
+        }
 
-        // Collect use statements construct class names and methods used from classes
-        foreach ($tokens as $key => $token) {
-            if ($token->isGivenKind(T_USE)) {
-                $useStatements[] = $this->getUseStatementContent($tokens, $key);
-            }
+        $constructor = $classStructure->getConstructorMethod();
+        if ($constructor === null) {
+            return;
+        }
 
-            if (
-                $token->isGivenKind(T_STRING)
-                && $token->getContent() === self::CONSTRUCT
-                && $tokens[$tokens->getPrevMeaningfulToken($key)]->isGivenKind(T_FUNCTION)
-            ) {
-                $startIndex = $tokens->getNextTokenOfKind($key, ['(']);
-                $endIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $startIndex);
-                $constructClassProperties = $this->getConstructArgumentClassesAndAssignedProperties(
-                    $tokens,
-                    $startIndex,
-                    $endIndex
-                );
-            }
+        $calls = $this->analyseFunctionCalls($token);
 
-            if (count($constructClassProperties) === 0) {
+        foreach ($constructor->getParameters() as $parameter) {
+            $typeHintFullClass = $parameter->getTypeHintFullClass();
+            if ($typeHintFullClass === null) {
                 continue;
             }
 
-            $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
-            $methodIndex = $tokens->getNextMeaningfulToken($key);
-            if (
-                $token->isGivenKind(T_OBJECT_OPERATOR)
-                && (
-                    $tokens[$previousTokenIndex]->isGivenKind(T_STRING)
-                    || $tokens[$previousTokenIndex]->isGivenKind(T_VARIABLE)
-                )
-                && $tokens[$methodIndex]->isGivenKind(T_STRING)
-                && $tokens[$tokens->getNextMeaningfulToken($methodIndex)]->equals('(')
-            ) {
-                foreach ($constructClassProperties as &$constructClassProperty) {
-                    if ($constructClassProperty['Property'] === $tokens[$previousTokenIndex]->getContent()) {
-                        $constructClassProperty['Methods'][] = $tokens[$methodIndex]->getContent();
-                    }
-                }
+            $propertyCalls = $calls[$parameter->getName()] ?? [];
+            if (count($propertyCalls) === 0) {
+                continue;
             }
-        }
 
-        if (isset($endIndex) && count($constructClassProperties) > 0 && count($useStatements) > 0) {
-            $this->validateConstructTypeHints($tokens, $endIndex, $useStatements, $constructClassProperties);
+            if ($this->isBlacklisted($typeHintFullClass)) {
+                continue;
+            }
+
+            $suggestedTypeHint = $this->suggestTypeHint($typeHintFullClass, $propertyCalls);
+            if ($suggestedTypeHint === null) {
+                continue;
+            }
+
+            $firstToken = $parameter->getTypeHintItem()->firstToken()->setNextContextualToken(
+                $parameter->getTypeHintItem()->lastToken()->getNextToken()
+            );
+            $firstToken->replaceWithTokens($this->buildTokens($suggestedTypeHint));
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $endIndex
-     * @param string[] $useStatements
-     * @param string[] $constructClassProperties
-     */
-    private function validateConstructTypeHints(Tokens $tokens, $endIndex, $useStatements, $constructClassProperties)
+    private function analyseFunctionCalls(ContextualToken $firstToken)
     {
-        $properInterfaces = [];
-
-        foreach ($useStatements as $useStatement) {
-            foreach ($constructClassProperties as $key => $constructClassProperty) {
-                foreach ($this->exceptions as $exception) {
-                    if (strpos($key, $exception) !== false) {
-                        continue 2;
-                    }
-                }
-
-                if (!preg_match('#' . $key . '$#', $useStatement)) {
-                    continue;
-                }
-                if (!is_array($constructClassProperty)) {
-                    continue;
-                }
-                if (!isset($constructClassProperty['Methods'])) {
-                    continue;
-                }
-
-                try {
-                    $reflectionClass = new ReflectionClass($useStatement);
-                    $interfaces = $reflectionClass->getInterfaces();
-                    if (count($interfaces) === 0) {
-                        continue;
-                    }
-
-                    /** @var ReflectionClass $interface */
-                    foreach (array_reverse($interfaces) as $interface) {
-                        $reflectionMethods = $interface->getMethods();
-                        if (count($reflectionMethods) === 0) {
-                            continue;
-                        }
-
-                        $methods = [];
-                        foreach ($reflectionMethods as $reflectionMethod) {
-                            $methods[] = $reflectionMethod->getName();
-                        }
-
-                        if (count(array_intersect($constructClassProperty['Methods'], $methods)) > 0) {
-                            $properInterfaces[$key] = $interface->getShortName();
-                            break;
-                        }
-                    }
-                } catch (Exception $exception) {
+        $calls = [];
+        $token = $firstToken;
+        while ($token !== null) {
+            if ($token->getContent() === '->') {
+                $variableName = '$' . ltrim($token->previousNonWhitespaceToken()->getContent(), '$');
+                $functionNameToken = $token->nextNonWhitespaceToken();
+                if ($functionNameToken->nextNonWhitespaceToken()->getContent() === '(') {
+                    $calls[$variableName][] = $functionNameToken->getContent();
                 }
             }
+
+            $token = $token->getNextToken();
         }
 
-        if (count($properInterfaces) > 0) {
-            $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($endIndex);
-            if ($tokens[$curlyBraceStartIndex]->equals('{')) {
-                $insertIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-                $this->insertComment($tokens, $insertIndex, $properInterfaces);
-            }
-        }
+        return $calls;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return array
-     */
-    private function getConstructArgumentClassesAndAssignedProperties(Tokens $tokens, $startIndex, $endIndex)
+    private function suggestTypeHint(string $fullTypeHint, array $propertyCalls)
     {
-        $constructClassProperties = [];
-        for ($i = $startIndex; $i < $endIndex; $i++) {
-            $classNameIndex = $tokens->getPrevMeaningfulToken($i);
-            $className = $tokens[$classNameIndex]->getContent();
-            if (
-                $tokens[$i]->isGivenKind(T_VARIABLE)
-                && $tokens[$classNameIndex]->isGivenKind(T_STRING)
-            ) {
-                $constructClassProperties[$className]['Variable'] = $tokens[$i]->getContent();
+        try {
+            $reflectionClass = new ReflectionClass($fullTypeHint);
+            $interfaces = $reflectionClass->getInterfaces();
+        } catch (Exception $exception) {
+            $interfaces = [];
+        }
+
+        if (count($interfaces) === 0) {
+            return null;
+        }
+
+        foreach (array_reverse($interfaces) as $interface) {
+            $methods = [];
+            foreach ($interface->getMethods() as $reflectionMethod) {
+                $methods[] = $reflectionMethod->getName();
+            }
+
+            if (count(array_diff($propertyCalls, $methods)) === 0) {
+                return $interface->getName();
             }
         }
 
-        $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($endIndex);
-        if (!$tokens[$curlyBraceStartIndex]->equals('{') || count($constructClassProperties) === 0) {
-            return [];
-        }
-
-        $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-        for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
-            $assignIndex = $tokens->getPrevMeaningfulToken($i);
-            if (
-                $tokens[$i]->isGivenKind(T_VARIABLE)
-                && $tokens[$assignIndex]->equals('=')
-            ) {
-                $propertyIndex = $tokens->getPrevMeaningfulToken($assignIndex);
-                if (!$tokens[$propertyIndex]->isGivenKind(T_STRING)) {
-                    continue;
-                }
-
-                $objectOperatorIndex = $tokens->getPrevMeaningfulToken($propertyIndex);
-                if (!$tokens[$objectOperatorIndex]->isGivenKind(T_OBJECT_OPERATOR)) {
-                    continue;
-                }
-
-                $thisIndex = $tokens->getPrevMeaningfulToken($objectOperatorIndex);
-                if (!$tokens[$thisIndex]->isGivenKind(T_VARIABLE) && $tokens[$thisIndex]->getContent() !== self::THIS) {
-                    continue;
-                }
-
-                foreach ($constructClassProperties as $key => $constructClassProperty) {
-                    if ($constructClassProperty['Variable'] === $tokens[$i]->getContent()) {
-                        $constructClassProperties[$key]['Property'] = $tokens[$propertyIndex]->getContent();
-                        break;
-                    }
-                }
-            }
-        }
-
-        foreach ($constructClassProperties as $key => &$constructClassProperty) {
-            if (!isset($constructClassProperty['Property'])) {
-                unset($constructClassProperties[$key]);
-            }
-        }
-
-        return $constructClassProperties;
+        return null;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param array $properInterfaces
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $properInterfaces)
+    private function buildTokens(string $fullClassName)
     {
-        $interfacesComment = '';
-        foreach ($properInterfaces as $key => $interface) {
-            $interfacesComment .= $key . '(' . $interface . ')';
-            if (count($properInterfaces) > 1) {
-                $interfacesComment .= ' | ';
+        $parts = explode('\\', ltrim($fullClassName, '\\'));
+        $tokens = [];
+        foreach ($parts as $part) {
+            $tokens[] = new ContextualToken([T_NS_SEPARATOR, '\\']);
+            $tokens[] = new ContextualToken([T_STRING, $part]);
+        }
+        return $tokens;
+    }
+
+    private function isBlacklisted(string $typeHintFullClass)
+    {
+        foreach ($this->exceptions as $exception) {
+            if (strpos($typeHintFullClass, $exception) !== false) {
+                return true;
             }
         }
 
-        $comment = '/* TODO: Class(Narrowest Interface): "' . $interfacesComment . '" - ' . self::CONVENTION . ' */';
-        if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertAt($insertIndex + 1, new Token([T_COMMENT, $comment]));
-            $tokens->insertAt($insertIndex + 1, new Token([T_WHITESPACE, ' ']));
-        }
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $useIndex
-     * @return string
-     */
-    private function getUseStatementContent(Tokens $tokens, $useIndex)
-    {
-        $index = $useIndex + 1;
-        $useStatementContent = '';
-        while (!$tokens[$index + 1]->equals(';')) {
-            $index++;
-            $useStatementContent .= $tokens[$index]->getContent();
-        }
-        return $useStatementContent;
+        return false;
     }
 }
