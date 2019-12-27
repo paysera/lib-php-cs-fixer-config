@@ -11,6 +11,12 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.2.3
+
+### Removed
+
+- Some functions without substitutions in PHP Date/Time classes were removed from DateTimeFixer
+
 ## 2.2.2
 
 ### Added

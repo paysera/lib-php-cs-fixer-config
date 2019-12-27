@@ -20,13 +20,10 @@ final class DateTimeFixer extends AbstractFixer
     {
         parent::__construct();
         $this->dateFunctions = [
-            'checkdate',
             'date_add',
             'date_create_from_format',
             'date_create',
             'date_date_set',
-            'date_default_timezone_get',
-            'date_default_timezone_set',
             'date_diff',
             'date_format',
             'date_get_last_errors',
@@ -38,9 +35,6 @@ final class DateTimeFixer extends AbstractFixer
             'date_parse_from_format',
             'date_parse',
             'date_sub',
-            'date_sun_info',
-            'date_sunrise',
-            'date_sunset',
             'date_time_set',
             'date_timestamp_get',
             'date_timestamp_set',
@@ -54,7 +48,6 @@ final class DateTimeFixer extends AbstractFixer
             'gmstrftime',
             'idate',
             'localtime',
-            'microtime',
             'mktime',
             'strftime',
             'strptime',
@@ -63,12 +56,11 @@ final class DateTimeFixer extends AbstractFixer
             'timezone_abbreviations_list',
             'timezone_identifiers_list',
             'timezone_location_get',
-            'timezone_name_from_ abbr',
+            'timezone_name_from_abbr',
             'timezone_name_get',
             'timezone_offset_get',
             'timezone_open',
             'timezone_transitions_get',
-            'timezone_version_get',
         ];
     }
 

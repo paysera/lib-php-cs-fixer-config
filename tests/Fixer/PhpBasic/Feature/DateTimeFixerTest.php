@@ -27,10 +27,6 @@ final class DateTimeFixerTest extends AbstractPayseraFixerTestCase
                 '<?php $otherDate = date("l jS \of F Y h:i:s A");',
             ],
             [
-                '<?php date_default_timezone_set("UTC"); // TODO: "date_default_timezone_set" - PhpBasic convention 3.19: Use \\DateTime object instead',
-                '<?php date_default_timezone_set("UTC");',
-            ],
-            [
                 '<?php $someDate = date("l"); // TODO: "date" - PhpBasic convention 3.19: Use \\DateTime object instead',
                 '<?php $someDate = date("l");',
             ],
