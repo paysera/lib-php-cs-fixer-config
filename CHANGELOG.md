@@ -11,6 +11,13 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.3.0
+
+### Changed
+
+- `php-cs-fixer` is updated to `2.16.3` version, including binary `paysera-php-cs-fixer` that's distributed with this
+library.
+
 ## 2.2.3
 
 ### Removed

@@ -9,7 +9,7 @@
     "require-dev": {
         "gecko-packages/gecko-php-unit": "^2.0",
         "phpunit/phpunit": "^6.0",
-        "friendsofphp/php-cs-fixer": "2.14.2"
+        "friendsofphp/php-cs-fixer": "2.16.3"
     },
     "autoload": {
         "psr-4": {
@@ -30,9 +30,11 @@
         "bin-dir": "bin"
     },
     "scripts" : {
-        "download-phar": [
-            "./download-phar.sh"
-        ]
+        "download-phar": "./download-phar.sh",
+        "phpunit": "phpunit",
+        "fix-cs": "./paysera-php-cs-fixer fix",
+        "test-cs": "./paysera-php-cs-fixer fix --dry-run -v",
+        "test": ["@phpunit", "@test-cs"]
     },
     "bin": [
         "paysera-php-cs-fixer"

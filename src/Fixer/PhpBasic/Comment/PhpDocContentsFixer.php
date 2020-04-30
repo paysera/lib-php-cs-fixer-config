@@ -140,7 +140,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         // Collect parameters
         for ($i = $parenthesesStartIndex; $i < $parenthesesEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
-                $parameter = null;
+                $parameter = [];
                 $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
                 if ($tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
                     $index = $previousTokenIndex;
@@ -149,7 +149,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
                         && !$tokens[$index]->equals(',')
                         && !$tokens[$index]->isWhitespace()
                     ) {
-                        $parameter['Typecast'] = $tokens[$index]->getContent() . $parameter['Typecast'];
+                        $parameter['Typecast'] = $tokens[$index]->getContent() . ($parameter['Typecast'] ?? '');
                         $index--;
                     }
                 } elseif (in_array($tokens[$previousTokenIndex]->getContent(), $this->scalarTypes, true)) {
