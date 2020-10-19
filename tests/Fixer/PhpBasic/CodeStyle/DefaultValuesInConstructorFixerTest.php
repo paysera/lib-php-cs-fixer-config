@@ -341,6 +341,38 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 ',
                 null,
             ],
+            [
+                '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public string $text;
+                    protected int $number;
+                    private array $list;
+                    
+                    public DateTimeInterface $date;
+                    private SomeClass $someClass;
+                }
+                ',
+                null,
+            ],
+            [
+                '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public string $text;
+                    
+                    public function __construct()
+                    {
+                        $this->text = \'test\';
+                    }
+                }
+                '
+            ],
+
         ];
     }
 
