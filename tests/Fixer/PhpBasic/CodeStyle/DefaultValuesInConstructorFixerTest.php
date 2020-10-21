@@ -363,7 +363,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 
                 class A
                 {
-                    public string $text;
+                    public ?string $text;
                     
                     public function __construct()
                     {
