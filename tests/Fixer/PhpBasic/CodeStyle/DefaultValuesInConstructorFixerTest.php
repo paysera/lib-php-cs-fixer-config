@@ -16,6 +16,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
      */
     public function testFix($expected, $input = null)
     {
+
         $this->doTest($expected, $input);
     }
 
@@ -344,7 +345,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
 
         ];
 
-        if(PHP_MAJOR_VERSION === '7' && PHP_MINOR_VERSION >=4) {
+        if(PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION >= 4) {
             $php74 = [
                 [
                     '<?php
@@ -377,10 +378,28 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 }
                 '
                 ],
+                [
+                    '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public const PUBLIC_BAR=\'FOO\';
+                    protected const PROTECTED_BAR=\'FOO\';
+                    private const PRIVATE_BAR=\'FOO\';
+                    
+                    public function __construct()
+                    {
+                        $this->text = \'test\';
+                    }
+                }
+                '
+                ],
 
             ];
 
             $data = array_merge($data, $php74);
+
         }
 
         return $data;
