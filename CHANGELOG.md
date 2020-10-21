@@ -11,6 +11,13 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.4.0
+
+### Added
+
+- added support for php 7.4 typed properties declarations
+- added support for php 7.4 constants with access modifiers
+
 ## 2.3.0
 
 ### Changed

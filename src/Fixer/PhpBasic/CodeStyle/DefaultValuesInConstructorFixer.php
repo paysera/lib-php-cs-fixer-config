@@ -87,6 +87,18 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
                 $propertyNameIndex = $tokens->getNextNonWhitespace($key);
                 $endOfPropertyDeclarationSemicolon = $tokens->getNextTokenOfKind($key, [';']);
 
+                if ($tokens[$propertyNameIndex]->isGivenKind(T_CONST)) {
+                    continue;
+                }
+
+                if ($tokens[$propertyNameIndex]->isGivenKind(10022)) {
+                    $propertyNameIndex = $tokens->getNextNonWhitespace($propertyNameIndex);
+                }
+
+                if (!$tokens[$propertyNameIndex]->isGivenKind(T_VARIABLE)) {
+                    $propertyNameIndex = $tokens->getNextNonWhitespace($propertyNameIndex);
+                }
+
                 if ($tokens[$tokens->getNextMeaningfulToken($propertyNameIndex)]->equals(';')) {
                     continue;
                 }

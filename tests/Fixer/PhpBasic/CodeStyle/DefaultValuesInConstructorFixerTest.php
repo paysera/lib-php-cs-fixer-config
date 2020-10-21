@@ -16,12 +16,13 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
      */
     public function testFix($expected, $input = null)
     {
+
         $this->doTest($expected, $input);
     }
 
     public function provideCases()
     {
-        return [
+        $data = [
             [
                 '<?php
                 class Sample
@@ -341,7 +342,70 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 ',
                 null,
             ],
+
         ];
+
+        if(
+            (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION >= 4)
+            || PHP_MAJOR_VERSION > 7
+        ) {
+            $php74 = [
+                [
+                    '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public string $text;
+                    protected int $number;
+                    private array $list;
+                    
+                    public DateTimeInterface $date;
+                    private SomeClass $someClass;
+                }
+                ',
+                    null,
+                ],
+                [
+                    '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public ?string $text;
+                    
+                    public function __construct()
+                    {
+                        $this->text = \'test\';
+                    }
+                }
+                '
+                ],
+                [
+                    '<?php
+                declare(strict_types=1);
+                
+                class A
+                {
+                    public const PUBLIC_BAR=\'FOO\';
+                    protected const PROTECTED_BAR=\'FOO\';
+                    private const PRIVATE_BAR=\'FOO\';
+                    
+                    public function __construct()
+                    {
+                        $this->text = \'test\';
+                    }
+                }
+                '
+                ],
+
+            ];
+
+            $data = array_merge($data, $php74);
+
+        }
+
+        return $data;
     }
 
     public function createFixerFactory()
