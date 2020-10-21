@@ -13,7 +13,7 @@ New fixers could be added with minor releases, this would require changes in con
 
 ## 2.4.0
 
-### Changed
+### Added
 
 - added support for php 7.4 typed properties declarations
 - added support for php 7.4 constants with access modifiers
