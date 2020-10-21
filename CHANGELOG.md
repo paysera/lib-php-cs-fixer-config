@@ -11,7 +11,7 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
-## 2.3.1
+## 2.4.0
 
 ### Changed
 
