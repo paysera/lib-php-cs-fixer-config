@@ -345,7 +345,10 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
 
         ];
 
-        if(PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION >= 4) {
+        if(
+            (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION >= 4)
+            || PHP_MAJOR_VERSION > 7
+        ) {
             $php74 = [
                 [
                     '<?php
