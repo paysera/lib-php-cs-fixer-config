@@ -21,7 +21,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
 
     public function provideCases()
     {
-        return [
+        $data = [
             [
                 '<?php
                 class Sample
@@ -341,8 +341,13 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 ',
                 null,
             ],
-            [
-                '<?php
+
+        ];
+
+        if(PHP_MAJOR_VERSION === '7' && PHP_MINOR_VERSION >=4) {
+            $php74 = [
+                [
+                    '<?php
                 declare(strict_types=1);
                 
                 class A
@@ -355,10 +360,10 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                     private SomeClass $someClass;
                 }
                 ',
-                null,
-            ],
-            [
-                '<?php
+                    null,
+                ],
+                [
+                    '<?php
                 declare(strict_types=1);
                 
                 class A
@@ -371,9 +376,14 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                     }
                 }
                 '
-            ],
+                ],
 
-        ];
+            ];
+
+            $data = array_merge($data, $php74);
+        }
+
+        return $data;
     }
 
     public function createFixerFactory()
