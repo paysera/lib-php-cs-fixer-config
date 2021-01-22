@@ -9,7 +9,7 @@
     "require-dev": {
         "gecko-packages/gecko-php-unit": "^2.0",
         "phpunit/phpunit": "^6.0",
-        "friendsofphp/php-cs-fixer": "2.16.3"
+        "friendsofphp/php-cs-fixer": "2.18.1"
     },
     "autoload": {
         "psr-4": {
