@@ -881,6 +881,31 @@ function something(\App\Entity\Payment $a)
 {
 }'
             ],
+            [
+                '<?php
+namespace App;
+
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+use DateTime;
+
+class Kernel extends BaseKernel
+{
+    public function something(DateTime $dateTime)
+    {
+    }
+}',
+                '<?php
+namespace App;
+
+use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+
+class Kernel extends BaseKernel
+{
+    public function something(\DateTime $dateTime)
+    {
+    }
+}'
+            ],
         ];
     }
 
