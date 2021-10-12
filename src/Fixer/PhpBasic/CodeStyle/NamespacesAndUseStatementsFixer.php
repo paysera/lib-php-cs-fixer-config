@@ -275,6 +275,7 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         while (
             $token->isGivenKind(T_USE)
             || $token->isGivenKind(T_STRING)
+            || $token->isGivenKind(T_AS)
             || $token->getContent() === '\\'
             || $token->isWhitespace()
             || $token->getContent() === ';'
