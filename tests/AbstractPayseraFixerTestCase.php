@@ -20,7 +20,7 @@ abstract class AbstractPayseraFixerTestCase extends AbstractFixerTestCase
      */
     protected function createFixerFactory()
     {
-        return FixerFactory::create()->registerBuiltInFixers();
+        return  (new FixerFactory())->registerBuiltInFixers();
     }
 
     protected function createFixer()
