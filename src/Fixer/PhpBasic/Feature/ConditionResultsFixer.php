@@ -34,22 +34,24 @@ final class ConditionResultsFixer extends AbstractFixer
         return new FixerDefinition(
             'If condition result is boolean, we do not use condition at all.',
             [
-                new CodeSample('
-                <?php
-                class Sample
-                {
-                    private function sampleFunction()
-                    {
-                        $a = $d && $e ? false : true;
-                        
-                        if ($a && $b) {
-                            return true;
-                        }
-                        
-                        return false;
-                    }
-                }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function sampleFunction()
+    {
+        $a = $d && $e ? false : true;
+        
+        if ($a && $b) {
+            return true;
+        }
+        
+        return false;
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

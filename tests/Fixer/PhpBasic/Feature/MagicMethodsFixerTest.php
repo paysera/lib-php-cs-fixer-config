@@ -68,10 +68,10 @@ final class MagicMethodsFixerTest extends AbstractPayseraFixerTestCase
                 {
                     public function __clone() // TODO: "__clone" - PhpBasic convention 3.14.1: We avoid magic methods
                     {
-                        return __call(); // TODO: "__call" - PhpBasic convention 3.14.1: We avoid magic methods
+                        return __call(\'name\'); // TODO: "__call" - PhpBasic convention 3.14.1: We avoid magic methods
                     }
                     
-                    public function __call() // TODO: "__call" - PhpBasic convention 3.14.1: We avoid magic methods
+                    public function __call($name, $arguments) // TODO: "__call" - PhpBasic convention 3.14.1: We avoid magic methods
                     {
                         return __clone(); // TODO: "__clone" - PhpBasic convention 3.14.1: We avoid magic methods
                     }
@@ -81,10 +81,10 @@ final class MagicMethodsFixerTest extends AbstractPayseraFixerTestCase
                 {
                     public function __clone()
                     {
-                        return __call();
+                        return __call(\'name\');
                     }
                     
-                    public function __call()
+                    public function __call($name, $arguments)
                     {
                         return __clone();
                     }

@@ -20,18 +20,23 @@ final class ThrowBaseExceptionFixer extends AbstractFixer
         return new FixerDefinition(
             'We never throw base \Exception class except if we don’t intend for it to be caught.',
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            public function sampleFunction()
-                            {
-                                throw new \Exception();
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function sampleFunction()
+    {
+        throw new \Exception();
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

@@ -82,6 +82,23 @@ final class ComparingToBooleanFixerTest extends AbstractPayseraFixerTestCase
                     return $valid !== true && $something !== false;
                 }',
             ],
+            'Does not pick from previous method docblock' => [
+                '<?php
+
+                class Sample {
+                    /**
+                     * @param bool $valid
+                     * @param bool|null $something
+                     */
+                    private function a($valid, $something) {
+                        return true;
+                    }
+                    
+                    public static function b($valid, $something) {
+                        return $valid !== true && $something !== false;
+                    }
+                }',
+            ],
         ];
     }
 

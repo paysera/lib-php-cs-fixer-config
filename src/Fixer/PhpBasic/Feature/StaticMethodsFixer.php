@@ -34,23 +34,30 @@ final class StaticMethodsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We do use static methods only in these cases:
-            * to create an entity for fluent interface, if PHP version in the project is lower than 5.4.
-                We use (new Entity())->set(\'a\') in 5.4 or above
-            * to give available values for some field of an entity, used in validation
-            ',
+            <<<'TEXT'
+We do use static methods only in these cases:
+* to create an entity for fluent interface, if PHP version in the project is lower than 5.4.
+    We use (new Entity())->set(\'a\') in 5.4 or above
+* to give available values for some field of an entity, used in validation.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                class Sample {
-                    public static function someFunction()
-                    {
-                        return SomeClass::get("something");
-                    }
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample {
+    public static function someFunction()
+    {
+        return SomeClass::get("something");
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

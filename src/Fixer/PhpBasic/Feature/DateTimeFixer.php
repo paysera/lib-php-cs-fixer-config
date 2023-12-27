@@ -69,20 +69,25 @@ final class DateTimeFixer extends AbstractFixer
         return new FixerDefinition(
             'We use \DateTime object to represent date or date and time inside system.',
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            private function sampleFunction()
-                            {
-                                date_default_timezone_set(\'UTC\');
-                                $someDate = date("l");
-                                $otherDate = date(\'l jS \of F Y h:i:s A\');
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function sampleFunction()
+    {
+        date_default_timezone_set('UTC');
+        $someDate = date("l");
+        $otherDate = date('l jS \of F Y h:i:s A');
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
