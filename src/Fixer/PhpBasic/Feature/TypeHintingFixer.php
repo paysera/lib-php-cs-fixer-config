@@ -41,48 +41,37 @@ final class TypeHintingFixer extends AbstractContextualTokenFixer
         return new FixerDefinition(
             'We always type hint narrowest possible interface which we use inside the function or class.',
             [
-                new CodeSample(
-                    '<?php
-                        class NormalizerInterface
-                        {
-                            public function methodA();
-                        }
-                        
-                        class DenormalizerInterface
-                        {
-                            public function methodB();
-                        }
-                        
-                        class ResultNormalizer implements NormalizerInterface, DenormalizerInterface
-                        {
-                            public function methodA()
-                            {
-                                return true;
-                            }
-                            
-                            public function methodB()
-                            {
-                                return true;
-                            }
-                        }
-                    
-                        class Sample
-                        {
-                            $private $arg1;
-                        
-                            public function __construct(ResultNormalizer $arg1)
-                            {
-                                $this->arg1 = $arg1;
-                            }
-                            
-                            private function someFunction()
-                            {
-                                $this->arg1->methodA();
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+
+use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext;
+
+class OAuthApiWalletListener
+{
+    private $securityContext;
+
+    // $securityContext should be type hinted with TokenStorageInterface instead of SecurityContext
+    // as we use only methods from TokenStorageInterface
+    public function __construct(SecurityContext $securityContext)
+    {
+        $this->securityContext = $securityContext;
+    }
+
+    public function onKernelController()
+    {
+        $this->securityContext->getToken();
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

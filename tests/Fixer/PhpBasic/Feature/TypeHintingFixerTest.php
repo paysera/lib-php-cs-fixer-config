@@ -24,6 +24,12 @@ final class TypeHintingFixerTest extends AbstractPayseraFixerTestCase
         return [
             [
                 '<?php
+                class ClassWithoutConstructor
+                {
+                }',
+            ],
+            [
+                '<?php
                 class ClassWithConstructorWithoutParameters
                 {
                     public function __construct()

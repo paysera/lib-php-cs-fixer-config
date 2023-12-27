@@ -59,37 +59,44 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We always return value of one type. Optionally, we can return null when using any other return type, too.
-            
-            For example, we can*not* return boolean|string or SuccessResult|FailureResult
-            (if SuccessResult and FailureResult has no common class or interface;
-            if they do, we document to return that interface instead).
-            
-            We can return SomeClass|null or string|null.
-            ',
+            <<<'TEXT'
+We always return value of one type. Optionally, we can return null when using any other return type, too.
+
+For example, we can*not* return boolean|string or SuccessResult|FailureResult
+(if SuccessResult and FailureResult has no common class or interface;
+if they do, we document to return that interface instead).
+
+We can return SomeClass|null or string|null.
+TEXT
+            ,
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            /*
-                             * @param int|MyClass $arg1
-                             * @param OneClass|AnotherClass $arg2
-                             * @return void|int
-                             */
-                            public function someFunction($arg1, $arg2)
-                            {
-                                if ($arg1) {
-                                    return $arg1;
-                                } elseif ($arg2) {
-                                    return;
-                                }
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    /*
+     * @param int|MyClass $arg1
+     * @param OneClass|AnotherClass $arg2
+     * @return void|int
+     */
+    public function someFunction($arg1, $arg2)
+    {
+        if ($arg1) {
+            return $arg1;
+        } elseif ($arg2) {
+            return;
+        }
+    }
+}
+
+PHP
+
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

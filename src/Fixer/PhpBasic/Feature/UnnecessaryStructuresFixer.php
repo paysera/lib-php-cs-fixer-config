@@ -32,24 +32,24 @@ final class UnnecessaryStructuresFixer extends AbstractFixer implements Whitespa
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We avoid unnecessary structures.
-            ',
+            'We avoid unnecessary structures.',
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function sampleFunction()
-                        {
-                            if ($first) {
-                                if ($second) {
-                                    do();
-                                }
-                            }
-                        }
-                    }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function sampleFunction()
+    {
+        if ($first) {
+            if ($second) {
+                return true;
+            }
+        }
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

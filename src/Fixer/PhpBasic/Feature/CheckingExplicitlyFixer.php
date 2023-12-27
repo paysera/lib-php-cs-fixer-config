@@ -17,36 +17,42 @@ final class CheckingExplicitlyFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use only functions or conditions that are designed for specific task we are trying to accomplish. 
-            We don’t use unrelated features, even if they give required result with less code.
-            
-            We avoid side-effects even if in current situation they are practically impossible.
-            For example, we use isset versus empty if we only want to check if array element is defined.
-            For example, we use $x !== \'\' instead of strlen($x) > 0 - length of $x
-            has nothing to do with what we are trying to check here, even if it gives us needed result.
-            
-            For example, we use count($array) > 0 to check if array is not empty and not !empty($array),
-            as we do not want to check whether $array is 0, false, \'\' or even not defined at all
-            (in which case IDE would possibly hide some warnings that could help noticing possible bugs).
-            ',
+            <<<'TEXT'
+We use only functions or conditions that are designed for specific task we are trying to accomplish. 
+We don’t use unrelated features, even if they give required result with less code.
+
+We avoid side-effects even if in current situation they are practically impossible.
+For example, we use isset versus empty if we only want to check if array element is defined.
+For example, we use $x !== \'\' instead of strlen($x) > 0 - length of $x
+has nothing to do with what we are trying to check here, even if it gives us needed result.
+
+For example, we use count($array) > 0 to check if array is not empty and not !empty($array),
+as we do not want to check whether $array is 0, false, \'\' or even not defined at all
+(in which case IDE would possibly hide some warnings that could help noticing possible bugs).
+TEXT
+            ,
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            public function __construct($arg1, $arg2)
-                            {
-                                if (strlen($arg1) > 0) {
-                                    return $arg1;
-                                } elseif (!empty($arg2)) {
-                                    return $arg2;
-                                }
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function __construct($arg1, $arg2)
+    {
+        if (strlen($arg1) > 0) {
+            return $arg1;
+        } elseif (!empty($arg2)) {
+            return $arg2;
+        }
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

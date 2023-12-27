@@ -42,34 +42,41 @@ final class MagicMethodsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We do not use __toString method for main functionality, only for debugging purposes.
-            It applies to all magic methods except __construct().
-            ',
+            <<<'TEXT'
+We do not use __toString method for main functionality, only for debugging purposes.
+It applies to all magic methods except __construct().
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                class Sample
-                {
-                    private $foo;
-                    
-                    public function __toString()
-                    {
-                        return $this->foo;
-                    }
-                    
-                    public function __clone()
-                    {
-                        return $this->foo;
-                    }
-                    
-                    public function __call()
-                    {
-                        return $this->foo;
-                    }
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private $foo;
+    
+    public function __toString()
+    {
+        return $this->foo;
+    }
+    
+    public function __clone()
+    {
+        return $this->foo;
+    }
+    
+    public function __call()
+    {
+        return $this->foo;
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

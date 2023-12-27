@@ -48,31 +48,37 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            If argument is optional, we provide default value for it.
-            If optional argument is object, we type hint it with required class and add default to null.
-            
-            If argument is not optional, but just nullable, we can type hint it with default value null,
-            but when using, we pass null explicitly.
-            
-            Risky, because of type hint copy from docBlock.
-            ',
+            <<<'TEXT'
+If argument is optional, we provide default value for it.
+If optional argument is object, we type hint it with required class and add default to null.
+
+If argument is not optional, but just nullable, we can type hint it with default value null,
+but when using, we pass null explicitly.
+
+Risky, because of type hint copy from docBlock.
+TEXT
+            ,
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            /**
-                             * @param ValueClass $value
-                             */
-                            public function setValue($value)
-                            {
-                         
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    /**
+     * @param ValueClass $value
+     */
+    public function setValue($value)
+    {
+ 
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

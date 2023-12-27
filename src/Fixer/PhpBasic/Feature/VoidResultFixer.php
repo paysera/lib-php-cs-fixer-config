@@ -6,6 +6,7 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
@@ -14,31 +15,39 @@ final class VoidResultFixer extends AbstractFixer
 {
     const CONVENTION = 'PhpBasic convention 3.17.5: We always return something or return nothing';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            '
-            We always return something or return nothing. If method does not return anything (“returns” void),
-            we do not return null, false or any other value in that case.
-            
-            If method must return some value, we always specify what to return, even when returning null.
-            ',
+          <<<TEXT
+We always return something or return nothing. If method does not return anything (“returns” void),
+we do not return null, false or any other value in that case.
+
+If method must return some value, we always specify what to return, even when returning null.
+
+TEXT
+            ,
             [
                 new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            function getValue(MyObject $object)
-                            {
-                                if (!$object->has()) {
-                                    return;
-                                }
-                                return $object->get();
-                            }
-                        }
-                    '
+                  <<<'PHP'
+<?php
+    class Sample
+    {
+        private function getValue(MyObject $object)
+        {
+            if (!$object->has()) {
+                return;
+            }
+            return $object->get();
+        }
+    }
+
+PHP
                 ),
-            ]
+            ],
+          null,
+          null,
+          null,
+          'Paysera recommendation.'
         );
     }
 

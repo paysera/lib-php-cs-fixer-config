@@ -11,6 +11,11 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.4.2
+
+### Changed
+- modified another chunk of the fixers to prepare to be compatible with php-cs-fixer `2.19`
+
 ## 2.4.1
 
 ### Changed

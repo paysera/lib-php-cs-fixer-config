@@ -24,7 +24,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
         return [
             [
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($arg1, $arg2)
                     {
@@ -33,7 +33,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
                     }
                 }',
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($arg1, $arg2)
                     {
@@ -44,7 +44,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
             ],
             [
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($arg1, $arg2)
                     {
@@ -58,7 +58,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
                     }
                 }',
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($arg1, $arg2)
                     {
@@ -74,7 +74,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
             ],
             'Allows actions that do not involve the instance' => [
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($token)
                     {
@@ -86,7 +86,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
             ],
             'Allows actions with structures that do not involve the instance' => [
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($token)
                     {
@@ -101,7 +101,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
             ],
             'Makes invalid code in some rare cases' => [
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($token)
                     {
@@ -110,7 +110,7 @@ final class CallingParentConstructorFixerTest extends AbstractPayseraFixerTestCa
                     }
                 }',
                 '<?php
-                class Sample
+                class Sample extends ParentSample
                 {
                     public function __construct($token)
                     {
