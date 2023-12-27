@@ -37,31 +37,37 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition(
-            'If class has a namespace, we use "use" statements instead of providing full namespace.
-            This applies to php-doc comments, too.
-            
-            Does not process namespace without root. Example: Some\Entity\Operation.
-            Risky as class can be imported or aliased with same name as another class inside that namespace.
-            ',
+        return new FixerDefinition(<<<TEXT
+If class has a namespace, we use `use` statements instead of providing full namespace.
+This applies to php-doc comments, too.
+
+Does not process namespace without root. Example: Some\Entity\Operation.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                
-                namespace Some\Namespace;
-                
-                class Sample
-                {
-                    /**
-                     * @var \Vendor\Namespace\Entity\Value $value
-                     */
-                    public function sampleFunction(\Vendor\Namespace\Entity\Value $value)
-                    {
-                        $sample = new \Some\ClassName\Sample();
-                    }
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+
+namespace Some\Something;
+
+class Sample
+{
+    /**
+     * @var \Vendor\Something\Entity\Value $value
+     */
+    public function sampleFunction(\Vendor\Something\Entity\Value $value)
+    {
+        $sample = new \Some\ClassName\Sample();
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Risky as class can be imported or aliased with same name as another class inside that namespace.'
         );
     }
 

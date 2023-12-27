@@ -20,31 +20,37 @@ final class PhpDocOnPropertiesFixer extends AbstractFixer implements Whitespaces
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use PhpDoc on properties that are not injected via constructor.
-            
-            We do NOT put PhpDoc on services, that are type-casted and injected via constructor,
-            as they are automatically recognised by IDE and desynchronization between typecast and
-            PhpDoc can cause warnings to be silenced.
-            
-            We may add PhpDoc on properties that are injected via constructor and are scalar,
-            but this is not necessary as IDE gets the type from constructor’s PhpDoc.
-            ',
+            <<<'TEXT'
+We use PhpDoc on properties that are not injected via constructor.
+
+We do NOT put PhpDoc on services, that are type-casted and injected via constructor,
+as they are automatically recognised by IDE and desynchronization between typecast and
+PhpDoc can cause warnings to be silenced.
+
+We may add PhpDoc on properties that are injected via constructor and are scalar,
+but this is not necessary as IDE gets the type from constructor’s PhpDoc.
+TEXT
+            ,
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            private $someVariable;
-                            
-                            public function someFunction()
-                            {
-                                $a = $this->someVariable;
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private $someVariable;
+    
+    public function someFunction()
+    {
+        $a = $this->someVariable;
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

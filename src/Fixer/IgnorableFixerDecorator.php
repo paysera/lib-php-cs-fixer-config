@@ -8,12 +8,13 @@ use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\DefinedFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
+use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 
-class IgnorableFixerDecorator implements
+final class IgnorableFixerDecorator implements
     DefinedFixerInterface,
     ConfigurableFixerInterface,
     WhitespacesAwareFixerInterface
@@ -32,7 +33,13 @@ class IgnorableFixerDecorator implements
         if ($this->innerFixer instanceof DefinedFixerInterface) {
             return $this->innerFixer->getDefinition();
         }
-        return new FixerDefinition('Description is not available.', []);
+        return new FixerDefinition('Description is not available.', [
+            new CodeSample(<<<'PHP'
+<?php // @php-cs-fixer-ignore my_test_fixer'
+
+PHP
+            )
+        ]);
 
     }
 
@@ -64,7 +71,7 @@ class IgnorableFixerDecorator implements
     public function fix(SplFileInfo $file, Tokens $tokens)
     {
         $ignoreNotice = self::IGNORE_ANNOTATION . ' ' . $this->getName();
-        $contents = file_get_contents($file->getPathname());
+        $contents = $tokens->generateCode();
         if (strpos($contents, $ignoreNotice) !== false) {
             return;
         }

@@ -15,23 +15,25 @@ final class DocBlockWhitespaceFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            'We use only 1 whitespace inside method\'s doc block annotations',
+            'We use only 1 whitespace inside method\'s doc block annotations.',
             [
-                new CodeSample('
-                <?php
-                
-                namespace Some\Namespace;
-                
-                class Sample
-                {
-                    /**
-                     * @var      $value
-                     */
-                    public function sampleFunction($value)
-                    {
-                    }
-                }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+
+namespace Some\Service;
+
+class Sample
+{
+    /**
+     * @var      $value
+     */
+    public function sampleFunction($value)
+    {
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

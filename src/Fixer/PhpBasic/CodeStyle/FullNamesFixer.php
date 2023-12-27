@@ -34,22 +34,29 @@ final class FullNamesFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
-            Risky for possible local variable duplicate renaming
-            ',
+            <<<'TEXT'
+We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
+Risky for possible local variable duplicate renaming.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function sampleFunction(SomeProvider $sp)
-                        {
-                            $a = $sp;
-                        }
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function sampleFunction(SomeProvider $sp)
+    {
+        $a = $sp;
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

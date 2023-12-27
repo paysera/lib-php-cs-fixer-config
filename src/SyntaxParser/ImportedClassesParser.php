@@ -5,6 +5,9 @@ namespace Paysera\PhpCsFixerConfig\SyntaxParser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\ImportedClasses;
+use PhpCsFixer\Tokenizer\Token;
+use PhpCsFixer\Tokenizer\Tokens;
+use PhpCsFixer\Tokenizer\TokensAnalyzer;
 
 class ImportedClassesParser
 {
@@ -20,6 +23,48 @@ class ImportedClassesParser
             }
 
             $token = $token->getNextToken();
+        }
+
+        return $importedClasses;
+    }
+
+    public function parseImportedClassesFromTokens(Tokens $tokens)
+    {
+        $importedClasses = new ImportedClasses();
+        $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
+        $namespaceEndIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']);
+        $start = $tokens->getNextMeaningfulToken($namespaceIndex);
+        $end = $tokens->getPrevMeaningfulToken($namespaceEndIndex);
+        $namespace = $tokens->generatePartialCode($start, $end);
+        $importedClasses->setCurrentNamespace($namespace);
+        $tokensAnalyzer = new TokensAnalyzer($tokens);
+        $useIndices = $tokensAnalyzer->getImportUseIndexes();
+        foreach ($useIndices as $useIndex) {
+            $className = null;
+            $currentContent = '';
+            for ($i = $useIndex + 1; $i < $tokens->count(); $i++) {
+                /** @var Token $token */
+                $token = $tokens[$i];
+                if ($token->getContent() === ';') {
+                    break;
+                }
+                if ($token->isGivenKind(T_AS)) {
+                    $className = $currentContent;
+                    $currentContent = '';
+                } elseif (!$token->isWhitespace()) {
+                    $currentContent .= $token->getContent();
+                }
+            }
+
+            if ($className === null) {
+                $className = $currentContent;
+                preg_match('/[^\\\\]+$/', $className, $matches);
+                $importName = $matches[0];
+            } else {
+                $importName = $currentContent;
+            }
+
+            $importedClasses->registerImport($importName, $className);
         }
 
         return $importedClasses;

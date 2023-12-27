@@ -906,6 +906,30 @@ class Kernel extends BaseKernel
     }
 }'
             ],
+            'It fixes return type' => [
+                '<?php
+namespace App;
+
+use DateTime;
+
+class Sample
+{
+    public function something(): DateTime
+    {
+        return new DateTime();
+    }
+}',
+                '<?php
+namespace App;
+
+class Sample
+{
+    public function something(): \DateTime
+    {
+        return new \DateTime();
+    }
+}'
+            ]
         ];
     }
 

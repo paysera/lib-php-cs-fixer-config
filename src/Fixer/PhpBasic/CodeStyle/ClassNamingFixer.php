@@ -39,29 +39,38 @@ final class ClassNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition(
-            '
-            We use nouns for class names.
-            For services we use some suffix to represent the job of that service, usually *er:
-            manager
-            normalizer
-            provider
-            updater
-            controller
-            registry
-            resolver
-            We do not use service as a suffix, as this does not represent anything (for example PageService).
-            We use object names only for entities, not for services (for example Page).
-            ',
+        return new FixerDefinition(<<<TEXT
+We use nouns for class names.
+For services we use some suffix to represent the job of that service, usually *er:
+manager
+normalizer
+provider
+updater
+controller
+registry
+resolver
+We do not use service as a suffix, as this does not represent anything (for example PageService).
+We use object names only for entities, not for services (for example Page).
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class SampleService
-                    {
-                    
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+
+namespace App\Service;
+
+class SampleService
+{
+
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
@@ -153,7 +162,7 @@ final class ClassNamingFixer extends AbstractFixer
     }
 
     /**
-     * @param int $className
+     * @param string $className
      * @param string $classNamespace
      * @return bool
      */
