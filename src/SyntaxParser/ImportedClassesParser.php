@@ -40,34 +40,39 @@ class ImportedClassesParser
         $tokensAnalyzer = new TokensAnalyzer($tokens);
         $useIndices = $tokensAnalyzer->getImportUseIndexes();
         foreach ($useIndices as $useIndex) {
-            $className = null;
-            $currentContent = '';
-            for ($i = $useIndex + 1; $i < $tokens->count(); $i++) {
-                /** @var Token $token */
-                $token = $tokens[$i];
-                if ($token->getContent() === ';') {
-                    break;
-                }
-                if ($token->isGivenKind(T_AS)) {
-                    $className = $currentContent;
-                    $currentContent = '';
-                } elseif (!$token->isWhitespace()) {
-                    $currentContent .= $token->getContent();
-                }
-            }
-
-            if ($className === null) {
-                $className = $currentContent;
-                preg_match('/[^\\\\]+$/', $className, $matches);
-                $importName = $matches[0];
-            } else {
-                $importName = $currentContent;
-            }
-
-            $importedClasses->registerImport($importName, $className);
+            $this->parseUseStatementFromTokens($useIndex, $tokens, $importedClasses);
         }
 
         return $importedClasses;
+    }
+
+    public function parseUseStatementFromTokens(int $start, Tokens $tokens, ImportedClasses $importedClasses)
+    {
+        $className = null;
+        $currentContent = '';
+        for ($i = $start + 1; $i < $tokens->count(); $i++) {
+            /** @var Token $token */
+            $token = $tokens[$i];
+            if ($token->getContent() === ';') {
+                break;
+            }
+            if ($token->isGivenKind(T_AS)) {
+                $className = $currentContent;
+                $currentContent = '';
+            } elseif (!$token->isWhitespace()) {
+                $currentContent .= $token->getContent();
+            }
+        }
+
+        if ($className === null) {
+            $className = $currentContent;
+            preg_match('/[^\\\\]+$/', $className, $matches);
+            $importName = $matches[0];
+        } else {
+            $importName = $currentContent;
+        }
+
+        $importedClasses->registerImport($importName, $className);
     }
 
     private function parseUseStatement(ContextualToken $useToken, ImportedClasses $importedClasses): ContextualToken

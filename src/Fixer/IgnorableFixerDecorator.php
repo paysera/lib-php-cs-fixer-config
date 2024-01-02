@@ -33,13 +33,16 @@ final class IgnorableFixerDecorator implements
         if ($this->innerFixer instanceof DefinedFixerInterface) {
             return $this->innerFixer->getDefinition();
         }
-        return new FixerDefinition('Description is not available.', [
-            new CodeSample(<<<'PHP'
+        return new FixerDefinition(
+            'Description is not available.',
+            [
+                new CodeSample(<<<'PHP'
 <?php // @php-cs-fixer-ignore my_test_fixer'
 
 PHP
-            )
-        ]);
+                ),
+            ]
+        );
 
     }
 
