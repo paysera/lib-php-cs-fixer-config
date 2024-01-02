@@ -38,26 +38,33 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use singular for namespaces: Service, Bundle, Entity, Controller etc.
-            Exception: if English word does not have singular form.
-            
-            We do not make directories just for interfaces.
-            We put them together with services by related functionality (no ServiceInterface namespace).
-            
-            We use abstractions for namespaces, not service names.
-            For example, UserMerge or UserMerging, not UserMergeManager.
-            ',
+            <<<TEXT
+We use singular for namespaces: Service, Bundle, Entity, Controller etc.
+Exception: if English word does not have singular form.
+
+We do not make directories just for interfaces.
+We put them together with services by related functionality (no ServiceInterface namespace).
+
+We use abstractions for namespaces, not service names.
+For example, UserMerge or UserMerging, not UserMergeManager.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                namespace Some\Invalid\Namespaces\Namings;
-                
-                namespace Evp\Bundle\UserBundle\ServiceInterface\MergeProviderInterface;
-                
-                namespace Evp\Bundle\UserBundle\UserManager;
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+namespace Some\Invalid\Namespaces\Namings;
+
+namespace Evp\Bundle\UserBundle\ServiceInterface\MergeProviderInterface;
+
+namespace Evp\Bundle\UserBundle\UserManager;
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

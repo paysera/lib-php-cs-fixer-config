@@ -18,31 +18,37 @@ final class GlobalsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            'Checks for global variables, constants and functions',
+            'Checks for global variables, constants and functions.',
             [
-                new CodeSample('
-                <?php
-                    function globalFunction(){
-                        return 0;
-                    }
-                    const GLOBAL_CONSTANT = 1;
-                    $GLOBALS["a"] = "a";
-                    global $variable;
-                    $variable = 1;
-                    
-                    class Sample
-                    {
-                        public function sampleFunction()
-                        {
-                            global $variable;
-                            $globalVar = $variable;
-                            $globalVariable = $GLOBALS["a"];
-                            $globalFunction = globalFunction();
-                            $globalConstant = GLOBAL_CONSTANT;
-                        }
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+    function globalFunction(){
+        return 0;
+    }
+    const GLOBAL_CONSTANT = 1;
+    $GLOBALS["a"] = "a";
+    global $variable;
+    $variable = 1;
+    
+    class Sample
+    {
+        public function sampleFunction()
+        {
+            global $variable;
+            $globalVar = $variable;
+            $globalVariable = $GLOBALS["a"];
+            $globalFunction = globalFunction();
+            $globalConstant = GLOBAL_CONSTANT;
+        }
+    }
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

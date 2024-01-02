@@ -40,21 +40,25 @@ final class PropertyNamingFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use nouns or adjectives for property names, not verbs or questions.
-            ',
+            'We use nouns or adjectives for property names, not verbs or questions.',
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        protected $isValid;
-                        private $canWork;
-                        private $willSlide;
-                        protected $check;
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    protected $isValid;
+    private $canWork;
+    private $willSlide;
+    protected $check;
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

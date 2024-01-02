@@ -39,33 +39,39 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            If we use phpdoc comment, it must contain all information about parameters,
-            return type and exceptions that the method throws.
-            
-            If method does not return anything, we skip @return comment.
-            ',
+            <<<'TEXT'
+If we use phpdoc comment, it must contain all information about parameters,
+return type and exceptions that the method throws.
+
+If method does not return anything, we skip @return comment.
+TEXT
+            ,
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            /**
-                             * @param $arg1
-                             * @param $arg2
-                             */
-                            public function __construct($arg1, $arg2)
-                            {
-                                if ($arg1) {
-                                    throw new \Exception();
-                                } else {
-                                    return $arg2;
-                                }
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    /**
+     * @param $arg1
+     * @param $arg2
+     */
+    public function __construct($arg1, $arg2)
+    {
+        if ($arg1) {
+            throw new \Exception();
+        } else {
+            return $arg2;
+        }
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

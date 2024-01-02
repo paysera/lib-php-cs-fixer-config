@@ -16,30 +16,33 @@ final class CommentStylesFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We use multi-line /** */ comments for method, property and class annotations.
-            We use single-line /** @var Class $object */ annotation for local variables.
-            We can use // single line comments in the code.
-            We do not use /* */ or # comments at all.
-            ',
+            <<<'TEXT'
+We use multi-line /** */ comments for method, property and class annotations.
+We use single-line /** @var Class $object */ annotation for local variables.
+We can use // single line comments in the code.
+We do not use /* */ or # comments at all.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        /** @var string $variable */
-                        private $variable;
-                        
-                        /* some comment */
-                        public function sampleFunction()
-                        {
-                            /**
-                             * @var Sample $value
-                             */
-                            $value = new Sample;
-                        }
-                    }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    /** @var string $variable */
+    private $variable;
+    
+    /* some comment */
+    public function sampleFunction()
+    {
+        /**
+         * @var Sample $value
+         */
+        $value = new Sample;
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

@@ -45,7 +45,13 @@ class ContextualTokenBuilder
             $token = $token->getNextToken();
         } while ($token !== null);
 
+        $tokensToCompare = Tokens::fromArray($allTokens);
+        $isChanged = $tokens->generateCode() !== $tokensToCompare->generateCode();
+
         $tokens->overrideRange(0, count($tokens) - 1, $allTokens);
+        if (!$isChanged) {
+            $tokens->clearChanged();
+        }
     }
 
     public function replaceItem(ItemInterface $itemToReplace, ItemInterface $replaceWith)

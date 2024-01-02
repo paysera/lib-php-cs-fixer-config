@@ -31,36 +31,42 @@ final class MethodNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition(
-            '
-            We use verbs for methods that perform action and/or return something,
-            questions only for methods which return boolean.
-            
-            Questions start with has, is, can - these cannot make any side-effect and always return boolean.
-            
-            For entities we use is* or are* for boolean getters, get* 
-            for other getters, set* for setters, add* for adders, remove* for removers.
-            
-            We always make correct English phrase from method names,
-            this is more important that naming method to \'is\' + propertyName.
-            ',
+        return new FixerDefinition(<<<TEXT
+We use verbs for methods that perform action and/or return something,
+questions only for methods which return boolean.
+
+Questions start with has, is, can - these cannot make any side-effect and always return boolean.
+
+For entities we use is* or are* for boolean getters, get* 
+for other getters, set* for setters, add* for adders, remove* for removers.
+
+We always make correct English phrase from method names,
+this is more important that naming method to \'is\' + propertyName.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function isThisNeeded()
-                        {
-                            return 123;
-                        }
-                        
-                        public function hasAllRights()
-                        {
-                            soSomething();
-                        }
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function isThisNeeded()
+    {
+        return 123;
+    }
+    
+    public function hasAllRights()
+    {
+        soSomething();
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

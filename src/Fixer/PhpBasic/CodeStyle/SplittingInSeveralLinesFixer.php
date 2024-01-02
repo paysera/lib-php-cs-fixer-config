@@ -34,42 +34,44 @@ final class SplittingInSeveralLinesFixer extends AbstractFixer implements Whites
     public function getDefinition()
     {
         return new FixerDefinition(
-            'Formats new lines, whitespaces and operators as needed when splitting in several lines',
+            'Formats new lines, whitespaces and operators as needed when splitting in several lines.',
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function sampleFunction()
-                        {
-                            $a = 1;
-                            $b = 2;
-                            $c = 3;
-                            $d = 4;
-                            
-                            if ($a === 1) {
-                                if ($b === 2) {
-                                    in_array($a, [1,
-                                        2, 3, 4,5,  ]);
-                                }
-                            }
-                            
-                            in_array($a, [1,
-                                2, 3, 4,5  ], true);
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function sampleFunction()
+    {
+        $a = 1;
+        $b = 2;
+        $c = 3;
+        $d = 4;
+        
+        if ($a === 1) {
+            if ($b === 2) {
+                in_array($a, [1,
+                    2, 3, 4,5,  ]);
+            }
+        }
+        
+        in_array($a, [1,
+            2, 3, 4,5  ], true);
 
-                            return ((
-                                $a
-                                &&
-                                $b
-                            ) ||
-                                (
-                                $c
-                                &&
-                                $d
-                            ));
-                        }
-                    }
-                '),
+        return ((
+            $a
+            &&
+            $b
+        ) ||
+            (
+            $c
+            &&
+            $d
+        ));
+    }
+}
+
+PHP
+                ),
             ]
         );
     }
