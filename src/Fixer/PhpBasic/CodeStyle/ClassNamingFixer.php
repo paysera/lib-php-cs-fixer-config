@@ -196,8 +196,12 @@ PHP
     {
         $comment = '// TODO: "' . $className . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getPrevNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertAt($insertIndex + 1, new Token([T_WHITESPACE, $tokens[$insertIndex]->getContent()]));
-            $tokens->insertAt($insertIndex + 1, new Token([T_COMMENT, $comment]));
+            $tokens->insertSlices([
+                $insertIndex + 1 => [
+                    new Token([T_COMMENT, $comment]),
+                    new Token([T_WHITESPACE, $tokens[$insertIndex]->getContent()]),
+                ],
+            ]);
         }
     }
 }

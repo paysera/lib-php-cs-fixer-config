@@ -153,12 +153,11 @@ PHP
      */
     private function insertNullExplicitCompare(Tokens $tokens, $insertIndex, $identical)
     {
-        $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(
-            ++$insertIndex,
-            new Token($identical ? [T_IS_IDENTICAL, '==='] : [T_IS_NOT_IDENTICAL, '!=='])
-        );
-        $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(++$insertIndex, new Token([T_STRING, 'null']));
+        $tokens->insertSlices([++$insertIndex => [
+            new Token([T_WHITESPACE, ' ']),
+            new Token($identical ? [T_IS_IDENTICAL, '==='] : [T_IS_NOT_IDENTICAL, '!==']),
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_STRING, 'null']),
+        ]]);
     }
 }

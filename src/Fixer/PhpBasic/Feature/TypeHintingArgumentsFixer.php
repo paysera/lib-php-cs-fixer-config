@@ -207,8 +207,10 @@ PHP
                         && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
-                        $tokens->insertAt($i, new Token([T_STRING, $argumentType]));
-                        $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
+                        $tokens->insertSlices([$i => [
+                            new Token([T_STRING, $argumentType]),
+                            new Token([T_WHITESPACE, ' ']),
+                        ]]);
                         $currentParenthesesEndIndex += 2;
                     }
 
@@ -237,10 +239,12 @@ PHP
                         }
 
                         if ($variablePosition !== null) {
-                            $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
-                            $tokens->insertAt(++$variablePosition, new Token('='));
-                            $tokens->insertAt(++$variablePosition, new Token([T_WHITESPACE, ' ']));
-                            $tokens->insertAt(++$variablePosition, new Token([T_STRING, 'null']));
+                            $tokens->insertSlices([++$variablePosition => [
+                                new Token([T_WHITESPACE, ' ']),
+                                new Token('='),
+                                new Token([T_WHITESPACE, ' ']),
+                                new Token([T_STRING, 'null']),
+                            ]]);
                         }
                     }
                     break;

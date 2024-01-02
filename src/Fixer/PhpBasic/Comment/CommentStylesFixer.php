@@ -148,9 +148,9 @@ PHP
             $replacementArray = array_values($replacementArray);
             foreach ($replacementArray as $key => &$line) {
                 if ($key > 0) {
-                    $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indent]));
+                    $tokens->insertSlices([++$index => [new Token([T_WHITESPACE, $indent])]]);
                 }
-                $tokens->insertAt(++$index, new Token([T_COMMENT, '// ' . $line]));
+                $tokens->insertSlices([++$index => [new Token([T_COMMENT, '// ' . $line])]]);
             }
             $tokens->clearRange($commentIndex, $commentIndex);
         }

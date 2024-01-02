@@ -16,15 +16,21 @@ final class ClassConstantUpperCaseFixer extends AbstractFixer
         return new FixerDefinition(
             'Ensures that constant names are all uppercase with underscores.',
             [
-                new CodeSample('
-                <?php 
-                    class invalid_className 
-                    {
-                        const class_constantLongName = 1;
-                        const classconstant = 2;
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php 
+class invalid_className 
+{
+    const class_constantLongName = 1;
+    const classconstant = 2;
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

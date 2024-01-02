@@ -85,15 +85,15 @@ PHP
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
                 && $tokens[$i - 1]->equals(')')
             ) {
-                $tokens->insertAt($i, new Token([T_WHITESPACE, $indent]));
+                $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent])]]);
             }
         }
 
         if (!$tokens[$i - 1]->isWhitespace() && strpos($tokens[$i - 2]->getContent(), "\n") === false) {
-            $tokens->insertAt($i, new Token([
+            $tokens->insertSlices([$i => [new Token([
                 T_WHITESPACE,
                 preg_replace('/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/', '', $indent, 1),
-            ]));
+            ])]]);
         }
 
         return $i;

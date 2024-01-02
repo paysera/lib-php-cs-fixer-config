@@ -318,8 +318,10 @@ PHP
     private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertAt(++$insertIndex, new Token([T_WHITESPACE, ' ']));
-            $tokens->insertAt(++$insertIndex, new Token([T_COMMENT, '// ' . $comment]));
+            $tokens->insertSlices([$insertIndex + 1 => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_COMMENT, '// ' . $comment]),
+            ]]);
         }
     }
 }

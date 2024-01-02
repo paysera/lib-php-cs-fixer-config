@@ -13,7 +13,7 @@ class PayseraConventionsConfigTest extends TestCase
     public function testEnableMigrationModeWithIncompleteRuleSet()
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageRegExp('/\'psr4\' => false,/');
+        $this->expectExceptionMessageMatches('/\'psr4\' => false,/');
 
         (new PayseraConventionsConfig())
             ->setDefaultFinder()

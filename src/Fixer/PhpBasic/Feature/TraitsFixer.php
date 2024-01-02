@@ -58,11 +58,13 @@ PHP
                 $commentTokenIndex = $tokens->getPrevNonWhitespace($key);
                 $traitName = $tokens[$tokens->getNextMeaningfulToken($key)]->getContent();
                 if (!$tokens[$commentTokenIndex]->isGivenKind(T_COMMENT)) {
-                    $tokens->insertAt($key++, new Token([
-                        T_COMMENT,
-                        '// TODO: "' . $traitName . '" - ' . self::CONVENTION,
-                    ]));
-                    $tokens->insertAt($key, new Token([T_WHITESPACE, "\n"]));
+                    $tokens->insertSlices([$key => [
+                        new Token([
+                            T_COMMENT,
+                            '// TODO: "' . $traitName . '" - ' . self::CONVENTION,
+                        ]),
+                        new Token([T_WHITESPACE, "\n"]),
+                    ]]);
                     break;
                 }
             }

@@ -642,15 +642,15 @@ PHP
             $statementEndIndex = $this->findStatementEnd($tokens, $parenthesisEndIndex);
 
             // insert closing brace
-            $tokens->insertAt($statementEndIndex + 1, [new Token([T_WHITESPACE, ' ']), new Token('}')]);
+            $tokens->insertSlices([$statementEndIndex + 1 => [new Token([T_WHITESPACE, ' ']), new Token('}')]]);
 
             // insert missing `;` if needed
             if (!$tokens[$statementEndIndex]->equalsAny([';', '}'])) {
-                $tokens->insertAt($statementEndIndex + 1, new Token(';'));
+                $tokens->insertSlices([$statementEndIndex + 1 => [new Token(';')]]);
             }
 
             // insert opening brace
-            $tokens->insertAt($parenthesisEndIndex + 1, new Token('{'));
+            $tokens->insertSlices([$parenthesisEndIndex + 1 => [new Token('{')]]);
             $tokens->ensureWhitespaceAtIndex($parenthesisEndIndex + 1, 0, ' ');
         }
     }

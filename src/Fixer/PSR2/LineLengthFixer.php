@@ -36,11 +36,29 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
         return new FixerDefinition(
             'Checks all lines in the file, and throws warnings if they are over hard and soft limits.',
             [
-                new CodeSample('
-                <?php 
-                    echo "something"."something"."something"."something"."something"."something"."some"."until here ->";
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php 
+echo "something"."something"."something"."something"."something"."something"."something"."something"."some"."until here ->";
+
+PHP
+                ),
+                new CodeSample(<<<'PHP'
+<?php 
+echo "something"."something"."something"."something"."some"."until here ->";
+
+PHP
+                ,
+                [
+                    'limits' => [
+                        'soft_limit' => 60,
+                        'hard_limit' => 40,
+                    ],
+                ])
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
@@ -162,6 +180,10 @@ final class LineLengthFixer extends AbstractFixer implements ConfigurationDefini
 
         $limits = $limits
             ->setAllowedTypes(['array', 'bool'])
+            ->setDefault([
+                'soft_limit' => self::DEFAULT_SOFT_LIMIT,
+                'hard_limit' => self::DEFAULT_HARD_LIMIT,
+            ])
             ->getOption()
         ;
 

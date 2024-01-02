@@ -235,23 +235,26 @@ PHP
         $insertionIndex = $endIndex;
 
         if ($assignCondition) {
-            $tokens->insertAt(++$insertionIndex, new Token('='));
+            $tokens->insertSlices([++$insertionIndex => [new Token('=')]]);
         } else {
-            $tokens->insertAt(++$insertionIndex, new Token([T_RETURN, 'return']));
+            $tokens->insertSlices([++$insertionIndex => [new Token([T_RETURN, 'return'])]]);
         }
 
-        $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertSlices([++$insertionIndex => [new Token([T_WHITESPACE, ' '])]]);
         if ($returnCondition === self::TRUE) {
-            $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertSlices([++$insertionIndex => [new Token([T_WHITESPACE, ' '])]]);
             $overrideIndex = $insertionIndex;
         } else {
-            $tokens->insertAt(++$insertionIndex, new Token('!'));
-            $tokens->insertAt(++$insertionIndex, new Token('('));
-            $tokens->insertAt(++$insertionIndex, new Token([T_WHITESPACE, ' ']));
-            $overrideIndex = $insertionIndex;
-            $tokens->insertAt(++$insertionIndex, new Token(')'));
+            $tokens->insertSlices([$insertionIndex + 1 => [
+                new Token('!'),
+                new Token('('),
+                new Token([T_WHITESPACE, ' ']),
+                new Token(')'),
+            ]]);
+            $overrideIndex = $insertionIndex + 3;
+            $insertionIndex += 4;
         }
-        $tokens->insertAt(++$insertionIndex, new Token(';'));
+        $tokens->insertSlices([++$insertionIndex => [new Token(';')]]);
 
         $tokens->overrideRange(
             $overrideIndex,

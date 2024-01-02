@@ -100,11 +100,13 @@ PHP
                     !$this->isStaticMethodValid($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
                     && !$tokens[$curlyBraceStartIndex - 2]->isGivenKind(T_COMMENT)
                 ) {
-                    $tokens->insertAt($curlyBraceStartIndex - 1, new Token([
-                        T_COMMENT,
-                        '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
-                    ]));
-                    $tokens->insertAt($curlyBraceStartIndex - 1, new Token([T_WHITESPACE, ' ']));
+                    $tokens->insertSlices([$curlyBraceStartIndex -1 => [
+                        new Token([T_WHITESPACE, ' ']),
+                        new Token([
+                            T_COMMENT,
+                            '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
+                        ]),
+                    ]]);
                 }
             }
         }

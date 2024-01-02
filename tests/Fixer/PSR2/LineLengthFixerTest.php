@@ -16,7 +16,7 @@ final class LineLengthFixerTest extends AbstractPayseraFixerTestCase
      */
     public function testFix($expected, $input = null)
     {
-        $this->fixer->configure(['soft_limit' => 80, 'hard_limit' => 119]);
+        $this->fixer->configure(['limits' => ['soft_limit' => 80, 'hard_limit' => 119]]);
         $this->doTest($expected, $input);
     }
 

@@ -16,14 +16,20 @@ final class FunctionNameCamelCaseFixer extends AbstractFixer
         return new FixerDefinition(
             'Ensures function names are defined using camel case.',
             [
-                new CodeSample('
-                <?php 
-                    class Sample 
-                    {
-                        private function invalid_function_name(){}
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php 
+class Sample 
+{
+    private function invalid_function_name(){}
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
