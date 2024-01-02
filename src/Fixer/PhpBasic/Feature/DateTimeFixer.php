@@ -136,10 +136,9 @@ PHP
      */
     private function addResult(Tokens $tokens, $functionIndex, $endOfLineIndex)
     {
-        $tokens->insertAt(
-            $endOfLineIndex + 1,
-            new Token([T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION])
-        );
-        $tokens->insertAt($endOfLineIndex + 1, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertSlices([$endOfLineIndex + 1 => [
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION]),
+        ]]);
     }
 }

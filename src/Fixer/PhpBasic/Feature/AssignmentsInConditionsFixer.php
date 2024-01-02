@@ -119,11 +119,12 @@ PHP
     private function insertComment(Tokens $tokens, $variableIndex, $insertIndex)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertAt(
-                $insertIndex + 1,
-                new Token([T_COMMENT, '// TODO: "' . $tokens[$variableIndex]->getContent() . '" - ' . self::CONVENTION])
-            );
-            $tokens->insertAt($insertIndex + 1, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertSlices([
+                $insertIndex + 1 => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, '// TODO: "' . $tokens[$variableIndex]->getContent() . '" - ' . self::CONVENTION]),
+                ],
+            ]);
         }
     }
 }

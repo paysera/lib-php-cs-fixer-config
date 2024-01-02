@@ -135,7 +135,9 @@ PHP
      */
     private function insertComment(Tokens $tokens, $insertIndex, $methodName, $convention)
     {
-        $tokens->insertAt($insertIndex, new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]));
-        $tokens->insertAt($insertIndex, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertSlices([$insertIndex => [
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]),
+        ]]);
     }
 }

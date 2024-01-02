@@ -315,11 +315,15 @@ PHP
     private function insertComment(Tokens $tokens, $insertIndex, $propertyName)
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . self::MISSING_DOC_BLOCK_CONVENTION;
-        $tokens->insertAt(++$insertIndex, new Token([T_COMMENT, $comment]));
-        $tokens->insertAt(++$insertIndex, new Token([
-            T_WHITESPACE,
-            $this->whitespacesConfig->getLineEnding() . $this->whitespacesConfig->getIndent(),
-        ]));
+        $tokens->insertSlices([
+            $insertIndex + 1 => [
+                new Token([T_COMMENT, $comment]),
+                new Token([
+                    T_WHITESPACE,
+                    $this->whitespacesConfig->getLineEnding() . $this->whitespacesConfig->getIndent(),
+                ]),
+            ],
+        ]);
     }
 
     private function hasCommentAdditionalData(Token $docBlockToken)

@@ -14,13 +14,19 @@ final class ClassNameStudlyCapsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            'Ensures classes are in StudlyCaps, and the first letter is capitalised',
+            'Ensures classes are in StudlyCaps, and the first letter is capitalised.',
             [
-                new CodeSample('
-                <?php 
-                    class invalid_className {}
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php 
+class invalid_className {}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
