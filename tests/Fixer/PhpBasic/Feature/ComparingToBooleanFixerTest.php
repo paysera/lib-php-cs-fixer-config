@@ -85,7 +85,8 @@ final class ComparingToBooleanFixerTest extends AbstractPayseraFixerTestCase
             'Does not pick from previous method docblock' => [
                 '<?php
 
-                class Sample {
+                class Sample
+                {
                     /**
                      * @param bool $valid
                      * @param bool|null $something

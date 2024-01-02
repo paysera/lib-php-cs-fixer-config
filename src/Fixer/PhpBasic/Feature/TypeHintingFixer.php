@@ -52,6 +52,8 @@ class OAuthApiWalletListener
 {
     private $securityContext;
 
+    // $securityContext should be type hinted with TokenStorageInterface instead of SecurityContext
+    // as we use only methods from TokenStorageInterface
     public function __construct(SecurityContext $securityContext)
     {
         $this->securityContext = $securityContext;

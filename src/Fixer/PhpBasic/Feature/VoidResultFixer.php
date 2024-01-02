@@ -32,7 +32,7 @@ TEXT
 <?php
     class Sample
     {
-        function getValue(MyObject $object)
+        private function getValue(MyObject $object)
         {
             if (!$object->has()) {
                 return;
@@ -76,7 +76,7 @@ PHP
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-                && ($visibilityTokenIndex || $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE]))
+                && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
             ) {
                 $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
                 $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
