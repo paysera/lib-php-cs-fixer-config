@@ -28,7 +28,7 @@ class ImportedClassesParser
         return $importedClasses;
     }
 
-    public function parseImportedClassesFromTokens(Tokens $tokens)
+    public function parseImportedClassesFromTokens(Tokens $tokens): ImportedClasses
     {
         $importedClasses = new ImportedClasses();
         $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
@@ -50,9 +50,9 @@ class ImportedClassesParser
     {
         $className = null;
         $currentContent = '';
-        for ($i = $start + 1; $i < $tokens->count(); $i++) {
+        for ($index = $start + 1; $index < $tokens->count(); $index++) {
             /** @var Token $token */
-            $token = $tokens[$i];
+            $token = $tokens[$index];
             if ($token->getContent() === ';') {
                 break;
             }

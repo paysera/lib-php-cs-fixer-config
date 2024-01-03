@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\SyntaxParser;
@@ -13,19 +14,19 @@ class ImportedClassesParserTest extends TestCase
     /**
      * @dataProvider parseImportedClassesFromTokensDataProvider
      */
-    public function testParseImportedClassesFromTokens(Tokens $tokens, ImportedClasses $expectedImportedClasses): void
+    public function testParseImportedClassesFromTokens(string $code, ImportedClasses $expectedImportedClasses)
     {
-        $importedClassesParser = new ImportedClassesParser();
-        $importedClasses = $importedClassesParser->parseImportedClassesFromTokens($tokens);
-        $this->assertEquals($expectedImportedClasses, $importedClasses);
+        $this->assertEquals(
+            $expectedImportedClasses,
+            (new ImportedClassesParser())->parseImportedClassesFromTokens(Tokens::fromCode($code))
+        );
     }
 
-    public function parseImportedClassesFromTokensDataProvider()
+    public function parseImportedClassesFromTokensDataProvider(): array
     {
         return [
             'empty' => [
-                Tokens::fromCode(
-                    <<<'PHP'
+                <<<'PHP'
 <?php
 
 class Sample
@@ -34,12 +35,11 @@ class Sample
 }
 
 PHP
-                ),
+                ,
                 (new ImportedClasses()),
             ],
             'only namespace' => [
-                Tokens::fromCode(
-                    <<<'PHP'
+                <<<'PHP'
 <?php
 
 namespace App;
@@ -50,12 +50,11 @@ class Sample
 }
 
 PHP
-                ),
+                ,
                 (new ImportedClasses())->setCurrentNamespace('App'),
             ],
             'namespace and use' => [
-                Tokens::fromCode(
-                    <<<'PHP'
+                <<<'PHP'
 <?php
 
 namespace App;
@@ -68,15 +67,14 @@ class Sample
 }
 
 PHP
-                ),
+                ,
                 (new ImportedClasses())
                     ->setCurrentNamespace('App')
                     ->registerImport('AbstractFixer', 'PhpCsFixer\AbstractFixer')
                 ,
             ],
             'namespace and use with alias' => [
-                Tokens::fromCode(
-                    <<<'PHP'
+                <<<'PHP'
 <?php
 
 namespace App;
@@ -89,15 +87,14 @@ class Sample
 }
 
 PHP
-                ),
+                ,
                 (new ImportedClasses())
                     ->setCurrentNamespace('App')
                     ->registerImport('BaseFixer', 'PhpCsFixer\AbstractFixer')
                 ,
             ],
             'multiple imports' => [
-                Tokens::fromCode(
-                    <<<'PHP'
+                <<<'PHP'
 <?php
 
 namespace App;
@@ -111,7 +108,7 @@ class Sample
 }
 
 PHP
-                ),
+                ,
                 (new ImportedClasses())
                     ->setCurrentNamespace('App')
                     ->registerImport('BaseFixer', 'PhpCsFixer\AbstractFixer')
