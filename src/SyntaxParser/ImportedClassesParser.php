@@ -30,20 +30,25 @@ class ImportedClassesParser
 
     public function parseImportedClassesFromTokens(Tokens $tokens): ImportedClasses
     {
-        $importedClasses = new ImportedClasses();
-        $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
-        $namespaceEndIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']);
-        $start = $tokens->getNextMeaningfulToken($namespaceIndex);
-        $end = $tokens->getPrevMeaningfulToken($namespaceEndIndex);
-        $namespace = $tokens->generatePartialCode($start, $end);
-        $importedClasses->setCurrentNamespace($namespace);
-        $tokensAnalyzer = new TokensAnalyzer($tokens);
-        $useIndices = $tokensAnalyzer->getImportUseIndexes();
-        foreach ($useIndices as $useIndex) {
+        $namespace = $this->getNamespace($tokens);
+        $importedClasses = (new ImportedClasses())->setCurrentNamespace($namespace);
+
+        foreach ((new TokensAnalyzer($tokens))->getImportUseIndexes() as $useIndex) {
             $this->parseUseStatementFromTokens($useIndex, $tokens, $importedClasses);
         }
 
         return $importedClasses;
+    }
+
+    public function getNamespace(Tokens $tokens): string
+    {
+        $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
+        $namespaceEndIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']);
+
+        return $tokens->generatePartialCode(
+            $tokens->getNextMeaningfulToken($namespaceIndex),
+            $tokens->getPrevMeaningfulToken($namespaceEndIndex)
+        );
     }
 
     public function parseUseStatementFromTokens(int $start, Tokens $tokens, ImportedClasses $importedClasses)
