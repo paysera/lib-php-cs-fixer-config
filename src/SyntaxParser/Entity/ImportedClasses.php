@@ -19,10 +19,11 @@ class ImportedClasses
         $this->lowercasedUsage = [];
     }
 
-    public function registerImport(string $importedAs, string $className)
+    public function registerImport(string $importedAs, string $className): self
     {
         $this->classMap[$importedAs] = ltrim($className, '\\');
         $this->lowercasedUsage[mb_strtolower($importedAs)] = $importedAs;
+        return $this;
     }
 
     /**

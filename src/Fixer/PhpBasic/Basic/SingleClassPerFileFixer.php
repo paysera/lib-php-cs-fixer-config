@@ -19,16 +19,22 @@ final class SingleClassPerFileFixer extends AbstractFixer
         return new FixerDefinition(
             'Checks if there is one class per file.',
             [
-                new CodeSample('
-                <?php
-                    class ClassOne
-                    {
-                    }
-                    class ClassTwo
-                    {
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+    class ClassOne
+    {
+    }
+    class ClassTwo
+    {
+    }
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

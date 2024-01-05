@@ -5,6 +5,9 @@ namespace Paysera\PhpCsFixerConfig\SyntaxParser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\ImportedClasses;
+use PhpCsFixer\Tokenizer\Token;
+use PhpCsFixer\Tokenizer\Tokens;
+use PhpCsFixer\Tokenizer\TokensAnalyzer;
 
 class ImportedClassesParser
 {
@@ -23,6 +26,58 @@ class ImportedClassesParser
         }
 
         return $importedClasses;
+    }
+
+    public function parseImportedClassesFromTokens(Tokens $tokens): ImportedClasses
+    {
+        $namespace = $this->getNamespace($tokens);
+        $importedClasses = (new ImportedClasses())->setCurrentNamespace($namespace);
+
+        foreach ((new TokensAnalyzer($tokens))->getImportUseIndexes() as $useIndex) {
+            $this->parseUseStatementFromTokens($useIndex, $tokens, $importedClasses);
+        }
+
+        return $importedClasses;
+    }
+
+    public function getNamespace(Tokens $tokens): string
+    {
+        $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
+        $namespaceEndIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']);
+
+        return $tokens->generatePartialCode(
+            $tokens->getNextMeaningfulToken($namespaceIndex),
+            $tokens->getPrevMeaningfulToken($namespaceEndIndex)
+        );
+    }
+
+    public function parseUseStatementFromTokens(int $start, Tokens $tokens, ImportedClasses $importedClasses)
+    {
+        $className = null;
+        $currentContent = '';
+        for ($index = $start + 1; $index < $tokens->count(); $index++) {
+            /** @var Token $token */
+            $token = $tokens[$index];
+            if ($token->getContent() === ';') {
+                break;
+            }
+            if ($token->isGivenKind(T_AS)) {
+                $className = $currentContent;
+                $currentContent = '';
+            } elseif (!$token->isWhitespace()) {
+                $currentContent .= $token->getContent();
+            }
+        }
+
+        if ($className === null) {
+            $className = $currentContent;
+            preg_match('/[^\\\\]+$/', $className, $matches);
+            $importName = $matches[0];
+        } else {
+            $importName = $currentContent;
+        }
+
+        $importedClasses->registerImport($importName, $className);
     }
 
     private function parseUseStatement(ContextualToken $useToken, ImportedClasses $importedClasses): ContextualToken

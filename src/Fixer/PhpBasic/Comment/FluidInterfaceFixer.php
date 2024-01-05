@@ -20,25 +20,28 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            If method returns $this, we use @return $this that IDE could guess correct type
-            if we use this method for objects of sub-classes.
-            ',
+            <<<'TEXT'
+If method returns $this, we use @return $this that IDE could guess correct type
+if we use this method for objects of sub-classes.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                namespace Some\Entity;
-                    class Sample
-                    {
-                        /**
-                         * @param int $something
-                         */
-                        public function sampleFunction($something)
-                        {
-                            return $this;
-                        }
-                    }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+namespace Some\Entity;
+class Sample
+{
+    /**
+     * @param int $something
+     */
+    public function sampleFunction($something)
+    {
+        return $this;
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

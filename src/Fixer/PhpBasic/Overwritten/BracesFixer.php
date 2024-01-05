@@ -64,8 +64,8 @@ final class BracesFixer extends AbstractFixer implements ConfigurationDefinition
         return new FixerDefinition(
             'The body of each structure MUST be enclosed by braces. Braces should be properly placed. Body of braces should be properly indented.',
             [
-                new CodeSample(
-'<?php
+                new CodeSample(<<<'PHP'
+<?php
 
 class Foo {
     public function bar($baz) {
@@ -90,18 +90,21 @@ class Foo {
             }
     }
 }
-'
+
+PHP
                 ),
-                new CodeSample(
-'<?php
+                new CodeSample(<<<'PHP'
+<?php
 $positive = function ($item) { return $item >= 0; };
 $negative = function ($item) {
                 return $item < 0; };
-',
+
+PHP
+                    ,
                     ['allow_single_line_closure' => true]
                 ),
-                new CodeSample(
-'<?php
+                new CodeSample(<<<'PHP'
+<?php
 
 class Foo
 {
@@ -128,7 +131,9 @@ class Foo
             }
     }
 }
-',
+
+PHP
+                    ,
                     ['position_after_functions_and_oop_constructs' => self::LINE_SAME]
                 ),
             ]

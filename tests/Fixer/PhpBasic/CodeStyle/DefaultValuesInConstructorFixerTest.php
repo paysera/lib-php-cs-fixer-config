@@ -83,7 +83,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
             ],
             [
                 '<?php
-                class Sample extends Parent
+                class Sample extends ParentClass
                 {
                     private $defaultArray;
                     private $defaultInteger;
@@ -101,7 +101,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                     }
                 }',
                 '<?php
-                class Sample extends Parent
+                class Sample extends ParentClass
                 {
                     private $defaultArray = [];
                     private $defaultInteger = 1;
@@ -114,7 +114,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
             ],
             [
                 '<?php
-                class Sample extends Parent
+                class Sample extends ParentClass
                 {
                     private $defaultArray;
                     private $defaultBool;
@@ -131,7 +131,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                     }
                 }',
                 '<?php
-                class Sample extends Parent
+                class Sample extends ParentClass
                 {
                     private $defaultArray = [];
                     private $defaultBool = true;

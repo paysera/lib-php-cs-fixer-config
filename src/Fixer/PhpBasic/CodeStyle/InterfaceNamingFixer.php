@@ -15,20 +15,26 @@ final class InterfaceNamingFixer extends AbstractFixer
 
     public function getDefinition()
     {
-        return new FixerDefinition(
-            '
-            We always add suffix Interface to interfaces, even if interface name would be adjective.
-            Risky for renaming interface name.
-            ',
+        return new FixerDefinition(<<<TEXT
+We always add suffix Interface to interfaces, even if interface name would be adjective.
+Risky for renaming interface name.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    interface Sample
-                    {
-                        
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+interface Sample
+{
+    
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

@@ -17,21 +17,22 @@ final class ChainedMethodCallsFixer extends AbstractFixer implements Whitespaces
     {
         return new FixerDefinition(
             'When making chain method calls, we put semicolon on it’s own separate line,
-            chained method calls are indented and comes in it’s own line.
-            ',
+            chained method calls are indented and comes in it’s own line.',
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function sampleFunction()
-                        {
-                            return $this->createQueryBuilder("a")->join("a.items", "i")->andWhere("i.param = :param")
-                                ->setParameter("param", $param)->getQuery()
-                                ->getResult();
-                        }
-                    }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+    class Sample
+    {
+        public function sampleFunction()
+        {
+            return $this->createQueryBuilder("a")->join("a.items", "i")->andWhere("i.param = :param")
+                ->setParameter("param", $param)->getQuery()
+                ->getResult();
+        }
+    }
+
+PHP
+                ),
             ]
         );
     }

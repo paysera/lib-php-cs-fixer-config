@@ -18,24 +18,28 @@ final class DefaultValuesInConstructorFixer extends AbstractFixer implements Whi
     public function getDefinition()
     {
         return new FixerDefinition(
-            'We declare default variables in constructor',
+            'We declare default variables in constructor.',
             [
-                new CodeSample(
-                    '<?php
+                new CodeSample(<<<'PHP'
+<?php
                     
-                    class Sample
-                    {
-                        private $array;
-                        private $integer;
-                        
-                        public function __construct()
-                        {
-                            $this->array = [];
-                            $this->integer = 1;
-                        }
-                    }'
+class Sample
+{
+    private $array = [];
+    private $integer = 1;
+    
+    public function __construct()
+    {
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
