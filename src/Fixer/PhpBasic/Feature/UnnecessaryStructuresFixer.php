@@ -42,7 +42,7 @@ class Sample
     {
         if ($first) {
             if ($second) {
-                return true;
+                doSomething();
             }
         }
     }

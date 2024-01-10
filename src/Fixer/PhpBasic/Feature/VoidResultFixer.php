@@ -32,7 +32,7 @@ TEXT
 <?php
     class Sample
     {
-        private function getValue(MyObject $object)
+        public function getValue(MyObject $object)
         {
             if (!$object->has()) {
                 return;

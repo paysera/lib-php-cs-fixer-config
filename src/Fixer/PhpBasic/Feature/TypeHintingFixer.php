@@ -41,27 +41,47 @@ final class TypeHintingFixer extends AbstractContextualTokenFixer
         return new FixerDefinition(
             'We always type hint narrowest possible interface which we use inside the function or class.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
-use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SecurityContext;
+use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SomeImplementation;
 
-class OAuthApiWalletListener
+/*
+interface InterfaceA
 {
-    private $securityContext;
+    public function a();
+}
 
-    // $securityContext should be type hinted with TokenStorageInterface instead of SecurityContext
-    // as we use only methods from TokenStorageInterface
-    public function __construct(SecurityContext $securityContext)
+interface InterfaceB
+{
+    public function b();
+    public function c();
+}
+
+class SomeImplementation implements InterfaceA, InterfaceB
+{
+    public function a() {}
+    public function b() {}
+    public function c() {}
+}
+*/
+
+class Sample
+{
+    private $arg1;
+
+    public function __construct(SomeImplementation $service)
     {
-        $this->securityContext = $securityContext;
+        // should be type hinted with InterfaceA instead of SomeImplementation // as we use only methods from InterfaceA
+        $this->service = $service;
     }
-
-    public function onKernelController()
+    
+    private function someFunction()
     {
-        $this->securityContext->getToken();
+        $this->service->a();
     }
 }
 
