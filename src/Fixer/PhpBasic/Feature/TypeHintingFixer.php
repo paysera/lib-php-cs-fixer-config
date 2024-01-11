@@ -42,47 +42,56 @@ final class TypeHintingFixer extends AbstractContextualTokenFixer
             'We always type hint narrowest possible interface which we use inside the function or class.',
             [
                 new CodeSample(
-                    '<?php
-                        class NormalizerInterface
-                        {
-                            public function methodA();
-                        }
-                        
-                        class DenormalizerInterface
-                        {
-                            public function methodB();
-                        }
-                        
-                        class ResultNormalizer implements NormalizerInterface, DenormalizerInterface
-                        {
-                            public function methodA()
-                            {
-                                return true;
-                            }
-                            
-                            public function methodB()
-                            {
-                                return true;
-                            }
-                        }
-                    
-                        class Sample
-                        {
-                            $private $arg1;
-                        
-                            public function __construct(ResultNormalizer $arg1)
-                            {
-                                $this->arg1 = $arg1;
-                            }
-                            
-                            private function someFunction()
-                            {
-                                $this->arg1->methodA();
-                            }
-                        }
-                    '
+                    <<<'PHP'
+<?php
+
+namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
+
+use Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature\Fixtures\SomeImplementation;
+
+/*
+interface InterfaceA
+{
+    public function a();
+}
+
+interface InterfaceB
+{
+    public function b();
+    public function c();
+}
+
+class SomeImplementation implements InterfaceA, InterfaceB
+{
+    public function a() {}
+    public function b() {}
+    public function c() {}
+}
+*/
+
+class Sample
+{
+    private $arg1;
+
+    public function __construct(SomeImplementation $service)
+    {
+        // should be type hinted with InterfaceA instead of SomeImplementation // as we use only methods from InterfaceA
+        $this->service = $service;
+    }
+    
+    private function someFunction()
+    {
+        $this->service->a();
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

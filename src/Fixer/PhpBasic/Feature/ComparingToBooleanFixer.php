@@ -44,32 +44,35 @@ final class ComparingToBooleanFixer extends AbstractContextualTokenFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We do not use true/false keywords when checking variable which is already boolean.
-            ',
+            'We do not use true/false keywords when checking variable which is already boolean.',
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            private function sampleFunction(bool $valid)
-                            {
-                                if ($valid === false) {
-                                    return $valid !== true;
-                                }
-                                
-                                if ($valid === true) {
-                                    return $valid === false;
-                                }
-                                
-                                if ($valid === true) {
-                                    return false !== $valid;
-                                }
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function sampleFunction(bool $valid)
+    {
+        if ($valid === false) {
+            return $valid !== true;
+        }
+        
+        if ($valid === true) {
+            return $valid === false;
+        }
+        
+        if ($valid === true) {
+            return false !== $valid;
+        }
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

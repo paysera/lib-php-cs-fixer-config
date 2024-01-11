@@ -19,19 +19,24 @@ final class CallingParentConstructorFixer extends AbstractFixer
         return new FixerDefinition(
             'If we need to call parent constructor, we do it as first statement in constructor.',
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            public function __construct($arg1, $arg2)
-                            {
-                                $this->setArg2($arg2);
-                                parent::__construct($arg1);
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample extends ParentClass
+{
+    public function __construct($arg1, $arg2)
+    {
+        $this->setArg2($arg2);
+        parent::__construct($arg1);
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

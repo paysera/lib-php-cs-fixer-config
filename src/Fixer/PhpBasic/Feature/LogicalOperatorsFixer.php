@@ -14,28 +14,35 @@ final class LogicalOperatorsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            Use `&&` and `||` logical operators instead of `and` and `or`.
-            Risky, if lower precedence was used intentionally
-            ',
+            <<<'TEXT'
+Use `&&` and `||` logical operators instead of `and` and `or`.
+Risky, if lower precedence was used intentionally.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                class Sample
-                {
-                    private function sampleFunction()
-                    {
-                        $a = $d and $e ? false : true;
-                        
-                        if ($a or $b) {
-                            return ($a and $b or $c and $d);
-                        }
-                        
-                        return $c or $d;
-                    }
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function sampleFunction()
+    {
+        $a = $d and $e ? false : true;
+        
+        if ($a or $b) {
+            return ($a and $b or $c and $d);
+        }
+        
+        return $c or $d;
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

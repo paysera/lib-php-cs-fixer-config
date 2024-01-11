@@ -20,21 +20,26 @@ final class UnnecessaryVariablesFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            'We avoid unnecessary variables. Risky for possible incompatibility',
+            'We avoid unnecessary variables. Risky for possible incompatibility.',
             [
-                new CodeSample(
-                    '<?php
-                        class Sample
-                        {
-                            private function getSomething()
-                            {
-                                $a = get();
-                                return $a;
-                            }
-                        }
-                    '
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function getSomething()
+    {
+        $a = get();
+        return $a;
+    }
+}
+
+PHP
                 ),
-            ]
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

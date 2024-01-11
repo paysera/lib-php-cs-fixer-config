@@ -19,13 +19,19 @@ final class TraitsFixer extends AbstractFixer
         return new FixerDefinition(
             'The only valid case for traits is in unit test classes. We do not use traits in our base code.',
             [
-                new CodeSample('
-                <?php
-                    trait TraitSample
-                    {
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+trait TraitSample
+{
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

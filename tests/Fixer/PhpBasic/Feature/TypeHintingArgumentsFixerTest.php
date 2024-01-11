@@ -182,7 +182,10 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
                      *
                      * @return PushRecipient
                      */
-                    public function persistRecipient(PushRecipient $recipient, array $parameters);
+                    public function persistRecipient(PushRecipient $recipient, array $parameters)
+                    {
+                    
+                    }
                 }',
                 null,
             ],

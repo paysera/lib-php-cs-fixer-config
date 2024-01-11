@@ -29,27 +29,34 @@ final class AssignmentsInConditionsFixer extends AbstractFixer implements Whites
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We do not use assignments inside conditional statements.
-            Exception: in a while loop condition.
-            ',
+            <<<'TEXT'
+We do not use assignments inside conditional statements.
+Exception: in a while loop condition.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function sampleFunction()
-                        {
-                            if (($b = $a->get()) !== null && ($c = $b->get()) !== null) {
-                                $c->do();
-                            }
-                            if ($project = $this->findProject()) {
-                             
-                            }
-                        }
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function sampleFunction()
+    {
+        if (($b = $a->get()) !== null && ($c = $b->get()) !== null) {
+            $c->do();
+        }
+        if ($project = $this->findProject()) {
+         
+        }
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

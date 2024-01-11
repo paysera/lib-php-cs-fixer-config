@@ -39,45 +39,53 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We don’t use public and dynamic properties. All used properties must be defined.
-            
-            We prefer private over protected as it constraints the scope - it’s easier to refactor,
-            find usages, plan possible changes in code. Also IDE can warn about unused methods or properties.
-            
-            We use protected when we intend some property or method to be overwritten if necessary.
-            ',
+            <<<TEXT
+We don’t use public and dynamic properties. All used properties must be defined.
+
+We prefer private over protected as it constraints the scope - it’s easier to refactor,
+find usages, plan possible changes in code. Also IDE can warn about unused methods or properties.
+
+We use protected when we intend some property or method to be overwritten if necessary.
+
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                class Sample
-                {
-                    public $foo;
-                    public static $bar;
-                    protected $baz;
-                    
-                    public function __construct()
-                    {
-                        $this->a = "some dynamic property";
-                    }
-                    
-                    public function someFunction()
-                    {
-                        $this->a = "dynamic property usage";
-                    }
-                    
-                    public function anotherFunction()
-                    {
-                        $foo = new Sample();
-                        $foo->createProperty(\'hello\', \'something\');
-                    }
-                    
-                    public function createProperty($name, $value){
-                        $this->{$name} = $value;
-                    }
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public $foo;
+    public static $bar;
+    protected $baz;
+    
+    public function __construct()
+    {
+        $this->a = "some dynamic property";
+    }
+    
+    public function someFunction()
+    {
+        $this->a = "dynamic property usage";
+    }
+    
+    public function anotherFunction()
+    {
+        $foo = new Sample();
+        $foo->createProperty('hello', 'something');
+    }
+    
+    public function createProperty($name, $value){
+        $this->{$name} = $value;
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 

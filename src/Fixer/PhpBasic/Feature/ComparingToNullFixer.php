@@ -17,22 +17,22 @@ final class ComparingToNullFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            When comparing to null, we always compare explicitly.
-            ',
+            'When comparing to null, we always compare explicitly.',
             [
-                new CodeSample('
-                <?php
-                class Sample
-                {
-                    private function sampleFunction(Something $something = null)
-                    {
-                        if ($something) {
-                    
-                        }
-                    }
-                }
-                '),
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    private function sampleFunction(Something $something = null)
+    {
+        if ($something) {
+    
+        }
+    }
+}
+
+PHP
+                ),
             ]
         );
     }

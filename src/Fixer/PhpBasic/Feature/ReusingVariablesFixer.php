@@ -47,25 +47,35 @@ final class ReusingVariablesFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            We do not set value to variable passed as an argument.
-            We do not change the type of the variable.
-            ',
+            <<<'TEXT'
+We do not set value to variable passed as an argument.
+We do not change the type of the variable.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                    class Sample
-                    {
-                        public function thisIsWrong($number, $text, Request $request)
-                        {
-                            $number = (int)$number;  // Illegal: we 1) change argument value 2) change it\'s type
-                            $text .= \' \';  // Illegal: we change argument value
-                            $document = $request->get(\'documentId\');
-                            $document = $this->repository->find($document); // Illegal: we change variable\'s type
-                        }
-                    }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+class Sample
+{
+    public function thisIsWrong($number, $text, Request $request)
+    {
+        // Illegal: we 1) change argument value 2) change it's type
+        $number = (int)$number;
+        // Illegal: we change argument value
+        $text .= ' ';
+        $document = $request->get('documentId');
+        // Illegal: we change variable's type
+        $document = $this->repository->find($document);
+    }
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
