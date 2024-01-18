@@ -59,9 +59,13 @@ PHP
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        $tokens->overrideRange(0, count($tokens) - 1, [
-            new Token([T_OPEN_TAG, '<?php ']),
-            new Token([T_COMMENT, '// replaced']),
-        ]);
+        $tokens->overrideRange(
+            0,
+            count($tokens) - 1,
+            [
+                new Token([T_OPEN_TAG, '<?php ']),
+                new Token([T_COMMENT, '// replaced']),
+            ]
+        );
     }
 }

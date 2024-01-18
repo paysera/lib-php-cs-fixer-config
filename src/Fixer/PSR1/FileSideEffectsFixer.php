@@ -128,10 +128,12 @@ PHP
 
             if ($sideEffects > 0 && $symbols > 0) {
                 if (!$tokens[$count - 1]->isGivenKind(T_COMMENT)) {
-                    $tokens->insertSlices([$count => [
-                        new Token([T_WHITESPACE, "\n"]),
-                        new Token([T_COMMENT, self::CONVENTION]),
-                    ]]);
+                    $tokens->insertSlices([
+                        $count => [
+                            new Token([T_WHITESPACE, "\n"]),
+                            new Token([T_COMMENT, self::CONVENTION]),
+                        ],
+                    ]);
                 }
                 break;
             }
