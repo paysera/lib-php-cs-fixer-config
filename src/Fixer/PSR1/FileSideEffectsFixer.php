@@ -30,28 +30,35 @@ final class FileSideEffectsFixer extends AbstractFixer
     public function getDefinition()
     {
         return new FixerDefinition(
-            '
-            Ensures a file declare new symbols and causes no other side effects,
-            or executes logic with side effects, but not both.
-            ',
+            <<<'TEXT'
+Ensures a file declare new symbols and causes no other side effects,
+or executes logic with side effects, but not both.
+TEXT
+            ,
             [
-                new CodeSample('
-                <?php
-                // side effect: change ini settings
-                ini_set("error_reporting", E_ALL);
-                 
-                // side effect: loads a file
-                include "file.php";
-                                  
-                // declaration
-                function foo()
-                {
-                    // function body
-                    $a = 1;
-                    var_dump($a);
-                }
-                '),
-            ]
+                new CodeSample(<<<'PHP'
+<?php
+// side effect: change ini settings
+ini_set("error_reporting", E_ALL);
+ 
+// side effect: loads a file
+include "file.php";
+                  
+// declaration
+function foo()
+{
+    // function body
+    $a = 1;
+    var_dump($a);
+}
+
+PHP
+                ),
+            ],
+            null,
+            null,
+            null,
+            'Paysera recommendation.'
         );
     }
 
@@ -121,8 +128,12 @@ final class FileSideEffectsFixer extends AbstractFixer
 
             if ($sideEffects > 0 && $symbols > 0) {
                 if (!$tokens[$count - 1]->isGivenKind(T_COMMENT)) {
-                    $tokens->insertAt($count, new Token([T_COMMENT, self::CONVENTION]));
-                    $tokens->insertAt($count, new Token([T_WHITESPACE, "\n"]));
+                    $tokens->insertSlices([
+                        $count => [
+                            new Token([T_WHITESPACE, "\n"]),
+                            new Token([T_COMMENT, self::CONVENTION]),
+                        ],
+                    ]);
                 }
                 break;
             }

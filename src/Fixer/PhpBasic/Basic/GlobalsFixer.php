@@ -125,10 +125,14 @@ PHP
      */
     private function addGlobalUsageWarning(Tokens $tokens, $key, $tokenIndex)
     {
-        $tokens->insertAt($tokenIndex + 1, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt($tokenIndex + 2, new Token([
-            T_COMMENT,
-            '// TODO: "' . $tokens[$key]->getContent() . '" - ' . self::CONVENTION,
-        ]));
+        $tokens->insertSlices([
+            $tokenIndex + 1 => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([
+                    T_COMMENT,
+                    '// TODO: "' . $tokens[$key]->getContent() . '" - ' . self::CONVENTION,
+                ]),
+            ],
+        ]);
     }
 }

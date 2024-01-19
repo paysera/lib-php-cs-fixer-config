@@ -133,15 +133,17 @@ PHP
         $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
 
         $tokens->offsetSet($key, new Token([T_STRING, 'count']));
-        $tokens->insertAt(++$parenthesesEndIndex, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertSlices([++$parenthesesEndIndex => [new Token([T_WHITESPACE, ' '])]]);
         if ($negation) {
-            $tokens->insertAt(++$parenthesesEndIndex, new Token('>'));
+            $tokens->insertSlices([++$parenthesesEndIndex => [new Token('>')]]);
             $tokens->clearAt($notOperatorIndex);
         } else {
-            $tokens->insertAt(++$parenthesesEndIndex, new Token([T_IS_IDENTICAL, '===']));
+            $tokens->insertSlices([++$parenthesesEndIndex => [new Token([T_IS_IDENTICAL, '==='])]]);
         }
-        $tokens->insertAt(++$parenthesesEndIndex, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(++$parenthesesEndIndex, new Token([T_LNUMBER, '0']));
+        $tokens->insertSlices([++$parenthesesEndIndex => [
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_LNUMBER, '0']),
+        ]]);
 
         return true;
     }
@@ -173,7 +175,7 @@ PHP
             if ($negation) {
                 $tokens->clearAt($notOperatorIndex);
             } else {
-                $tokens->insertAt($notOperatorIndex + 1, new Token('!'));
+                $tokens->insertSlices([$notOperatorIndex + 1 => [new Token('!')]]);
             }
             return true;
         }

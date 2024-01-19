@@ -145,8 +145,10 @@ PHP
         $comment = '// TODO: "' . $namespaceName . '" - ' . $convention;
         $commentIndex = $tokens->getNextNonWhitespace($insertIndex);
         if ($commentIndex === null || !$tokens[$commentIndex]->isGivenKind(T_COMMENT)) {
-            $tokens->insertAt($insertIndex + 1, new Token([T_COMMENT, $comment]));
-            $tokens->insertAt($insertIndex + 1, new Token([T_WHITESPACE, ' ']));
+            $tokens->insertSlices([$insertIndex + 1 => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_COMMENT, $comment]),
+            ]]);
         }
     }
 }

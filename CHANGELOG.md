@@ -11,6 +11,21 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.5.0
+
+### Added
+
+- added support for php 8.2
+
+### Changed
+
+- `php-cs-fixer` is updated to `2.19` version, including binary `paysera-php-cs-fixer` that's distributed with this
+  library.
+
+### Removed
+
+- Removed unused dependency `gecko-packages/gecko-php-unit`
+
 ## 2.4.2
 
 ### Changed

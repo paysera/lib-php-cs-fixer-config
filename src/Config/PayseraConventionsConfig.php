@@ -141,7 +141,7 @@ class PayseraConventionsConfig extends Config
         return $this;
     }
 
-    public function getRules()
+    public function getRules(): array
     {
         $rules = parent::getRules();
         if ($this->migrationModeRules === null) {

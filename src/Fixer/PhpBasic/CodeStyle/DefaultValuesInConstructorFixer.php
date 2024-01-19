@@ -146,7 +146,9 @@ PHP
                     $endOfPropertyDeclarationSemicolon + 1,
                     $indentation
                 );
-                $tokens->insertAt($index + 3, new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()]));
+                $tokens->insertSlices([
+                    $index + 3 => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
+                ]);
 
                 if ($tokens[$index]->equals('{')) {
                     $indentation .= $this->whitespacesConfig->getIndent();
@@ -169,21 +171,26 @@ PHP
         array $propertiesWithDefaultValues
     ) {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
-            $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
-            $tokens->insertAt(++$index, new Token([T_VARIABLE, '$this']));
-            $tokens->insertAt(++$index, new Token([T_OBJECT_OPERATOR, '->']));
-            $tokens->insertAt(++$index, new Token([T_STRING, str_replace('$', '', $name)]));
+            $tokens->insertSlices([
+                $index + 1 => [
+                    new Token([T_WHITESPACE, $indentation]),
+                    new Token([T_VARIABLE, '$this']),
+                    new Token([T_OBJECT_OPERATOR, '->']),
+                    new Token([T_STRING, str_replace('$', '', $name)])
+                ],
+            ]);
+            $index += 4;
 
             /** @var Token $item */
             foreach ($propertyTokens as $item) {
                 if (false !== strpos($item->getContent(), "\n")) {
                     $itemIndentation = $item->getContent() . $this->whitespacesConfig->getIndent();
-                    $tokens->insertAt(++$index, new Token([T_WHITESPACE, $itemIndentation]));
+                    $tokens->insertSlices([++$index => [new Token([T_WHITESPACE, $itemIndentation])]]);
                 } else {
-                    $tokens->insertAt(++$index, $item);
+                    $tokens->insertSlices([++$index => [$item]]);
                 }
             }
-            $tokens->insertAt(++$index, new Token(';'));
+            $tokens->insertSlices([++$index => [new Token(';')]]);
 
             $tokens->getPrevMeaningfulToken($index + 1);
         }
@@ -218,32 +225,36 @@ PHP
 
     private function insertConstructTokensAndReturnOpeningBraceIndex(Tokens $tokens, int $index, string $indentation)
     {
-        $tokens->insertAt(++$index, new Token([T_PUBLIC, 'public']));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(++$index, new Token([T_FUNCTION, 'function']));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, ' ']));
-        $tokens->insertAt(++$index, new Token([T_STRING, self::CONSTRUCT]));
-        $tokens->insertAt(++$index, new Token('('));
-        $tokens->insertAt(++$index, new Token(')'));
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
-        $tokens->insertAt(++$index, new Token('{'));
-        $openingCurlyBrace = $index;
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
-        $tokens->insertAt(++$index, new Token('}'));
+        $openingCurlyBrace = $index + 9;
+        $tokens->insertSlices([++$index => [
+            new Token([T_PUBLIC, 'public']),
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_FUNCTION, 'function']),
+            new Token([T_WHITESPACE, ' ']),
+            new Token([T_STRING, self::CONSTRUCT]),
+            new Token('('),
+            new Token(')'),
+            new Token([T_WHITESPACE, $indentation]),
+            new Token('{'),
+            new Token([T_WHITESPACE, $indentation]),
+            new Token('}'),
+        ]]);
 
         return $openingCurlyBrace;
     }
 
     private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation)
     {
-        $tokens->insertAt(++$index, new Token([T_WHITESPACE, $indentation]));
-        $tokens->insertAt(++$index, new Token([T_STRING, 'parent']));
-        $tokens->insertAt(++$index, new Token([T_DOUBLE_COLON, '::']));
-        $tokens->insertAt(++$index, new Token([T_STRING, self::CONSTRUCT]));
-        $tokens->insertAt(++$index, new Token('('));
-        $tokens->insertAt(++$index, new Token(')'));
-        $tokens->insertAt(++$index, new Token(';'));
+        $tokens->insertSlices([$index + 1 => [
+            new Token([T_WHITESPACE, $indentation]),
+            new Token([T_STRING, 'parent']),
+            new Token([T_DOUBLE_COLON, '::']),
+            new Token([T_STRING, self::CONSTRUCT]),
+            new Token('('),
+            new Token(')'),
+            new Token(';'),
+        ]]);
 
-        return $index;
+        return $index + 7;
     }
 }

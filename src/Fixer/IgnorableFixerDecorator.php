@@ -40,7 +40,7 @@ final class IgnorableFixerDecorator implements
 <?php // @php-cs-fixer-ignore my_test_fixer'
 
 PHP
-                ),
+                )
             ]
         );
 

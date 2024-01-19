@@ -65,11 +65,12 @@ PHP
             }
 
             if ($classCount > 1 && !$tokens[$tokenCount - 1]->isGivenKind(T_COMMENT)) {
-                $tokens->insertAt(
-                    $tokenCount,
-                    new Token([T_COMMENT, '// TODO: "' . $tokens[$key]->getContent() . '" - ' . self::CONVENTION])
-                );
-                $tokens->insertAt($tokenCount, new Token([T_WHITESPACE, "\n"]));
+                $tokens->insertSlices([
+                    $tokenCount => [
+                        new Token([T_WHITESPACE, "\n"]),
+                        new Token([T_COMMENT, '// TODO: "' . $tokens[$key]->getContent() . '" - ' . self::CONVENTION]),
+                    ],
+                ]);
                 break;
             }
         }
