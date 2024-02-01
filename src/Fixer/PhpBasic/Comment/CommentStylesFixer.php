@@ -133,7 +133,7 @@ PHP
     /**
      * @param Tokens $tokens
      * @param int $commentIndex
-     * @param int $commentContent
+     * @param string $commentContent
      */
     private function fixMultiLineComment(Tokens $tokens, $commentIndex, $commentContent)
     {
