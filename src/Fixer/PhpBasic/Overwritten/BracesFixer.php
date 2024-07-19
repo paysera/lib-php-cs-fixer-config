@@ -23,7 +23,8 @@ declare(strict_types=1);
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Overwritten;
 
 use PhpCsFixer\AbstractFixer;
-use PhpCsFixer\Fixer\ConfigurationDefinitionFixerInterface;
+use PhpCsFixer\Fixer\ConfigurableFixerInterface;
+use PhpCsFixer\Fixer\ConfigurableFixerTrait;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
@@ -41,8 +42,10 @@ use PhpCsFixer\Tokenizer\TokensAnalyzer;
  *
  * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  */
-final class BracesFixer extends AbstractFixer implements ConfigurationDefinitionFixerInterface, WhitespacesAwareFixerInterface
+final class BracesFixer extends AbstractFixer implements ConfigurableFixerInterface, WhitespacesAwareFixerInterface
 {
+    use ConfigurableFixerTrait;
+
     /**
      * @internal
      */
@@ -172,9 +175,6 @@ PHP
         $this->fixDoWhile($tokens);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
         return new FixerConfigurationResolver([
@@ -810,8 +810,6 @@ PHP
                 return $tokens->getPrevNonWhitespace($index);
             }
         }
-
-        throw new \RuntimeException('Statement end not found.');
     }
 
     private function getControlTokens(): array

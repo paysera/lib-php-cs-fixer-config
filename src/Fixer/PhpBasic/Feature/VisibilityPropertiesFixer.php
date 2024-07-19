@@ -123,20 +123,16 @@ PHP,
         }
     }
 
-    protected function createConfigurationDefinition(
-    ): \PhpCsFixer\FixerConfiguration\FixerConfigurationResolverInterface
+    protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        $options = new FixerOptionBuilder(
-            'excluded_parents',
-            'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
-        );
-
-        $options = $options
-            ->setAllowedTypes(['array', 'bool'])
-            ->getOption()
-        ;
-
-        return new FixerConfigurationResolver('excluded_parents', [$options], $this->getName());
+        return new FixerConfigurationResolver([
+            (new FixerOptionBuilder(
+                'excluded_parents',
+                'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
+            ))
+                ->setAllowedTypes(['array', 'bool'])
+                ->getOption(),
+        ]);
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void

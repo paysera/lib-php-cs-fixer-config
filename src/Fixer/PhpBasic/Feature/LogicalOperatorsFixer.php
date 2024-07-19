@@ -66,9 +66,9 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_LOGICAL_AND)) {
-                $tokens->overrideAt($key, [T_BOOLEAN_AND, '&&']);
+                $tokens->overrideRange($key, $key, [T_BOOLEAN_AND, '&&']);
             } elseif ($token->isGivenKind(T_LOGICAL_OR)) {
-                $tokens->overrideAt($key, [T_BOOLEAN_OR, '||']);
+                $tokens->overrideRange($key, $key, [T_BOOLEAN_OR, '||']);
             }
         }
     }

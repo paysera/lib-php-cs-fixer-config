@@ -103,8 +103,8 @@ PHP,
             return;
         }
 
-        $tokens->overrideAt($zeroIndex, new Token([T_CONSTANT_ENCAPSED_STRING, "''"]));
-        $tokens->overrideAt($greaterIndex, new Token([T_IS_NOT_IDENTICAL, '!==']));
+        $tokens->overrideRange($zeroIndex, $zeroIndex, [new Token([T_CONSTANT_ENCAPSED_STRING, "''"])]);
+        $tokens->overrideRange($greaterIndex, $greaterIndex, [new Token([T_IS_NOT_IDENTICAL, '!=='])]);
         $tokens->clearRange($key, $key);
     }
 
