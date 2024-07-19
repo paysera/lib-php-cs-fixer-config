@@ -84,6 +84,8 @@ PHP
 
     public function configure(array $configuration = null): void
     {
+        $this->configure($configuration);
+
         if ($this->configuration['limits'] === true) {
             $this->softLimit = self::DEFAULT_SOFT_LIMIT;
             $this->hardLimit = self::DEFAULT_HARD_LIMIT;
