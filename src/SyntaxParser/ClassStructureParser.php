@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\SyntaxParser;
@@ -14,8 +15,8 @@ use RuntimeException;
 
 class ClassStructureParser
 {
-    private $parser;
-    private $importedClassesParser;
+    private Parser $parser;
+    private ImportedClassesParser $importedClassesParser;
 
     public function __construct(Parser $parser, ImportedClassesParser $importedClassesParser)
     {
@@ -23,11 +24,7 @@ class ClassStructureParser
         $this->importedClassesParser = $importedClassesParser;
     }
 
-    /**
-     * @param ContextualToken $firstToken
-     * @return ClassStructure|null
-     */
-    public function parseClassStructure(ContextualToken $firstToken)
+    public function parseClassStructure(ContextualToken $firstToken): ?ClassStructure
     {
         $token = $firstToken;
         while ($token !== null) {
@@ -51,7 +48,6 @@ class ClassStructureParser
     }
 
     /**
-     * @param ContextualToken $token
      * @return array|FunctionStructure[]
      */
     public function parseFunctionStructures(ContextualToken $token): array
@@ -170,7 +166,6 @@ class ClassStructureParser
 
     /**
      * @param array|SimpleItemList[] $itemGroup
-     * @return ParameterStructure
      */
     private function parseParameter(array $itemGroup): ParameterStructure
     {
@@ -218,7 +213,7 @@ class ClassStructureParser
         }
     }
 
-    private function resolveFullClassName(ParameterStructure $parameter, ClassStructure $classStructure)
+    private function resolveFullClassName(ParameterStructure $parameter, ClassStructure $classStructure): ?string
     {
         if ($parameter->getTypeHintContent() === null) {
             return null;

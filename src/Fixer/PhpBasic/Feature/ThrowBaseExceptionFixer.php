@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,21 +7,23 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ThrowBaseExceptionFixer extends AbstractFixer
 {
-    const EXCEPTION = 'exception';
-    const CONVENTION = 'PhpBasic convention 3.20.1: We almost never throw base \Exception class';
+    public const EXCEPTION = 'exception';
+    public const CONVENTION = 'PhpBasic convention 3.20.1: We almost never throw base \Exception class';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We never throw base \Exception class except if we don’t intend for it to be caught.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -30,33 +33,31 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_throw_base_exception';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_THROW);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_THROW)) {
@@ -74,7 +75,7 @@ PHP
                 || (
                     $tokens[$exceptionIndex]->isGivenKind(T_NS_SEPARATOR)
                     && strtolower(
-                        $tokens[$tokens->getNextMeaningfulToken($exceptionIndex)]->getContent()
+                        $tokens[$tokens->getNextMeaningfulToken($exceptionIndex)]->getContent(),
                     ) === self::EXCEPTION
                 )
             ) {
@@ -87,15 +88,13 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $endOfLineIndex
-     */
-    private function insertComment(Tokens $tokens, $endOfLineIndex)
+    private function insertComment(Tokens $tokens, int $endOfLineIndex)
     {
-        $tokens->insertSlices([$endOfLineIndex + 1 => [
-            new Token([T_WHITESPACE, ' ']),
-            new Token([T_COMMENT, '// TODO: ' . self::CONVENTION]),
-        ]]);
+        $tokens->insertSlices([
+            $endOfLineIndex + 1 => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_COMMENT, '// TODO: ' . self::CONVENTION]),
+            ]
+        ]);
     }
 }

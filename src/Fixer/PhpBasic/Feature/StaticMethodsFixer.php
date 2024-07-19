@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,19 +7,21 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class StaticMethodsFixer extends AbstractFixer
 {
-    const CONVENTION = 'PhpBasic convention 3.11: Static function must return only "self" or "static" constants';
+    public const CONVENTION = 'PhpBasic convention 3.11: Static function must return only "self" or "static" constants';
 
-    private $validTokens;
+    private array $validTokens;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->validTokens = [
             T_COMMENT,
             T_STATIC,
@@ -31,7 +34,7 @@ final class StaticMethodsFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -42,7 +45,8 @@ We do use static methods only in these cases:
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample {
     public static function someFunction()
@@ -51,39 +55,37 @@ class Sample {
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_static_methods';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run after `VisibilityRequiredFixer` and after `ArraySyntaxFixer` as short syntax
         return -10;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_STATIC, T_FUNCTION]);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $functionIndex = $tokens->getNextMeaningfulToken($key);
@@ -100,13 +102,15 @@ PHP
                     !$this->isStaticMethodValid($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
                     && !$tokens[$curlyBraceStartIndex - 2]->isGivenKind(T_COMMENT)
                 ) {
-                    $tokens->insertSlices([$curlyBraceStartIndex -1 => [
-                        new Token([T_WHITESPACE, ' ']),
-                        new Token([
-                            T_COMMENT,
-                            '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
-                        ]),
-                    ]]);
+                    $tokens->insertSlices([
+                        $curlyBraceStartIndex - 1 => [
+                            new Token([T_WHITESPACE, ' ']),
+                            new Token([
+                                T_COMMENT,
+                                '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
+                            ]),
+                        ]
+                    ]);
                 }
             }
         }
@@ -118,7 +122,7 @@ PHP
      * @param int $endIndex
      * @return bool
      */
-    private function isStaticMethodValid(Tokens $tokens, $startIndex, $endIndex)
+    private function isStaticMethodValid(Tokens $tokens, $startIndex, $endIndex): bool
     {
         for ($i = $startIndex + 1; $i < $endIndex; $i++) {
             if (

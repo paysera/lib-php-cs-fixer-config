@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -7,20 +8,22 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class DefaultValuesInConstructorFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const CONSTRUCT = '__construct';
+    public const CONSTRUCT = '__construct';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We declare default variables in constructor.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
                     
 class Sample
@@ -33,32 +36,30 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
-            null,
-            null,
             null,
             'Paysera recommendation.'
         );
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_default_values_in_constructor';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_CLASS]);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $parentConstructNeeded = false;
         $isConstructorPresent = false;
@@ -128,7 +129,7 @@ PHP
                     $tokens,
                     $previousMeaningfulToken,
                     $indentation,
-                    $propertiesWithDefaultValues
+                    $propertiesWithDefaultValues,
                 );
             }
 
@@ -144,7 +145,7 @@ PHP
                 $index = $this->insertConstructTokensAndReturnOpeningBraceIndex(
                     $tokens,
                     $endOfPropertyDeclarationSemicolon + 1,
-                    $indentation
+                    $indentation,
                 );
                 $tokens->insertSlices([
                     $index + 3 => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
@@ -169,7 +170,7 @@ PHP
         int $index,
         string $indentation,
         array $propertiesWithDefaultValues
-    ) {
+    ): void {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
             $tokens->insertSlices([
                 $index + 1 => [
@@ -196,15 +197,15 @@ PHP
         }
     }
 
-    private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token)
+    private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token): bool
     {
         $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
         $subsequentToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
 
         return (
-                $token->equals(';')
-                && $tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                && !$tokens[$subsequentToken]->isGivenKind(T_VARIABLE)
+            $token->equals(';')
+            && $tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            && !$tokens[$subsequentToken]->isGivenKind(T_VARIABLE)
             || (
                 $token->equals(';')
                 && !$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
@@ -212,48 +213,54 @@ PHP
         );
     }
 
-    private function isConstructor(int $key, Tokens $tokens, Token $token)
+    private function isConstructor(int $key, Tokens $tokens, Token $token): bool
     {
         $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
         return
             $tokens[$key]->isGivenKind(T_STRING)
             && $token->getContent() === self::CONSTRUCT
             && $tokens[$key + 1]->equals('(')
-            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-        ;
+            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION);
     }
 
-    private function insertConstructTokensAndReturnOpeningBraceIndex(Tokens $tokens, int $index, string $indentation)
-    {
+    private function insertConstructTokensAndReturnOpeningBraceIndex(
+        Tokens $tokens,
+        int $index,
+        string $indentation
+    ): int {
         $openingCurlyBrace = $index + 9;
-        $tokens->insertSlices([++$index => [
-            new Token([T_PUBLIC, 'public']),
-            new Token([T_WHITESPACE, ' ']),
-            new Token([T_FUNCTION, 'function']),
-            new Token([T_WHITESPACE, ' ']),
-            new Token([T_STRING, self::CONSTRUCT]),
-            new Token('('),
-            new Token(')'),
-            new Token([T_WHITESPACE, $indentation]),
-            new Token('{'),
-            new Token([T_WHITESPACE, $indentation]),
-            new Token('}'),
-        ]]);
+        $tokens->insertSlices([
+            ++$index => [
+                new Token([T_PUBLIC, 'public']),
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_FUNCTION, 'function']),
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_STRING, self::CONSTRUCT]),
+                new Token('('),
+                new Token(')'),
+                new Token([T_WHITESPACE, $indentation]),
+                new Token('{'),
+                new Token([T_WHITESPACE, $indentation]),
+                new Token('}'),
+            ]
+        ]);
 
         return $openingCurlyBrace;
     }
 
-    private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation)
+    private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation): int
     {
-        $tokens->insertSlices([$index + 1 => [
-            new Token([T_WHITESPACE, $indentation]),
-            new Token([T_STRING, 'parent']),
-            new Token([T_DOUBLE_COLON, '::']),
-            new Token([T_STRING, self::CONSTRUCT]),
-            new Token('('),
-            new Token(')'),
-            new Token(';'),
-        ]]);
+        $tokens->insertSlices([
+            $index + 1 => [
+                new Token([T_WHITESPACE, $indentation]),
+                new Token([T_STRING, 'parent']),
+                new Token([T_DOUBLE_COLON, '::']),
+                new Token([T_STRING, self::CONSTRUCT]),
+                new Token('('),
+                new Token(')'),
+                new Token(';'),
+            ]
+        ]);
 
         return $index + 7;
     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -7,26 +8,28 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class AssignmentsInConditionsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const CONVENTION = 'PhpBasic convention 3.7: We do not use assignments inside conditional statements';
+    public const CONVENTION = 'PhpBasic convention 3.7: We do not use assignments inside conditional statements';
 
-    private $conditionalStatements;
+    private array $conditionalStatements;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->conditionalStatements = [
             T_IF,
             T_ELSEIF,
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -35,7 +38,8 @@ Exception: in a while loop condition.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -50,33 +54,31 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_assignments_in_conditions';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound($this->conditionalStatements);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind($this->conditionalStatements)) {
@@ -104,7 +106,7 @@ PHP
                 $this->insertComment(
                     $tokens,
                     $tokens->getPrevMeaningfulToken($i),
-                    $tokens->getNextTokenOfKind($endIndex, ['{'])
+                    $tokens->getNextTokenOfKind($endIndex, ['{']),
                 );
                 break;
             }
@@ -122,7 +124,9 @@ PHP
             $tokens->insertSlices([
                 $insertIndex + 1 => [
                     new Token([T_WHITESPACE, ' ']),
-                    new Token([T_COMMENT, '// TODO: "' . $tokens[$variableIndex]->getContent() . '" - ' . self::CONVENTION]),
+                    new Token(
+                        [T_COMMENT, '// TODO: "' . $tokens[$variableIndex]->getContent() . '" - ' . self::CONVENTION],
+                    ),
                 ],
             ]);
         }

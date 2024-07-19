@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -9,34 +10,39 @@ use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
 use Paysera\PhpCsFixerConfig\Parser\Parser;
 use Paysera\PhpCsFixerConfig\SyntaxParser\ClassStructureParser;
 use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
-use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\Fixer\ConfigurableFixerTrait;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
 use Exception;
 
 final class TypeHintingFixer extends AbstractContextualTokenFixer
 {
-    const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
-    const CONSTRUCT = '__construct';
-    const THIS = '$this';
+    use ConfigurableFixerTrait;
 
-    private $exceptions;
-    private $classStructureParser;
+    public const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
+    public const CONSTRUCT = '__construct';
+    public const THIS = '$this';
+
+    private array $exceptions;
+    private ClassStructureParser $classStructureParser;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->exceptions = ['EntityManager', 'Repository', 'Normalizer', 'Denormalizer'];
         $this->classStructureParser = new ClassStructureParser(
             new Parser(new GroupSeparatorHelper()),
-            new ImportedClassesParser()
+            new ImportedClassesParser(),
         );
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We always type hint narrowest possible interface which we use inside the function or class.',
@@ -85,41 +91,37 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_type_hinting';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // before NamespacesAndUseStatementsFixer as it does not import classes themselves
         return 75;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function configure(array $configuration = null)
+    public function configure(array $configuration = null): void
     {
-        parent::configure($configuration);
-
         if ($this->configuration['exceptions'] === true) {
             return;
         }
@@ -128,11 +130,11 @@ PHP
         }
     }
 
-    protected function createConfigurationDefinition()
+    protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
         $options = new FixerOptionBuilder(
             'exceptions',
-            'Sets the exceptions for which usage of narrowest interface could be skipped.'
+            'Sets the exceptions for which usage of narrowest interface could be skipped.',
         );
 
         $options = $options
@@ -140,7 +142,7 @@ PHP
             ->getOption()
         ;
 
-        return new FixerConfigurationResolverRootless('exceptions', [$options], $this->getName());
+        return new FixerConfigurationResolver('exceptions', [$options], $this->getName());
     }
 
     protected function applyFixOnContextualToken(ContextualToken $token)
@@ -178,13 +180,13 @@ PHP
             }
 
             $firstToken = $parameter->getTypeHintItem()->firstToken()->setNextContextualToken(
-                $parameter->getTypeHintItem()->lastToken()->getNextToken()
+                $parameter->getTypeHintItem()->lastToken()->getNextToken(),
             );
             $firstToken->replaceWithTokens($this->buildTokens($suggestedTypeHint));
         }
     }
 
-    private function analyseFunctionCalls(ContextualToken $firstToken)
+    private function analyseFunctionCalls(ContextualToken $firstToken): array
     {
         $calls = [];
         $token = $firstToken;
@@ -230,7 +232,7 @@ PHP
         return null;
     }
 
-    private function buildTokens(string $fullClassName)
+    private function buildTokens(string $fullClassName): array
     {
         $parts = explode('\\', ltrim($fullClassName, '\\'));
         $tokens = [];
@@ -241,7 +243,7 @@ PHP
         return $tokens;
     }
 
-    private function isBlacklisted(string $typeHintFullClass)
+    private function isBlacklisted(string $typeHintFullClass): bool
     {
         foreach ($this->exceptions as $exception) {
             if (strpos($typeHintFullClass, $exception) !== false) {

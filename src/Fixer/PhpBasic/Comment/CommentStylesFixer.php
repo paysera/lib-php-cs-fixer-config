@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
@@ -7,13 +8,14 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class CommentStylesFixer extends AbstractFixer
 {
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -24,7 +26,8 @@ We do not use /* */ or # comments at all.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -41,23 +44,23 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_comment_comment_styles';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_COMMENT, T_DOC_COMMENT]);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (
@@ -111,10 +114,6 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     */
     private function fixComments(Tokens $tokens, $key)
     {
         $commentContent = $tokens[$key]->getContent();
@@ -130,11 +129,6 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $commentIndex
-     * @param string $commentContent
-     */
     private function fixMultiLineComment(Tokens $tokens, $commentIndex, $commentContent)
     {
         $index = $commentIndex;
@@ -156,12 +150,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return int|null
-     */
-    private function getPropertyDocBlockIndex(Tokens $tokens, $key)
+    private function getPropertyDocBlockIndex(Tokens $tokens, $key): ?int
     {
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
@@ -184,12 +173,7 @@ PHP
         return null;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return int|null
-     */
-    private function getClassDocBlockIndex(Tokens $tokens, $key)
+    private function getClassDocBlockIndex(Tokens $tokens, $key): ?int
     {
         if ($tokens[$key]->isGivenKind(Token::getClassyTokenKinds())) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
@@ -221,11 +205,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $curlyBraceStartIndex
-     */
-    private function validateSingleLineDocBlocks(Tokens $tokens, $curlyBraceStartIndex)
+    private function validateSingleLineDocBlocks(Tokens $tokens, int $curlyBraceStartIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
         for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
@@ -240,25 +220,14 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param string $docBlockContent
-     */
-    private function convertToSingleLineDocBlock(Tokens $tokens, $key, $docBlockContent)
+    private function convertToSingleLineDocBlock(Tokens $tokens, int $key, string $docBlockContent)
     {
         $replacement = preg_replace('#\s\*\s#', ' ', $docBlockContent);
         $replacement = preg_replace('#\s+#', ' ', $replacement);
         $tokens[$key]->setContent($replacement);
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param string $docBlockContent
-     * @param string $indent
-     */
-    private function convertToMultiLineDocBlock(Tokens $tokens, $docBlockIndex, $docBlockContent, $indent)
+    private function convertToMultiLineDocBlock(Tokens $tokens, int $docBlockIndex, string $docBlockContent, string $indent)
     {
         preg_match('#\/\**(.*?)\*\/#', $docBlockContent, $match);
         if (isset($match[1])) {

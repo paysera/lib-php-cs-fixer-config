@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,21 +7,23 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class MagicMethodsFixer extends AbstractFixer
 {
-    const TO_STRING = '__toString';
-    const MAGIC_METHODS_CONVENTION = 'PhpBasic convention 3.14.1: We avoid magic methods';
-    const STRING_CONVENTION = 'PhpBasic convention 3.12: We do not use __toString method for main functionality';
+    public const TO_STRING = '__toString';
+    public const MAGIC_METHODS_CONVENTION = 'PhpBasic convention 3.14.1: We avoid magic methods';
+    public const STRING_CONVENTION = 'PhpBasic convention 3.12: We do not use __toString method for main functionality';
 
-    private $magicMethods;
+    private array $magicMethods;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->magicMethods = [
             self::TO_STRING,
             '__destruct',
@@ -39,7 +42,7 @@ final class MagicMethodsFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -48,7 +51,8 @@ It applies to all magic methods except __construct().
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -70,33 +74,31 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_magic_methods';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $methodName = $token->getContent();
@@ -104,7 +106,7 @@ PHP
                 $parenthesesStartIndex = $tokens->getNextTokenOfKind($key, ['(']);
                 $parenthesesEndIndex = $tokens->findBlockEnd(
                     Tokens::BLOCK_TYPE_PARENTHESIS_BRACE,
-                    $parenthesesStartIndex
+                    $parenthesesStartIndex,
                 );
 
                 if ($tokens[$parenthesesEndIndex + 1]->equals(';')) {
@@ -119,7 +121,7 @@ PHP
                             $tokens,
                             $parenthesesEndIndex + 1,
                             $methodName,
-                            self::MAGIC_METHODS_CONVENTION
+                            self::MAGIC_METHODS_CONVENTION,
                         );
                     }
                 }
@@ -127,17 +129,13 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $methodName
-     * @param string $convention
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $methodName, $convention)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $methodName, string $convention)
     {
-        $tokens->insertSlices([$insertIndex => [
-            new Token([T_WHITESPACE, ' ']),
-            new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]),
-        ]]);
+        $tokens->insertSlices([
+            $insertIndex => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]),
+            ]
+        ]);
     }
 }

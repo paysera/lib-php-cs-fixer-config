@@ -1,77 +1,82 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer;
 
 use PhpCsFixer\ConfigurationException\InvalidFixerConfigurationException;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
-use PhpCsFixer\Fixer\DefinedFixerInterface;
+use PhpCsFixer\Fixer\ConfigurableFixerTrait;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
-use PhpCsFixer\FixerDefinition\CodeSample;
-use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverInterface;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 
 final class IgnorableFixerDecorator implements
-    DefinedFixerInterface,
+//    DefinedFixerInterface,
     ConfigurableFixerInterface,
     WhitespacesAwareFixerInterface
 {
-    const IGNORE_ANNOTATION = '@php-cs-fixer-ignore';
+    use ConfigurableFixerTrait;
 
-    private $innerFixer;
+    public const IGNORE_ANNOTATION = '@php-cs-fixer-ignore';
+
+    private FixerInterface $innerFixer;
 
     public function __construct(FixerInterface $innerFixer)
     {
         $this->innerFixer = $innerFixer;
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
-        if ($this->innerFixer instanceof DefinedFixerInterface) {
-            return $this->innerFixer->getDefinition();
-        }
-        return new FixerDefinition(
-            'Description is not available.',
-            [
-                new CodeSample(<<<'PHP'
-<?php // @php-cs-fixer-ignore my_test_fixer'
+//        if ($this->innerFixer instanceof DefinedFixerInterface) {
+        return $this->innerFixer->getDefinition();
+//        }
 
-PHP
-                )
-            ]
-        );
-
+//        return new FixerDefinition(
+//            'Description is not available.',
+//            [
+//                new CodeSample(
+//                    <<<'PHP'
+//<?php // @php-cs-fixer-ignore my_test_fixer'
+//
+//PHP,
+//                )
+//            ],
+//        );
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $this->innerFixer->isCandidate($tokens);
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return $this->innerFixer->isRisky();
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->innerFixer->getName();
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return $this->innerFixer->getPriority();
     }
 
-    public function supports(SplFileInfo $file)
+    public function supports(SplFileInfo $file): bool
     {
         return $this->innerFixer->supports($file);
     }
 
-    public function fix(SplFileInfo $file, Tokens $tokens)
+    public function fix(SplFileInfo $file, Tokens $tokens): void
     {
         $ignoreNotice = self::IGNORE_ANNOTATION . ' ' . $this->getName();
         $contents = $tokens->generateCode();
@@ -82,7 +87,7 @@ PHP
         $this->innerFixer->fix($file, $tokens);
     }
 
-    public function configure(array $configuration = null)
+    public function configure(array $configuration = null): void
     {
         if (!$this->innerFixer instanceof ConfigurableFixerInterface) {
             throw new InvalidFixerConfigurationException($this->getName(), 'Is not configurable.');
@@ -91,7 +96,12 @@ PHP
         $this->innerFixer->configure($configuration);
     }
 
-    public function setWhitespacesConfig(WhitespacesFixerConfig $config)
+    public function createConfigurationDefinition(): FixerConfigurationResolverInterface
+    {
+        return new FixerConfigurationResolver([]);
+    }
+
+    public function setWhitespacesConfig(WhitespacesFixerConfig $config): void
     {
         if ($this->innerFixer instanceof WhitespacesAwareFixerInterface) {
             $this->innerFixer->setWhitespacesConfig($config);

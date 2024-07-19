@@ -1,17 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\SyntaxParser;
 
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\ImportedClasses;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use PhpCsFixer\Tokenizer\TokensAnalyzer;
 
 class ImportedClassesParser
 {
-    public function parseImportedClasses(ContextualToken $firstToken)
+    public function parseImportedClasses(ContextualToken $firstToken): ImportedClasses
     {
         $importedClasses = new ImportedClasses();
         $token = $firstToken;
@@ -56,7 +56,6 @@ class ImportedClassesParser
         $className = null;
         $currentContent = '';
         for ($index = $start + 1; $index < $tokens->count(); $index++) {
-            /** @var Token $token */
             $token = $tokens[$index];
             if ($token->getContent() === ';') {
                 break;

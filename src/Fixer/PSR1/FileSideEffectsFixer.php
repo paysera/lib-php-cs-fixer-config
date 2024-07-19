@@ -1,33 +1,39 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
 
 use PhpCsFixer\AbstractFixer;
-use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\Fixer\ConfigurableFixerTrait;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class FileSideEffectsFixer extends AbstractFixer
 {
-    const CONVENTION = '/* TODO: A file should declare new symbols (classes, functions, constants, etc.)
+    use ConfigurableFixerTrait;
+
+    public const CONVENTION = '/* TODO: A file should declare new symbols (classes, functions, constants, etc.)
     and cause no other side effects, or it should execute logic with side effects, but should not do both. */';
 
-    private $forbiddenFunctions;
-    private $forbiddenTokens;
+    private array $forbiddenFunctions;
+    private array $forbiddenTokens;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->forbiddenFunctions = ['print_r', 'var_dump', 'ini_set'];
         $this->forbiddenTokens = [T_INCLUDE, T_ECHO];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -36,7 +42,8 @@ or executes logic with side effects, but not both.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 // side effect: change ini settings
 ini_set("error_reporting", E_ALL);
@@ -52,41 +59,37 @@ function foo()
     var_dump($a);
 }
 
-PHP
+PHP,
                 ),
             ],
-            null,
-            null,
             null,
             'Paysera recommendation.'
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/psr_1_file_side_effects';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return -49;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    public function configure(array $configuration = null)
+    public function configure(array $configuration = null): void
     {
-        parent::configure($configuration);
-
         if ($this->configuration['side_effects'] === true) {
             return;
         }
@@ -98,22 +101,19 @@ PHP
         }
     }
 
-    protected function createConfigurationDefinition()
+    protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        $sideEffects = new FixerOptionBuilder(
-            'side_effects',
-            'Set forbidden functions and tokens, e.g. `["functions" => ["print_r"], "tokens" => [T_ECHO]]`.'
-        );
-
-        $sideEffects = $sideEffects
-            ->setAllowedTypes(['array', 'bool'])
-            ->getOption()
-        ;
-
-        return new FixerConfigurationResolverRootless('side_effects', [$sideEffects], $this->getName());
+        return new FixerConfigurationResolver([
+            (new FixerOptionBuilder(
+                'side_effects',
+                'Set forbidden functions and tokens, e.g. `["functions" => ["print_r"], "tokens" => [T_ECHO]]`.',
+            ))
+                ->setAllowedTypes(['array', 'bool'])
+                ->getOption(),
+        ]);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $sideEffects = 0;
         $symbols = 0;
@@ -140,11 +140,7 @@ PHP
         }
     }
 
-    /**
-     * @param Token $token
-     * @return int
-     */
-    private function countSymbols(Token $token)
+    private function countSymbols(Token $token): int
     {
         if ($token->isGivenKind([T_CLASS, T_INTERFACE, T_TRAIT, T_FUNCTION])) {
             return 1;
@@ -153,17 +149,12 @@ PHP
         return 0;
     }
 
-    /**
-     * @param Token $token
-     * @param Token $bracketToken
-     * @return int
-     */
-    private function countSideEffects(Token $token, Token $bracketToken)
+    private function countSideEffects(Token $token, Token $bracketToken): int
     {
         if (
-                $token->isGivenKind(T_STRING)
-                && in_array($token->getContent(), $this->forbiddenFunctions, true)
-                && $bracketToken->equals('(')
+            $token->isGivenKind(T_STRING)
+            && in_array($token->getContent(), $this->forbiddenFunctions, true)
+            && $bracketToken->equals('(')
             || $token->isGivenKind($this->forbiddenTokens)
         ) {
             return 1;

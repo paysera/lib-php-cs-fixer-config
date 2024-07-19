@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -11,25 +12,27 @@ use PhpCsFixer\DocBlock\Line;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ReturnAndArgumentTypesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const NO_MIXED_VOID = 'TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)';
-    const MULTIPLE_TYPES = 'TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)';
-    const MULTIPLE_ENTITIES = 'TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)';
-    const REPOSITORY = 'Repository';
+    public const NO_MIXED_VOID = 'TODO: we always return something or always nothing (https://bit.ly/psg-return-and-argument-types)';
+    public const MULTIPLE_TYPES = 'TODO: we do not use multiple types (https://bit.ly/psg-return-and-argument-types)';
+    public const MULTIPLE_ENTITIES = 'TODO: use single interface or common class instead (https://bit.ly/psg-return-and-argument-types)';
+    public const REPOSITORY = 'Repository';
 
-    const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$|<.*>/';
+    public const COLLECTION_TYPE_REGEXP = '/Collection$|Generator$|^array$|\[\]$|<.*>/';
 
-    private $scalarTypes;
-    private $strictValues;
+    private array $scalarTypes;
+    private array $strictValues;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->scalarTypes = [
             'array',
             'callable',
@@ -49,14 +52,14 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
     }
 
     // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
-    private static function getPassingIdNamespaceExclusions()
+    private static function getPassingIdNamespaceExclusions(): array
     {
         return [
             self::REPOSITORY,
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -70,7 +73,8 @@ We can return SomeClass|null or string|null.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -89,34 +93,32 @@ class Sample
     }
 }
 
-PHP
+PHP,
 
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_return_and_argument_types';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $classNamespace = null;
         foreach ($tokens as $key => $token) {
@@ -156,11 +158,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $curlyBraceStartIndex
-     */
-    private function validateReturnTypes(Tokens $tokens, $curlyBraceStartIndex)
+    private function validateReturnTypes(Tokens $tokens, int $curlyBraceStartIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
 
@@ -205,12 +203,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param string $classNamespace
-     */
-    private function validateDocBlockTypes(Tokens $tokens, $docBlockIndex, $classNamespace)
+    private function validateDocBlockTypes(Tokens $tokens, int $docBlockIndex, string $classNamespace)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $annotations = $docBlock->getAnnotationsOfType(['return', 'param']);
@@ -231,13 +224,13 @@ PHP
                     $tokens,
                     $docBlockIndex,
                     $annotation,
-                    $warning
+                    $warning,
                 );
             }
         }
     }
 
-    private function getTypeUsageWarning(array $types, $classNamespace)
+    private function getTypeUsageWarning(array $types, $classNamespace): ?string
     {
         if (in_array('mixed', $types, true)) {
             return self::MULTIPLE_TYPES;
@@ -289,39 +282,30 @@ PHP
         return self::MULTIPLE_ENTITIES;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param Annotation $returnAnnotation
-     * @param string $warning
-     */
     private function insertReturnAnnotationWarning(
         Tokens $tokens,
-        $docBlockIndex,
+        int $docBlockIndex,
         Annotation $returnAnnotation,
-        $warning
+        string $warning
     ) {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $lines = $docBlock->getLines();
         $replacement = preg_replace('#\\n$#', ' ', $returnAnnotation->getContent());
         $lines[$returnAnnotation->getEnd()] = new Line(
-            $replacement . $warning . $this->whitespacesConfig->getLineEnding()
+            $replacement . $warning . $this->whitespacesConfig->getLineEnding(),
         );
         $tokens[$docBlockIndex]->setContent(implode('', $lines));
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $comment
-     */
     private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, '// ' . $comment]),
-            ]]);
+            $tokens->insertSlices([
+                $insertIndex + 1 => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, '// ' . $comment]),
+                ]
+            ]);
         }
     }
 }

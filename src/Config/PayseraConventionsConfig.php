@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Config;
@@ -48,6 +49,7 @@ use Paysera\PhpCsFixerConfig\Fixer\PSR1\FileSideEffectsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FunctionNameCamelCaseFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
 use PhpCsFixer\Config;
+use PhpCsFixer\ConfigInterface;
 use PhpCsFixer\Finder;
 use PhpCsFixer\Fixer\FixerInterface;
 use RuntimeException;
@@ -57,10 +59,7 @@ use RuntimeException;
  */
 class PayseraConventionsConfig extends Config
 {
-    /**
-     * @var null|array
-     */
-    private $migrationModeRules;
+    private ?array $migrationModeRules;
 
     public function __construct()
     {
@@ -113,7 +112,7 @@ class PayseraConventionsConfig extends Config
         ]));
     }
 
-    private function decorateWithIgnorable(array $fixers)
+    private function decorateWithIgnorable(array $fixers): array
     {
         return array_map(function (FixerInterface $fixer) {
             return new IgnorableFixerDecorator($fixer);
@@ -123,7 +122,7 @@ class PayseraConventionsConfig extends Config
     public function setDefaultFinder(
         array $in = ['src'],
         array $exclude = ['tests', 'Tests', 'test', 'Test']
-    ) {
+    ): PayseraConventionsConfig {
         $finder = Finder::create()
             ->in($in)
             ->exclude($exclude)
@@ -134,7 +133,7 @@ class PayseraConventionsConfig extends Config
         return $this;
     }
 
-    public function enableMigrationMode(array $rules)
+    public function enableMigrationMode(array $rules): PayseraConventionsConfig
     {
         $this->migrationModeRules = $rules;
 
@@ -173,7 +172,7 @@ class PayseraConventionsConfig extends Config
         }
     }
 
-    public function setSafeRules(array $rules = [])
+    public function setSafeRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(false)
@@ -184,7 +183,7 @@ class PayseraConventionsConfig extends Config
         ;
     }
 
-    public function setRiskyRules(array $rules = [])
+    public function setRiskyRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(true)
@@ -196,7 +195,7 @@ class PayseraConventionsConfig extends Config
         ;
     }
 
-    public function setRecommendedRules(array $rules = [])
+    public function setRecommendedRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(true)
@@ -209,7 +208,7 @@ class PayseraConventionsConfig extends Config
         ;
     }
 
-    private function getRecommendedRules()
+    private function getRecommendedRules(): array
     {
         return [
             'Paysera/psr_1_file_side_effects' => true,
@@ -236,7 +235,7 @@ class PayseraConventionsConfig extends Config
         ];
     }
 
-    private function getRiskyRules()
+    private function getRiskyRules(): array
     {
         return [
             // Symfony:risky
@@ -279,7 +278,7 @@ class PayseraConventionsConfig extends Config
         ];
     }
 
-    private function getSafeRules()
+    private function getSafeRules(): array
     {
         return [
             // PSR1, PSR2 and Symfony

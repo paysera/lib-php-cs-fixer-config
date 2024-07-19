@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser;
@@ -12,7 +13,7 @@ use RuntimeException;
 
 class Parser
 {
-    private $groupSeparatorHelper;
+    private GroupSeparatorHelper $groupSeparatorHelper;
 
     public function __construct(GroupSeparatorHelper $groupSeparatorHelper)
     {
@@ -114,7 +115,7 @@ class Parser
         throw new RuntimeException(sprintf('Cannot find end token "%s"', $endTokenValue));
     }
 
-    private function buildConstructItem(ItemInterface $prefixItem, array $contents, ItemInterface $postfixItem)
+    private function buildConstructItem(ItemInterface $prefixItem, array $contents, ItemInterface $postfixItem): ComplexItemList
     {
         $contentList = new SimpleItemList($contents);
         $contentList->setReplaceCallback(function () {

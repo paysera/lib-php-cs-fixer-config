@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /*
@@ -28,6 +29,7 @@ use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Preg;
 use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
@@ -44,14 +46,14 @@ final class BracesFixer extends AbstractFixer implements ConfigurationDefinition
     /**
      * @internal
      */
-    const LINE_NEXT = 'next';
+    public const LINE_NEXT = 'next';
 
     /**
      * @internal
      */
-    const LINE_SAME = 'same';
+    public const LINE_SAME = 'same';
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_braces';
     }
@@ -59,7 +61,7 @@ final class BracesFixer extends AbstractFixer implements ConfigurationDefinition
     /**
      * {@inheritdoc}
      */
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'The body of each structure MUST be enclosed by braces. Braces should be properly placed. Body of braces should be properly indented.',
@@ -143,7 +145,7 @@ PHP
     /**
      * {@inheritdoc}
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         // should be run after the ElseIfFixer, NoEmptyStatementFixer and NoUselessElseFixer
         return -25;
@@ -152,7 +154,7 @@ PHP
     /**
      * {@inheritdoc}
      */
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return true;
     }
@@ -160,7 +162,7 @@ PHP
     /**
      * {@inheritdoc}
      */
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(\SplFileInfo $file, Tokens $tokens): void
     {
         $this->fixCommentBeforeBrace($tokens);
         $this->fixMissingControlBraces($tokens);
@@ -173,7 +175,7 @@ PHP
     /**
      * {@inheritdoc}
      */
-    protected function createConfigurationDefinition()
+    protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
         return new FixerConfigurationResolver([
             (new FixerOptionBuilder('allow_single_line_closure', 'Whether single line lambda notation should be allowed.'))
@@ -693,7 +695,7 @@ PHP
      *
      * @return string
      */
-    private function detectIndent(Tokens $tokens, $index)
+    private function detectIndent(Tokens $tokens, $index): string
     {
         while (true) {
             $whitespaceIndex = $tokens->getPrevTokenOfKind($index, [[T_WHITESPACE]]);
@@ -728,7 +730,7 @@ PHP
      *
      * @return int
      */
-    private function findParenthesisEnd(Tokens $tokens, $structureTokenIndex)
+    private function findParenthesisEnd(Tokens $tokens, $structureTokenIndex): int
     {
         $nextIndex = $tokens->getNextMeaningfulToken($structureTokenIndex);
         $nextToken = $tokens[$nextIndex];
@@ -747,7 +749,7 @@ PHP
      *
      * @return int
      */
-    private function findStatementEnd(Tokens $tokens, $parenthesisEndIndex)
+    private function findStatementEnd(Tokens $tokens, $parenthesisEndIndex): int
     {
         $nextIndex = $tokens->getNextMeaningfulToken($parenthesisEndIndex);
         $nextToken = $tokens[$nextIndex];
@@ -812,7 +814,7 @@ PHP
         throw new \RuntimeException('Statement end not found.');
     }
 
-    private function getControlTokens()
+    private function getControlTokens(): array
     {
         static $tokens = [
             T_DECLARE,
@@ -832,7 +834,7 @@ PHP
         return $tokens;
     }
 
-    private function getControlContinuationTokens()
+    private function getControlContinuationTokens(): array
     {
         static $tokens = [
             T_CATCH,
@@ -844,7 +846,7 @@ PHP
         return $tokens;
     }
 
-    private function getControlContinuationTokensForOpeningToken($openingTokenKind)
+    private function getControlContinuationTokensForOpeningToken($openingTokenKind): array
     {
         if (T_IF === $openingTokenKind) {
             return [
@@ -867,7 +869,7 @@ PHP
         return [];
     }
 
-    private function getFinalControlContinuationTokensForOpeningToken($openingTokenKind)
+    private function getFinalControlContinuationTokensForOpeningToken($openingTokenKind): array
     {
         if (T_IF === $openingTokenKind) {
             return [T_ELSE];
@@ -964,7 +966,7 @@ PHP
      *
      * @return bool
      */
-    private function isMultilined(Tokens $tokens, $startParenthesisIndex, $endParenthesisIndex)
+    private function isMultilined(Tokens $tokens, $startParenthesisIndex, $endParenthesisIndex): bool
     {
         for ($i = $startParenthesisIndex; $i < $endParenthesisIndex; ++$i) {
             if (false !== strpos($tokens[$i]->getContent(), "\n")) {
@@ -988,7 +990,7 @@ PHP
      *
      * @return bool
      */
-    private function isCommentWithFixableIndentation(Tokens $tokens, $index)
+    private function isCommentWithFixableIndentation(Tokens $tokens, $index): bool
     {
         if (!$tokens[$index]->isComment()) {
             return false;
@@ -1038,7 +1040,7 @@ PHP
      *
      * @return null|int
      */
-    private function getSiblingContinuousSingleLineComment(Tokens $tokens, $index, $after)
+    private function getSiblingContinuousSingleLineComment(Tokens $tokens, $index, $after): ?int
     {
         $siblingIndex = $index;
         do {

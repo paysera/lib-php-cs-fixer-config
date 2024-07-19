@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\SyntaxParser\Entity;
@@ -7,61 +8,35 @@ use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 
 class ClassStructure
 {
-    /**
-     * @var string|null
-     */
-    private $name;
+    private ?string $name;
 
-    /**
-     * @var ContextualToken|null
-     */
-    private $firstToken;
+    private ?ContextualToken $firstToken;
 
-    /**
-     * @var FunctionStructure[]
-     */
-    private $methods;
+    private array $methods;
 
-    /**
-     * @var ImportedClasses
-     */
-    private $importedClasses;
+    private ImportedClasses $importedClasses;
 
     public function __construct()
     {
         $this->methods = [];
     }
 
-    /**
-     * @return string|null
-     */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    /**
-     * @param string|null $name
-     * @return $this
-     */
     public function setName(string $name): self
     {
         $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return ContextualToken|null
-     */
-    public function getFirstToken()
+    public function getFirstToken(): ?ContextualToken
     {
         return $this->firstToken;
     }
 
-    /**
-     * @param ContextualToken|null $firstToken
-     * @return $this
-     */
     public function setFirstToken(ContextualToken $firstToken): self
     {
         $this->firstToken = $firstToken;
@@ -86,10 +61,7 @@ class ClassStructure
         return $this;
     }
 
-    /**
-     * @return FunctionStructure|null
-     */
-    public function getConstructorMethod()
+    public function getConstructorMethod(): ?FunctionStructure
     {
         foreach ($this->methods as $method) {
             if ($method->getName() === '__construct') {
@@ -100,18 +72,11 @@ class ClassStructure
         return null;
     }
 
-    /**
-     * @return ImportedClasses
-     */
     public function getImportedClasses(): ImportedClasses
     {
         return $this->importedClasses;
     }
 
-    /**
-     * @param ImportedClasses $importedClasses
-     * @return $this
-     */
     public function setImportedClasses(ImportedClasses $importedClasses): self
     {
         $this->importedClasses = $importedClasses;

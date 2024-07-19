@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -10,6 +11,7 @@ use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
@@ -21,12 +23,13 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
      *
      * @var array
      */
-    private $unavailableTypeHints;
-    private $inheritanceHelper;
+    private array $unavailableTypeHints;
+    private InheritanceHelper $inheritanceHelper;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->inheritanceHelper = new InheritanceHelper();
         $this->unavailableTypeHints = [
             'array',
@@ -45,7 +48,7 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -59,7 +62,8 @@ Risky, because of type hint copy from docBlock.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -72,32 +76,30 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_type_hinting_arguments';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
@@ -128,23 +130,13 @@ PHP
         }
     }
 
-    /**
-     * @param int $functionTokenIndex
-     * @param Tokens $tokens
-     * @return bool
-     */
-    private function methodImplementedFromInterface($functionTokenIndex, Tokens $tokens)
+    private function methodImplementedFromInterface(int $functionTokenIndex, Tokens $tokens): bool
     {
         $method = $tokens[$tokens->getNextNonWhitespace($functionTokenIndex)];
         return $this->inheritanceHelper->isMethodFromInterface($method->getContent(), $tokens);
     }
 
-    /**
-     * @param int $functionTokenIndex
-     * @param Tokens $tokens
-     * @return bool
-     */
-    private function methodCallsInheritedProperty($functionTokenIndex, Tokens $tokens)
+    private function methodCallsInheritedProperty(int $functionTokenIndex, Tokens $tokens): bool
     {
         $objectOperators = $tokens->findGivenKind(T_OBJECT_OPERATOR, $functionTokenIndex);
         if (count($objectOperators) === null) {
@@ -163,37 +155,30 @@ PHP
         return false;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param int $parenthesesStartIndex
-     * @param int $parenthesesEndIndex
-     */
     private function validateObjectArguments(
         Tokens $tokens,
-        $docBlockIndex,
-        $parenthesesStartIndex,
-        $parenthesesEndIndex
+        int $docBlockIndex,
+        int $parenthesesStartIndex,
+        int $parenthesesEndIndex
     ) {
         $currentParenthesesEndIndex = $parenthesesEndIndex;
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
-        for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex ; $i--) {
+        for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex; $i--) {
             if (!$tokens[$i]->isGivenKind(T_VARIABLE)) {
                 continue;
             }
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
             if (!$tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
-                /** @var Annotation $annotation */
                 foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                     $variable = $tokens[$i]->getContent();
                     if (
                         !preg_match(
                             '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
-                            $annotation->getContent()
+                            $annotation->getContent(),
                         )
                         || preg_match(
                             '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
-                            $annotation->getContent()
+                            $annotation->getContent(),
                         )
                     ) {
                         continue;
@@ -207,10 +192,12 @@ PHP
                         && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
-                        $tokens->insertSlices([$i => [
-                            new Token([T_STRING, $argumentType]),
-                            new Token([T_WHITESPACE, ' ']),
-                        ]]);
+                        $tokens->insertSlices([
+                            $i => [
+                                new Token([T_STRING, $argumentType]),
+                                new Token([T_WHITESPACE, ' ']),
+                            ]
+                        ]);
                         $currentParenthesesEndIndex += 2;
                     }
 
@@ -219,7 +206,7 @@ PHP
                         $variables = (clone $tokens)->findGivenKind(
                             T_VARIABLE,
                             $parenthesesStartIndex,
-                            $currentParenthesesEndIndex
+                            $currentParenthesesEndIndex,
                         );
                         $variablePosition = null;
                         foreach ($variables as $key => $variableToken) {
@@ -239,12 +226,14 @@ PHP
                         }
 
                         if ($variablePosition !== null) {
-                            $tokens->insertSlices([++$variablePosition => [
-                                new Token([T_WHITESPACE, ' ']),
-                                new Token('='),
-                                new Token([T_WHITESPACE, ' ']),
-                                new Token([T_STRING, 'null']),
-                            ]]);
+                            $tokens->insertSlices([
+                                ++$variablePosition => [
+                                    new Token([T_WHITESPACE, ' ']),
+                                    new Token('='),
+                                    new Token([T_WHITESPACE, ' ']),
+                                    new Token([T_STRING, 'null']),
+                                ]
+                            ]);
                         }
                     }
                     break;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
@@ -9,15 +10,9 @@ use PhpCsFixer\Tokenizer\Token;
 
 class ContextualToken extends Token implements ItemInterface
 {
-    /**
-     * @var ContextualToken|null
-     */
-    private $previousContextualToken;
+    private ?ContextualToken $previousContextualToken;
 
-    /**
-     * @var ContextualToken|null
-     */
-    private $nextContextualToken;
+    private ?ContextualToken $nextContextualToken;
 
     public function __construct($token)
     {
@@ -66,10 +61,7 @@ class ContextualToken extends Token implements ItemInterface
         $this->setNextContextualToken($contextualToken);
     }
 
-    /**
-     * @return ContextualToken|null
-     */
-    public function getNextToken()
+    public function getNextToken(): ?ContextualToken
     {
         return $this->nextContextualToken;
     }
@@ -139,7 +131,7 @@ class ContextualToken extends Token implements ItemInterface
         return strpos($this->getContent(), "\n") !== false;
     }
 
-    public function getLineIndent()
+    public function getLineIndent(): string
     {
         $codeBefore = '';
         $token = $this;

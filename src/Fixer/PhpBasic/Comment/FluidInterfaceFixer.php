@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
@@ -9,15 +10,16 @@ use PhpCsFixer\DocBlock\Line;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const NAMESPACE_ENTITY = 'Entity';
-    const VARIABLE_THIS = '$this';
+    public const NAMESPACE_ENTITY = 'Entity';
+    public const VARIABLE_THIS = '$this';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -26,7 +28,8 @@ if we use this method for objects of sub-classes.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 namespace Some\Entity;
 class Sample
@@ -40,23 +43,23 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_comment_fluid_interface';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_NAMESPACE)) {
@@ -91,12 +94,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $curlyBraceStartIndex
-     * @param int $docBlockIndex
-     */
-    private function validateFluidInterface(Tokens $tokens, $curlyBraceStartIndex, $docBlockIndex)
+    private function validateFluidInterface(Tokens $tokens, int $curlyBraceStartIndex, int $docBlockIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
         for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
@@ -115,11 +113,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     */
-    private function validateDocBlock(Tokens $tokens, $docBlockIndex)
+    private function validateDocBlock(Tokens $tokens, int $docBlockIndex)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $returnsBlock = $docBlock->getAnnotationsOfType('return');
@@ -131,12 +125,14 @@ PHP
             preg_match('/^(\s*).*$/', $lines[$linesCount - 1]->getContent(), $matches);
             $indent = $matches[1];
 
-            $returnLine[] = new Line(sprintf(
-                '%s* @return %s %s',
-                $indent,
-                self::VARIABLE_THIS,
-                $this->whitespacesConfig->getLineEnding()
-            ));
+            $returnLine[] = new Line(
+                sprintf(
+                    '%s* @return %s %s',
+                    $indent,
+                    self::VARIABLE_THIS,
+                    $this->whitespacesConfig->getLineEnding(),
+                ),
+            );
 
             array_splice($lines, $linesCount - 1, 0, $returnLine);
             $tokens[$docBlockIndex]->setContent(implode('', $lines));

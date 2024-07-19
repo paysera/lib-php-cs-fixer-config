@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Util;
@@ -10,12 +11,7 @@ use ReflectionProperty;
 
 class InheritanceHelper
 {
-    /**
-     * @param string $methodName
-     * @param Tokens $tokens
-     * @return bool
-     */
-    public function isMethodFromInterface($methodName, Tokens $tokens)
+    public function isMethodFromInterface(string $methodName, Tokens $tokens): bool
     {
         try {
             $reflection = $this->getReflection($tokens);
@@ -35,19 +31,13 @@ class InheritanceHelper
         return false;
     }
 
-    /**
-     * @param string $propertyName
-     * @param Tokens $tokens
-     * @return bool
-     */
-    public function isPropertyInherited($propertyName, Tokens $tokens)
+    public function isPropertyInherited(string $propertyName, Tokens $tokens): bool
     {
         try {
             $reflection = $this->getReflection($tokens);
         } catch (ReflectionException $exception) {
             return false;
         }
-        $parents = [];
 
         while ($parent = $reflection->getParentClass()) {
             $parents[] = $parent->getName();
@@ -63,6 +53,9 @@ class InheritanceHelper
         return false;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function getReflection(Tokens $tokens)
     {
         $fqcn = null;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -15,28 +16,31 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    private $parser;
-    private $contextualTokenBuilder;
+    private Parser $parser;
+    private ContextualTokenBuilder $contextualTokenBuilder;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->parser = new Parser(new GroupSeparatorHelper());
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'Formats new lines, whitespaces and operators as needed when splitting in several lines.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -70,33 +74,29 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_splitting_in_several_lines';
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run before TrailingCommaInMultilineArrayFixer
         return 1;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return true;
     }
 
-    /**
-     * @param SplFileInfo $file
-     * @param Tokens|Token[] $tokens
-     */
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $startEndTokens = [
             '=' => ';',
@@ -264,7 +264,7 @@ PHP
         }
     }
 
-    private function isItemListUnsupported(ComplexItemList $itemList)
+    private function isItemListUnsupported(ComplexItemList $itemList): bool
     {
         return (
             $itemList instanceof SeparatedItemList

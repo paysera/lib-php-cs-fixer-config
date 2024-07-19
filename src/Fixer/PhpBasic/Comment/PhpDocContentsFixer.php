@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
@@ -14,18 +15,19 @@ use SplFileInfo;
 
 final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const MISSING_RETURN = '@TODO: missing return statement';
-    const MISSING_TYPECAST = '@TODO: missing parameter typecast';
-    const MISSING_VARIABLE = '@TODO: missing parameter variable';
+    public const MISSING_RETURN = '@TODO: missing return statement';
+    public const MISSING_TYPECAST = '@TODO: missing parameter typecast';
+    public const MISSING_VARIABLE = '@TODO: missing parameter variable';
 
     /**
      * @var array
      */
-    private $scalarTypes;
+    private array $scalarTypes;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->scalarTypes = [
             'array',
             'string',
@@ -36,7 +38,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): \PhpCsFixer\FixerDefinition\FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -47,7 +49,8 @@ If method does not return anything, we skip @return comment.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -65,39 +68,37 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_comment_php_doc_contents';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run after all PhpDoc Fixers
         return -50;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
@@ -130,17 +131,11 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $parenthesesStartIndex
-     * @param int $parenthesesEndIndex
-     * @param int $docBlockIndex
-     */
     private function validateDocBlockParameters(
         Tokens $tokens,
-        $parenthesesStartIndex,
-        $parenthesesEndIndex,
-        $docBlockIndex
+        int $parenthesesStartIndex,
+        int $parenthesesEndIndex,
+        int $docBlockIndex
     ) {
         $parameters = [];
         // Collect parameters
@@ -185,7 +180,7 @@ PHP
                 if (
                     preg_match(
                         '#^[^$]+@param\s([^$].*?)\s\\' . $parameter['Variable'] . '#m',
-                        $annotation->getContent()
+                        $annotation->getContent(),
                     )
                     && !in_array('null', $annotation->getTypes(), true)
                     && $parameter['Nullable']
@@ -198,7 +193,7 @@ PHP
                 // Add missing parameter typecast
                 if (preg_match(
                     '#^[^$]+@param+.(\\' . $parameter['Variable'] . ').*$#m',
-                    $annotation->getContent()
+                    $annotation->getContent(),
                 )) {
                     $annotationContent = $annotation->getContent();
                     if (isset($parameter['Typecast'])) {
@@ -206,13 +201,13 @@ PHP
                             $replacement = preg_replace(
                                 '#\\' . $parameter['Variable'] . '#',
                                 $parameter['Typecast'] . '|null ' . $parameter['Variable'],
-                                $annotationContent
+                                $annotationContent,
                             );
                         } else {
                             $replacement = preg_replace(
                                 '#\\' . $parameter['Variable'] . '#',
                                 $parameter['Typecast'] . ' ' . $parameter['Variable'],
-                                $annotationContent
+                                $annotationContent,
                             );
                         }
                         $lines[$annotation->getEnd()] = new Line($replacement);
@@ -223,11 +218,11 @@ PHP
                     // Add missing parameter typecast warning
                     if (!preg_match(
                         '#\\' . $parameter['Variable'] . ' ' . self::MISSING_TYPECAST . '#',
-                        $tokens[$docBlockIndex]->getContent()
+                        $tokens[$docBlockIndex]->getContent(),
                     )) {
                         $replacement = preg_replace('#\\n#', ' ', $annotationContent);
                         $lines[$annotation->getEnd()] = new Line(
-                            $replacement . self::MISSING_TYPECAST . $this->whitespacesConfig->getLineEnding()
+                            $replacement . self::MISSING_TYPECAST . $this->whitespacesConfig->getLineEnding(),
                         );
                         $tokens[$docBlockIndex]->setContent(implode('', $lines));
                     }
@@ -246,31 +241,24 @@ PHP
                         $tokens,
                         $docBlockIndex,
                         $parameter['Typecast'],
-                        $parameter['Variable']
+                        $parameter['Variable'],
                     );
                 } else {
                     $this->insertParamAnnotation(
                         $tokens,
                         $docBlockIndex,
                         $parameter['Variable'],
-                        self::MISSING_TYPECAST
+                        self::MISSING_TYPECAST,
                     );
                 }
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param string $match
-     * @param string $warning
-     */
-    private function insertParamAnnotationWarning(Tokens $tokens, $docBlockIndex, $match, $warning)
+    private function insertParamAnnotationWarning(Tokens $tokens, int $docBlockIndex, string $match, string $warning)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $lines = $docBlock->getLines();
-        /** @var Line $annotation */
         foreach ($lines as $index => &$annotation) {
             $annotationContent = $annotation->getContent();
             if (
@@ -281,7 +269,7 @@ PHP
             }
             $replacement = preg_replace('#\\n#', ' ', $annotationContent);
             $lines[$index] = new Line(
-                $replacement . $warning . $this->whitespacesConfig->getLineEnding()
+                $replacement . $warning . $this->whitespacesConfig->getLineEnding(),
             );
             $tokens[$docBlockIndex]->setContent(implode('', $lines));
             break;
@@ -300,19 +288,21 @@ PHP
         $lines = $docBlock->getLines();
         preg_match('/^(\s*).*$/', $lines[count($lines) - 1]->getContent(), $indent);
 
-        $missingParam[] = new Line(sprintf(
-            '%s* @param %s %s%s',
-            $indent[1],
-            $typecast,
-            $variable,
-            $this->whitespacesConfig->getLineEnding()
-        ));
+        $missingParam[] = new Line(
+            sprintf(
+                '%s* @param %s %s%s',
+                $indent[1],
+                $typecast,
+                $variable,
+                $this->whitespacesConfig->getLineEnding(),
+            ),
+        );
 
         array_splice(
             $lines,
             count($lines) - 1,
             0,
-            $missingParam
+            $missingParam,
         );
         $tokens[$docBlockIndex]->setContent(implode('', $lines));
     }
@@ -358,7 +348,7 @@ PHP
                     $docBlockIndex,
                     $nextTokenIndex,
                     $exceptions,
-                    $docBlock
+                    $docBlock,
                 );
             }
 
@@ -384,13 +374,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param DocBlock $docBlock
-     * @return DocBlock
-     */
-    private function insertReturnAnnotationWarning(Tokens $tokens, $docBlockIndex, $docBlock)
+    private function insertReturnAnnotationWarning(Tokens $tokens, int $docBlockIndex, DocBlock $docBlock): DocBlock
     {
         $lines = $docBlock->getLines();
         preg_match('/^(\s*).*$/', $lines[count($lines) - 1]->getContent(), $indent);
@@ -401,43 +385,39 @@ PHP
             && !isset($returnAnnotations[0])
             && isset($indent[1])
         ) {
-            $missingReturn[] = new Line(sprintf(
-                '%s* %s%s',
-                $indent[1],
-                self::MISSING_RETURN,
-                $this->whitespacesConfig->getLineEnding()
-            ));
+            $missingReturn[] = new Line(
+                sprintf(
+                    '%s* %s%s',
+                    $indent[1],
+                    self::MISSING_RETURN,
+                    $this->whitespacesConfig->getLineEnding(),
+                ),
+            );
             array_splice($lines, count($lines) - 1, 0, $missingReturn);
             $tokens[$docBlockIndex]->setContent(implode('', $lines));
         }
         return new DocBlock($tokens[$docBlockIndex]->getContent());
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param int $variableIndex
-     * @param array $exceptions
-     * @param DocBlock $docBlock
-     * @return DocBlock
-     */
-    private function validateThrowAnnotation(Tokens $tokens, $docBlockIndex, $variableIndex, $exceptions, $docBlock)
-    {
+    private function validateThrowAnnotation(
+        Tokens $tokens,
+        int $docBlockIndex,
+        int $variableIndex,
+        array $exceptions,
+        DocBlock $docBlock
+    ): DocBlock {
         $exception = array_search($tokens[$variableIndex]->getContent(), $exceptions, true);
         $this->insertThrowsAnnotation($tokens, $docBlockIndex, $exception, $docBlock);
 
         return new DocBlock($tokens[$docBlockIndex]->getContent());
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param int $namespaceStartIndex
-     * @param DocBlock $docBlock
-     * @return DocBlock
-     */
-    private function validateThrowNewAnnotation(Tokens $tokens, $docBlockIndex, $namespaceStartIndex, $docBlock)
-    {
+    private function validateThrowNewAnnotation(
+        Tokens $tokens,
+        int $docBlockIndex,
+        int $namespaceStartIndex,
+        DocBlock $docBlock
+    ): DocBlock {
         $index = $namespaceStartIndex;
         $namespaceContent = '';
 
@@ -450,14 +430,12 @@ PHP
         return new DocBlock($tokens[$docBlockIndex]->getContent());
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param string $namespaceContent
-     * @param DocBlock $docBlock
-     */
-    private function insertThrowsAnnotation(Tokens $tokens, $docBlockIndex, $namespaceContent, $docBlock)
-    {
+    private function insertThrowsAnnotation(
+        Tokens $tokens,
+        int $docBlockIndex,
+        string $namespaceContent,
+        DocBlock $docBlock
+    ) {
         $lines = $docBlock->getLines();
         preg_match('/^(\s*).*$/', $lines[count($lines) - 1]->getContent(), $indent);
 
@@ -467,16 +445,18 @@ PHP
         preg_match(
             '#@throws\s(\\\?[A-z0-9_\\\]*' . $lastNamespace . ')+($|\|)#m',
             $tokens[$docBlockIndex]->getContent(),
-            $matches
+            $matches,
         );
 
         if (!isset($matches[1]) && isset($indent[1])) {
-            $throwLine[] = new Line(sprintf(
-                '%s* @throws %s%s',
-                $indent[1],
-                $namespaceContent,
-                $this->whitespacesConfig->getLineEnding()
-            ));
+            $throwLine[] = new Line(
+                sprintf(
+                    '%s* @throws %s%s',
+                    $indent[1],
+                    $namespaceContent,
+                    $this->whitespacesConfig->getLineEnding(),
+                ),
+            );
 
             array_splice($lines, count($lines) - 1, 0, $throwLine);
             $tokens[$docBlockIndex]->setContent(implode('', $lines));

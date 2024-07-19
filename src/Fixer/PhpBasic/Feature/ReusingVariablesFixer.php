@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,20 +7,22 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ReusingVariablesFixer extends AbstractFixer
 {
-    const CONVENTION = 'PhpBasic convention 3.9: We do not change argument type or value';
+    public const CONVENTION = 'PhpBasic convention 3.9: We do not change argument type or value';
 
-    private $assignmentOperators;
-    private $typeCasters;
+    private array $assignmentOperators;
+    private array $typeCasters;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->assignmentOperators = [
             T_CONCAT_EQUAL,
             T_AND_EQUAL,
@@ -44,7 +47,7 @@ final class ReusingVariablesFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -53,7 +56,8 @@ We do not change the type of the variable.
 TEXT
             ,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -69,33 +73,31 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_reusing_variables';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (!$token->isGivenKind(T_STRING)) {
@@ -127,13 +129,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param array $methodArguments
-     * @param int $startIndex
-     * @param int $endIndex
-     */
-    private function validateArgumentUsage(Tokens $tokens, $methodArguments, $startIndex, $endIndex)
+    private function validateArgumentUsage(Tokens $tokens, array $methodArguments, int $startIndex, int $endIndex)
     {
         $localVariables = [];
 
@@ -169,13 +165,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return array
-     */
-    private function getMethodArguments(Tokens $tokens, $startIndex, $endIndex)
+    private function getMethodArguments(Tokens $tokens, int $startIndex, int $endIndex): array
     {
         $methodArguments = [];
         for ($i = $startIndex; $i < $endIndex; $i++) {
@@ -186,19 +176,16 @@ PHP
         return $methodArguments;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $variableName
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $variableName)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $variableName)
     {
         $comment = '// TODO: "' . $variableName . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, $comment]),
-            ]]);
+            $tokens->insertSlices([
+                $insertIndex + 1 => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, $comment]),
+                ]
+            ]);
         }
     }
 }
