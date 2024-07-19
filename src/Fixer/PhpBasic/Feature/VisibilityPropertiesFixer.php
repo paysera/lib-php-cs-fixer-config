@@ -20,9 +20,8 @@ use Exception;
 
 final class VisibilityPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    use ConfigurableFixerTrait {
-        configure as public configureConfigurableFixerTrait;
-    }
+    use ConfigurableFixerTrait;
+
     public const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
     public const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
     public const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
@@ -43,7 +42,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<'TEXT'
+            <<<TEXT
 We don’t use public and dynamic properties. All used properties must be defined.
 
 We prefer private over protected as it constraints the scope - it’s easier to refactor,
@@ -51,7 +50,8 @@ find usages, plan possible changes in code. Also IDE can warn about unused metho
 
 We use protected when we intend some property or method to be overwritten if necessary.
 
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -115,8 +115,6 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
-        $this->configureConfigurableFixerTrait($configuration);
-
         if ($this->configuration['excluded_parents'] === true) {
             return;
         }
@@ -125,18 +123,20 @@ PHP,
         }
     }
 
-    protected function createConfigurationDefinition(): FixerConfigurationResolver
+    protected function createConfigurationDefinition(
+    ): \PhpCsFixer\FixerConfiguration\FixerConfigurationResolverInterface
     {
-        return
-            new FixerConfigurationResolver([
-            (new FixerOptionBuilder(
-                'excluded_parents',
-                'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
-            ))
-                ->setAllowedTypes(['array', 'bool'])
-                ->getOption(),
-            ])
+        $options = new FixerOptionBuilder(
+            'excluded_parents',
+            'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
+        );
+
+        $options = $options
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
         ;
+
+        return new FixerConfigurationResolver('excluded_parents', [$options], $this->getName());
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
@@ -286,10 +286,8 @@ PHP,
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PROTECTED_PROPERTIES_CONVENTION);
             }
-
             return $tokens[$key]->getContent();
         }
-
         return null;
     }
 

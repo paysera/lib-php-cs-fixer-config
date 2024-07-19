@@ -84,8 +84,7 @@ PHP,
     {
         return
             !(preg_match('/^[A-Z]/', $string) === 0)
-            && !(preg_match('|[^a-zA-Z0-9]|', substr($string, 1)) > 0)
-        ;
+            && !(preg_match('|[^a-zA-Z0-9]|', substr($string, 1)) > 0);
     }
 
     private function fixClassName(string $className): string

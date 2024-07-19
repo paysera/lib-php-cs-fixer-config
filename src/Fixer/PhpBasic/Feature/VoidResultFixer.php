@@ -19,13 +19,14 @@ final class VoidResultFixer extends AbstractFixer
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<'TEXT'
+            <<<TEXT
 We always return something or return nothing. If method does not return anything (“returns” void),
 we do not return null, false or any other value in that case.
 
 If method must return some value, we always specify what to return, even when returning null.
 
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -69,7 +70,7 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')

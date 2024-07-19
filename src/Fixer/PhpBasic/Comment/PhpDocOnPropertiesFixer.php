@@ -31,7 +31,8 @@ PhpDoc can cause warnings to be silenced.
 
 We may add PhpDoc on properties that are injected via constructor and are scalar,
 but this is not necessary as IDE gets the type from constructor’s PhpDoc.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -76,7 +77,7 @@ PHP,
         // Collecting __construct function info
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
                 $tokens[$key]->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
@@ -153,8 +154,7 @@ PHP,
         return
             isset($constructFunction['DocBlock'])
             && isset($property['Variable'])
-            && preg_match('#\\' . $property['Variable'] . '#', $constructFunction['DocBlock'])
-        ;
+            && preg_match('#\\' . $property['Variable'] . '#', $constructFunction['DocBlock']);
     }
 
     private function isPropertyAssignedFromArgument(array $property, array $constructFunction): bool
@@ -165,24 +165,21 @@ PHP,
                 $constructFunction['Assignments'][$property['Variable']],
                 array_keys($constructFunction['ConstructArguments']),
                 true,
-            )
-        ;
+            );
     }
 
     private function isPropertyAssignedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']], ['new', 'array'], true)
-        ;
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new', 'array'], true);
     }
 
     private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']], ['new'], true)
-        ;
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new'], true);
     }
 
     private function getConstructAssignments(Tokens $tokens, int $constructIndex): array
@@ -239,7 +236,6 @@ PHP,
                 $constructArguments[$tokens[$i]->getContent()] = $tokens[$previousTokenIndex]->getContent();
             }
         }
-
         return $constructArguments;
     }
 
@@ -247,8 +243,7 @@ PHP,
     {
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $previousPreviousTokenIndex =
-                $previousTokenIndex ? $tokens->getPrevNonWhitespace($previousTokenIndex) : null;
+            $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
             if (
                 $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$previousPreviousTokenIndex]->isGivenKind(T_COMMENT)
@@ -262,7 +257,6 @@ PHP,
                 return $this->getPropertyValues($tokens, $key, $previousPreviousTokenIndex);
             }
         }
-
         return null;
     }
 
@@ -276,7 +270,6 @@ PHP,
         } else {
             $property['DocBlockInsertIndex'] = $previousTokenIndex - 1;
         }
-
         return $property;
     }
 
@@ -284,7 +277,7 @@ PHP,
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . self::MISSING_DOC_BLOCK_CONVENTION;
         $tokens->insertSlices([
-            ($insertIndex + 1) => [
+            $insertIndex + 1 => [
                 new Token([T_COMMENT, $comment]),
                 new Token([
                     T_WHITESPACE,

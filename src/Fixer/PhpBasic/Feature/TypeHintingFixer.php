@@ -22,9 +22,7 @@ use Exception;
 
 final class TypeHintingFixer extends AbstractContextualTokenFixer
 {
-    use ConfigurableFixerTrait {
-        configure as public configureConfigurableFixerTrait;
-    }
+    use ConfigurableFixerTrait;
 
     public const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
     public const CONSTRUCT = '__construct';
@@ -124,8 +122,6 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
-        $this->configureConfigurableFixerTrait($configuration);
-
         if ($this->configuration['exceptions'] === true) {
             return;
         }
@@ -136,16 +132,17 @@ PHP,
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return
-            new FixerConfigurationResolver([
-            (new FixerOptionBuilder(
-                'exceptions',
-                'Sets the exceptions for which usage of narrowest interface could be skipped.',
-            ))
-                ->setAllowedTypes(['array', 'bool'])
-                ->getOption(),
-            ])
+        $options = new FixerOptionBuilder(
+            'exceptions',
+            'Sets the exceptions for which usage of narrowest interface could be skipped.',
+        );
+
+        $options = $options
+            ->setAllowedTypes(['array', 'bool'])
+            ->getOption()
         ;
+
+        return new FixerConfigurationResolver('exceptions', [$options], $this->getName());
     }
 
     protected function applyFixOnContextualToken(ContextualToken $token)
@@ -243,7 +240,6 @@ PHP,
             $tokens[] = new ContextualToken([T_NS_SEPARATOR, '\\']);
             $tokens[] = new ContextualToken([T_STRING, $part]);
         }
-
         return $tokens;
     }
 

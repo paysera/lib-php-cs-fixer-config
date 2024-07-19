@@ -46,7 +46,8 @@ for other getters, set* for setters, add* for adders, remove* for removers.
 
 We always make correct English phrase from method names,
 this is more important that naming method to \'is\' + propertyName.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -92,32 +93,29 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            if (
+                $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
+                && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
+                && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            ) {
+                $functionName = $tokens[$key]->getContent();
+                $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
+                $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
 
-            if ($functionTokenIndex && $visibilityTokenIndex) {
-                if (
-                    $token->isGivenKind(T_STRING)
-                    && $tokens[$key + 1]->equals('(')
-                    && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-                    && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                ) {
-                    $functionName = $tokens[$key]->getContent();
-                    $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
-                    $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
-
-                    $returnType = null;
-                    if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
-                        $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
-                        $returnType = $tokens[$typeIndex]->getContent();
-                        $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
-                    }
-
-                    if (!$tokens[$nextIndex]->equals('{')) {
-                        continue;
-                    }
-
-                    $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
+                $returnType = null;
+                if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
+                    $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                    $returnType = $tokens[$typeIndex]->getContent();
+                    $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
                 }
+
+                if (!$tokens[$nextIndex]->equals('{')) {
+                    continue;
+                }
+
+                $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
             }
         }
     }
@@ -172,10 +170,10 @@ PHP,
         $comment = '// TODO: ' . self::BOOL_FUNCTION_COMMENT;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                ($insertIndex + 1) => [
+                $insertIndex + 1 => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
-                ],
+                ]
             ]);
         }
     }

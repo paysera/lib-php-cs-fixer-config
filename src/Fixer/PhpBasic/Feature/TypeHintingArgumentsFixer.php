@@ -6,6 +6,7 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Util\InheritanceHelper;
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
@@ -58,7 +59,8 @@ If argument is not optional, but just nullable, we can type hint it with default
 but when using, we pass null explicitly.
 
 Risky, because of type hint copy from docBlock.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -101,7 +103,7 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -131,7 +133,6 @@ PHP,
     private function methodImplementedFromInterface(int $functionTokenIndex, Tokens $tokens): bool
     {
         $method = $tokens[$tokens->getNextNonWhitespace($functionTokenIndex)];
-
         return $this->inheritanceHelper->isMethodFromInterface($method->getContent(), $tokens);
     }
 
@@ -195,7 +196,7 @@ PHP,
                             $i => [
                                 new Token([T_STRING, $argumentType]),
                                 new Token([T_WHITESPACE, ' ']),
-                            ],
+                            ]
                         ]);
                         $currentParenthesesEndIndex += 2;
                     }
@@ -231,7 +232,7 @@ PHP,
                                     new Token('='),
                                     new Token([T_WHITESPACE, ' ']),
                                     new Token([T_STRING, 'null']),
-                                ],
+                                ]
                             ]);
                         }
                     }

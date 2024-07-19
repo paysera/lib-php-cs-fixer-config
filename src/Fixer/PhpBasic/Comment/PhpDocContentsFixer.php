@@ -10,8 +10,6 @@ use PhpCsFixer\DocBlock\Line;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
-use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
@@ -40,7 +38,7 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
         ];
     }
 
-    public function getDefinition(): FixerDefinitionInterface
+    public function getDefinition(): \PhpCsFixer\FixerDefinition\FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -48,7 +46,8 @@ If we use phpdoc comment, it must contain all information about parameters,
 return type and exceptions that the method throws.
 
 If method does not return anything, we skip @return comment.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -103,7 +102,7 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -187,7 +186,7 @@ PHP,
                     && $parameter['Nullable']
                 ) {
                     $annotation->setTypes(array_merge($annotation->getTypes(), ['null']));
-                    $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+                    $tokens[$docBlockIndex]->setContent(implode('', $lines));
                     continue;
                 }
 
@@ -212,7 +211,7 @@ PHP,
                             );
                         }
                         $lines[$annotation->getEnd()] = new Line($replacement);
-                        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+                        $tokens[$docBlockIndex]->setContent(implode('', $lines));
                         continue;
                     }
 
@@ -225,7 +224,7 @@ PHP,
                         $lines[$annotation->getEnd()] = new Line(
                             $replacement . self::MISSING_TYPECAST . $this->whitespacesConfig->getLineEnding(),
                         );
-                        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+                        $tokens[$docBlockIndex]->setContent(implode('', $lines));
                     }
                     continue;
                 }
@@ -234,6 +233,7 @@ PHP,
             if (preg_match('#@param\s(?!.*\$).*$#m', $tokens[$docBlockIndex]->getContent(), $matches)) {
                 // Add missing parameter variable warning
                 $this->insertParamAnnotationWarning($tokens, $docBlockIndex, $matches[0], self::MISSING_VARIABLE);
+                continue;
             } elseif (!preg_match('#\\' . $parameter['Variable'] . '#', $tokens[$docBlockIndex]->getContent())) {
                 // Add missing parameter
                 if (isset($parameter['Typecast'])) {
@@ -271,12 +271,18 @@ PHP,
             $lines[$index] = new Line(
                 $replacement . $warning . $this->whitespacesConfig->getLineEnding(),
             );
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+            $tokens[$docBlockIndex]->setContent(implode('', $lines));
             break;
         }
     }
 
-    private function insertParamAnnotation(Tokens $tokens, int $docBlockIndex, string $typecast, string $variable)
+    /**
+     * @param Tokens $tokens
+     * @param int $docBlockIndex
+     * @param string $typecast
+     * @param string $variable
+     */
+    private function insertParamAnnotation(Tokens $tokens, $docBlockIndex, $typecast, $variable)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $lines = $docBlock->getLines();
@@ -298,7 +304,7 @@ PHP,
             0,
             $missingParam,
         );
-        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+        $tokens[$docBlockIndex]->setContent(implode('', $lines));
     }
 
     /**
@@ -364,7 +370,7 @@ PHP,
         $returnAnnotations = $docBlock->getAnnotationsOfType('return');
         if (!$returnStatementExists && isset($returnAnnotations[0])) {
             $returnAnnotations[0]->remove();
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $docBlock->getContent()]);
+            $tokens[$docBlockIndex]->setContent($docBlock->getContent());
         }
     }
 
@@ -388,9 +394,8 @@ PHP,
                 ),
             );
             array_splice($lines, count($lines) - 1, 0, $missingReturn);
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+            $tokens[$docBlockIndex]->setContent(implode('', $lines));
         }
-
         return new DocBlock($tokens[$docBlockIndex]->getContent());
     }
 
@@ -454,7 +459,7 @@ PHP,
             );
 
             array_splice($lines, count($lines) - 1, 0, $throwLine);
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+            $tokens[$docBlockIndex]->setContent(implode('', $lines));
         }
     }
 }

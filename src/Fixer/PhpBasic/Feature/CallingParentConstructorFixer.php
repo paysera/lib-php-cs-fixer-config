@@ -37,6 +37,8 @@ PHP,
                 ),
             ],
             null,
+            null,
+            null,
             'Paysera recommendation.',
         );
     }
@@ -95,7 +97,6 @@ PHP,
                 $oldIndexStart = $i + count($parentStatement) - 1;
                 $oldIndexEnd = $oldIndexStart + count($parentStatement) - 1;
                 $tokens->clearRange($oldIndexStart, $oldIndexEnd);
-
                 return;
             }
         }
@@ -107,7 +108,6 @@ PHP,
         for ($i = $statementStartIndex - 1; $i <= $statementEndIndex; $i++) {
             $argumentTokens[] = $tokens[$i];
         }
-
         return $argumentTokens;
     }
 }

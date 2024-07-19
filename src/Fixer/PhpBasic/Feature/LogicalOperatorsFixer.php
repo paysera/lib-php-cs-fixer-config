@@ -8,7 +8,6 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
@@ -20,7 +19,8 @@ final class LogicalOperatorsFixer extends AbstractFixer
             <<<'TEXT'
 Use `&&` and `||` logical operators instead of `and` and `or`.
 Risky, if lower precedence was used intentionally.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -66,9 +66,9 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_LOGICAL_AND)) {
-                $tokens[$key] = new Token([T_BOOLEAN_AND, '&&']);
+                $tokens->overrideAt($key, [T_BOOLEAN_AND, '&&']);
             } elseif ($token->isGivenKind(T_LOGICAL_OR)) {
-                $tokens[$key] = new Token([T_BOOLEAN_OR, '||']);
+                $tokens->overrideAt($key, [T_BOOLEAN_OR, '||']);
             }
         }
     }

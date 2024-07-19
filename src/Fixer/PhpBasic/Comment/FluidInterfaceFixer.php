@@ -11,7 +11,6 @@ use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
@@ -26,7 +25,8 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
             <<<'TEXT'
 If method returns $this, we use @return $this that IDE could guess correct type
 if we use this method for objects of sub-classes.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -135,10 +135,10 @@ PHP,
             );
 
             array_splice($lines, $linesCount - 1, 0, $returnLine);
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
-        } elseif (!in_array(self::VARIABLE_THIS, $returnsBlock[0]->getTypes(), true)) {
+            $tokens[$docBlockIndex]->setContent(implode('', $lines));
+        } elseif ($returnsBlock[0]->getTypes() !== self::VARIABLE_THIS) {
             $returnsBlock[0]->setTypes([self::VARIABLE_THIS]);
-            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $docBlock->getContent()]);
+            $tokens[$docBlockIndex]->setContent($docBlock->getContent());
         }
     }
 }

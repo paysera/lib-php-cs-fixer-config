@@ -40,7 +40,7 @@ PHP,
                 ),
             ],
             null,
-            'Paysera recommendation.',
+            'Paysera recommendation.'
         );
     }
 
@@ -148,7 +148,7 @@ PHP,
                     $indentation,
                 );
                 $tokens->insertSlices([
-                    ($index + 3) => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
+                    $index + 3 => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
                 ]);
 
                 if ($tokens[$index]->equals('{')) {
@@ -173,18 +173,18 @@ PHP,
     ): void {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
             $tokens->insertSlices([
-                ($index + 1) => [
+                $index + 1 => [
                     new Token([T_WHITESPACE, $indentation]),
                     new Token([T_VARIABLE, '$this']),
                     new Token([T_OBJECT_OPERATOR, '->']),
-                    new Token([T_STRING, str_replace('$', '', $name)]),
+                    new Token([T_STRING, str_replace('$', '', $name)])
                 ],
             ]);
             $index += 4;
 
             /** @var Token $item */
             foreach ($propertyTokens as $item) {
-                if (strpos($item->getContent(), "\n") !== false) {
+                if (false !== strpos($item->getContent(), "\n")) {
                     $itemIndentation = $item->getContent() . $this->whitespacesConfig->getIndent();
                     $tokens->insertSlices([++$index => [new Token([T_WHITESPACE, $itemIndentation])]]);
                 } else {
@@ -200,7 +200,7 @@ PHP,
     private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token): bool
     {
         $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
-        $subsequentToken = $nextMeaningfulToken ? $tokens->getNextNonWhitespace($nextMeaningfulToken) : null;
+        $subsequentToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
 
         return (
             $token->equals(';')
@@ -216,13 +216,11 @@ PHP,
     private function isConstructor(int $key, Tokens $tokens, Token $token): bool
     {
         $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-
         return
             $tokens[$key]->isGivenKind(T_STRING)
             && $token->getContent() === self::CONSTRUCT
             && $tokens[$key + 1]->equals('(')
-            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-        ;
+            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION);
     }
 
     private function insertConstructTokensAndReturnOpeningBraceIndex(
@@ -244,7 +242,7 @@ PHP,
                 new Token('{'),
                 new Token([T_WHITESPACE, $indentation]),
                 new Token('}'),
-            ],
+            ]
         ]);
 
         return $openingCurlyBrace;
@@ -253,7 +251,7 @@ PHP,
     private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation): int
     {
         $tokens->insertSlices([
-            ($index + 1) => [
+            $index + 1 => [
                 new Token([T_WHITESPACE, $indentation]),
                 new Token([T_STRING, 'parent']),
                 new Token([T_DOUBLE_COLON, '::']),
@@ -261,7 +259,7 @@ PHP,
                 new Token('('),
                 new Token(')'),
                 new Token(';'),
-            ],
+            ]
         ]);
 
         return $index + 7;

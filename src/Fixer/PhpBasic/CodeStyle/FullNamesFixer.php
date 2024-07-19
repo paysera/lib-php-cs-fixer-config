@@ -38,7 +38,8 @@ final class FullNamesFixer extends AbstractFixer
             <<<'TEXT'
 We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
 Risky for possible local variable duplicate renaming.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -135,7 +136,7 @@ PHP,
                 $replacement = preg_replace($pattern, $key . ' $' . lcfirst($key), $replacement);
             }
         }
-        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $replacement]);
+        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), '$' . $replacement]);
 //        $tokens[$docBlockIndex]->setContent($replacement);
     }
 
@@ -150,7 +151,6 @@ PHP,
                 return true;
             }
         }
-
         return false;
     }
 

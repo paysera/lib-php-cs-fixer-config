@@ -134,12 +134,11 @@ PHP,
     private function addResult(Tokens $tokens, int $functionIndex, int $endOfLineIndex)
     {
         $tokens->insertSlices([
-            ($endOfLineIndex + 1) => [
+            $endOfLineIndex + 1 => [
                 new Token([T_WHITESPACE, ' ']),
-                new Token(
-                    [T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION],
+                new Token([T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION],
                 ),
-            ],
+            ]
         ]);
     }
 }

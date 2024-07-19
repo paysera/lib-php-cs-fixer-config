@@ -18,16 +18,16 @@ class PhpCsFixerConfigProvider
     {
         $fileSystem = new Filesystem();
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/php-cs-fixer.php',
-            'php-cs-fixer.php',
+            __DIR__ . '/../../defaults/.php_cs',
+            '.php_cs',
         );
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/php-cs-fixer-risky.php',
-            'php-cs-fixer-risky.php',
+            __DIR__ . '/../../defaults/.php_cs_risky',
+            '.php_cs_risky',
         );
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/php-cs-fixer-safe.php',
-            'php-cs-fixer-safe.php',
+            __DIR__ . '/../../defaults/.php_cs_safe',
+            '.php_cs_safe',
         );
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -29,7 +28,6 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
 
     private array $scalarTypes;
     private array $strictValues;
-    private Inflector $inflector;
 
     public function __construct()
     {
@@ -51,31 +49,6 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
             T_DNUMBER,
             T_LNUMBER,
         ];
-        $this->initializeInflector();
-    }
-
-    private function initializeInflector()
-    {
-        if (class_exists('Doctrine\Inflector\InflectorFactory')) {
-            // Doctrine Inflector v2
-            $this->inflector = InflectorFactory::create()->build();
-        } elseif (class_exists('Doctrine\Common\Inflector\Inflector')) {
-            // Doctrine Inflector v1
-            $this->inflector = new Inflector();
-        } else {
-            throw new \RuntimeException('Doctrine Inflector is not available');
-        }
-    }
-
-    private function pluralize($word)
-    {
-        if (method_exists($this->inflector, 'pluralize')) {
-            // Doctrine Inflector v2
-            return $this->inflector->pluralize($word);
-        } else {
-            // Doctrine Inflector v1
-            return Inflector::pluralize($word);
-        }
     }
 
     // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
@@ -97,7 +70,8 @@ For example, we can*not* return boolean|string or SuccessResult|FailureResult
 if they do, we document to return that interface instead).
 
 We can return SomeClass|null or string|null.
-TEXT,
+TEXT
+            ,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -120,6 +94,7 @@ class Sample
 }
 
 PHP,
+
                 ),
             ],
             null,
@@ -155,7 +130,7 @@ PHP,
             }
 
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
+            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -228,7 +203,7 @@ PHP,
         }
     }
 
-    private function validateDocBlockTypes(Tokens $tokens, int $docBlockIndex, ?string $classNamespace)
+    private function validateDocBlockTypes(Tokens $tokens, int $docBlockIndex, string $classNamespace)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $annotations = $docBlock->getAnnotationsOfType(['return', 'param']);
@@ -319,17 +294,17 @@ PHP,
         $lines[$returnAnnotation->getEnd()] = new Line(
             $replacement . $warning . $this->whitespacesConfig->getLineEnding(),
         );
-        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
+        $tokens[$docBlockIndex]->setContent(implode('', $lines));
     }
 
     private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                ($insertIndex + 1) => [
+                $insertIndex + 1 => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, '// ' . $comment]),
-                ],
+                ]
             ]);
         }
     }

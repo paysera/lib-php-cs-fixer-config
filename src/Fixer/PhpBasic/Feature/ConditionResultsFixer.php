@@ -209,11 +209,6 @@ PHP,
 
     /**
      * @param Token[] $ifStatementConditionTokens
-     * @param Tokens $tokens
-     * @param int $key
-     * @param string $returnCondition
-     * @param int $endIndex
-     * @param bool $assignCondition
      */
     private function fixIfStatement(
         Tokens $tokens,
@@ -237,12 +232,12 @@ PHP,
             $overrideIndex = $insertionIndex;
         } else {
             $tokens->insertSlices([
-                ($insertionIndex + 1) => [
+                $insertionIndex + 1 => [
                     new Token('!'),
                     new Token('('),
                     new Token([T_WHITESPACE, ' ']),
                     new Token(')'),
-                ],
+                ]
             ]);
             $overrideIndex = $insertionIndex + 3;
             $insertionIndex += 4;
@@ -277,7 +272,6 @@ PHP,
 
         $returnStatement['BoolCondition'] = $tokens[$boolIndex]->getContent();
         $returnStatement['SemicolonIndex'] = $semicolonIndex;
-
         return $returnStatement;
     }
 
