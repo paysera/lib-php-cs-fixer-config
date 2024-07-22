@@ -481,15 +481,11 @@ PHP
                                         return true;
                                     }
 
-                                    if ($tokens[$nextNextIndex]->equalsAny([
+                                    return !($tokens[$nextNextIndex]->equalsAny([
                                         [T_ELSE],
                                         [T_ELSEIF],
                                         ',',
-                                    ])) {
-                                        return false;
-                                    }
-
-                                    return true;
+                                    ]));
                                 };
 
                                 // add extra indent only if current content is not a comment for content outside of current block
