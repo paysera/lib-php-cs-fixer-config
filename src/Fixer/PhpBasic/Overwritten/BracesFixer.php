@@ -185,7 +185,7 @@ PHP
         $tokensAnalyzer = new TokensAnalyzer($tokens);
         $controlTokens = $this->getControlTokens();
 
-        for ($index = $tokens->count() - 1; 0 <= $index; --$index) {
+        for ($index = $tokens->count() - 1; $index >= 0; --$index) {
             $token = $tokens[$index];
 
             if ($token->isGivenKind($controlTokens)) {
@@ -203,7 +203,7 @@ PHP
             $commentIndex = $tokens->getNextNonWhitespace($prevIndex);
             $commentToken = $tokens[$commentIndex];
 
-            if (!$commentToken->isGivenKind(T_COMMENT) || 0 === strpos($commentToken->getContent(), '/*')) {
+            if (!$commentToken->isGivenKind(T_COMMENT) || strpos($commentToken->getContent(), '/*') === 0) {
                 continue;
             }
 
@@ -239,7 +239,7 @@ PHP
     {
         $controlContinuationTokens = $this->getControlContinuationTokens();
 
-        for ($index = count($tokens) - 1; 0 <= $index; --$index) {
+        for ($index = count($tokens) - 1; $index >= 0; --$index) {
             $token = $tokens[$index];
 
             if (!$token->isGivenKind($controlContinuationTokens)) {
@@ -256,7 +256,7 @@ PHP
             $tokens->ensureWhitespaceAtIndex(
                 $index - 1,
                 1,
-                self::LINE_NEXT === $this->configuration['position_after_control_structures'] ?
+                $this->configuration['position_after_control_structures'] === self::LINE_NEXT ?
                     $this->whitespacesConfig->getLineEnding() . $this->detectIndent($tokens, $index)
                     : ' '
             );
@@ -265,7 +265,7 @@ PHP
 
     private function fixDoWhile(Tokens $tokens)
     {
-        for ($index = count($tokens) - 1; 0 <= $index; --$index) {
+        for ($index = count($tokens) - 1; $index >= 0; --$index) {
             $token = $tokens[$index];
 
             if (!$token->isGivenKind(T_DO)) {
@@ -294,7 +294,7 @@ PHP
         $indentTokens = array_filter(
             array_merge($classyAndFunctionTokens, $controlTokens),
             static function ($item) {
-                return T_SWITCH !== $item;
+                return $item !== T_SWITCH;
             }
         );
         $tokensAnalyzer = new TokensAnalyzer($tokens);
@@ -375,7 +375,7 @@ PHP
                     continue;
                 }
 
-                if (1 === $nestLevel) {
+                if ($nestLevel === 1) {
                     // Next token is the beginning of a line that can be indented when
                     // the current token is a `;`, a `}` or the opening `{` of current
                     // scope. Current token may also be a comment that follows `;` or
@@ -399,7 +399,7 @@ PHP
 
                         if ($nextLineCanBeIndented || $i === $startBraceIndex) {
                             $nextToken = $tokens[$nestIndex + 1];
-                            $nextLineCanBeIndented = $nextToken->isWhitespace() && 1 === Preg::match('/\R/', $nextToken->getContent());
+                            $nextLineCanBeIndented = $nextToken->isWhitespace() && Preg::match('/\R/', $nextToken->getContent()) === 1;
                         }
                     }
 
@@ -427,13 +427,13 @@ PHP
                     ) {
                         if (
                             (
-                                self::LINE_NEXT !== $this->configuration['position_after_control_structures']
+                                $this->configuration['position_after_control_structures'] !== self::LINE_NEXT
                                 && $nextNonWhitespaceNestToken->isGivenKind($this->getControlContinuationTokens())
                                 && !$tokens[$tokens->getPrevNonWhitespace($nextNonWhitespaceNestIndex)]->isComment()
                             )
                             || $nextNonWhitespaceNestToken->isGivenKind(T_CLOSE_TAG)
                             || (
-                                self::LINE_NEXT !== $this->configuration['position_after_control_structures']
+                                $this->configuration['position_after_control_structures'] !== self::LINE_NEXT
                                 && $nextNonWhitespaceNestToken->isGivenKind(T_WHILE)
                                 && $tokensAnalyzer->isWhilePartOfDoWhile($nextNonWhitespaceNestIndex)
                             )
@@ -446,7 +446,7 @@ PHP
                             if ($nextToken->isWhitespace()) {
                                 $nextWhitespace = rtrim($nextToken->getContent(), " \t");
 
-                                if ('' !== $nextWhitespace) {
+                                if ($nextWhitespace !== '') {
                                     $nextWhitespace = Preg::replace(
                                         sprintf('/%s$/', $this->whitespacesConfig->getLineEnding()),
                                         '',
@@ -476,7 +476,7 @@ PHP
 
                                     $nextNextIndex = $tokens->getNextMeaningfulToken($nextIndex);
 
-                                    if (null === $nextNextIndex) {
+                                    if ($nextNextIndex === null) {
                                         return true;
                                     }
 
@@ -525,7 +525,7 @@ PHP
                 // set indent only if it is not a case, when comment is following { on same line
                 if (
                     !$nextNonWhitespaceToken->isComment()
-                    || ($nextToken->isWhitespace() && 1 === substr_count($nextToken->getContent(), "\n")) // preserve blank lines
+                    || ($nextToken->isWhitespace() && substr_count($nextToken->getContent(), "\n") === 1) // preserve blank lines
                 ) {
                     $this->ensureWhitespaceAtIndexAndIndentMultilineComment(
                         $tokens,
@@ -536,7 +536,7 @@ PHP
             }
 
             if ($token->isGivenKind($classyTokens) && !$tokensAnalyzer->isAnonymousClass($index)) {
-                if (self::LINE_SAME === $this->configuration['position_after_functions_and_oop_constructs'] && !$tokens[$tokens->getPrevNonWhitespace($startBraceIndex)]->isComment()) {
+                if ($this->configuration['position_after_functions_and_oop_constructs'] === self::LINE_SAME && !$tokens[$tokens->getPrevNonWhitespace($startBraceIndex)]->isComment()) {
                     $ensuredWhitespace = ' ';
                 } else {
                     $ensuredWhitespace = $this->whitespacesConfig->getLineEnding() . $indent;
@@ -546,9 +546,9 @@ PHP
             } elseif (
                 $token->isGivenKind(T_FUNCTION) && !$tokensAnalyzer->isLambda($index)
                 || (
-                    self::LINE_NEXT === $this->configuration['position_after_control_structures'] && $token->isGivenKind($controlTokens)
+                    $this->configuration['position_after_control_structures'] === self::LINE_NEXT && $token->isGivenKind($controlTokens)
                     || (
-                        self::LINE_NEXT === $this->configuration['position_after_anonymous_constructs']
+                        $this->configuration['position_after_anonymous_constructs'] === self::LINE_NEXT
                         && (
                             $token->isGivenKind(T_FUNCTION) && $tokensAnalyzer->isLambda($index)
                             || $token->isGivenKind(T_CLASS) && $tokensAnalyzer->isAnonymousClass($index)
@@ -559,7 +559,7 @@ PHP
                 $isAnonymousClass = $token->isGivenKind($classyTokens) && $tokensAnalyzer->isAnonymousClass($index);
 
                 $closingParenthesisIndex = $tokens->getPrevTokenOfKind($startBraceIndex, [')']);
-                if (null === $closingParenthesisIndex && !$isAnonymousClass) {
+                if ($closingParenthesisIndex === null && !$isAnonymousClass) {
                     continue;
                 }
 
@@ -567,13 +567,13 @@ PHP
                     $prevToken = $tokens[$closingParenthesisIndex - 1];
                 }
 
-                if (!$isAnonymousClass && $prevToken->isWhitespace() && false !== strpos($prevToken->getContent(), "\n")) {
+                if (!$isAnonymousClass && $prevToken->isWhitespace() && strpos($prevToken->getContent(), "\n") !== false) {
                     if (!$tokens[$startBraceIndex - 2]->isComment()) {
                         $tokens->ensureWhitespaceAtIndex($startBraceIndex - 1, 1, ' ');
                     }
                 } else {
                     if (
-                        self::LINE_SAME === $this->configuration['position_after_functions_and_oop_constructs']
+                        $this->configuration['position_after_functions_and_oop_constructs'] === self::LINE_SAME
                         && (
                             $token->isGivenKind([T_FUNCTION]) && !$tokensAnalyzer->isLambda($index)
                             || $token->isGivenKind($classyTokens) && !$tokensAnalyzer->isAnonymousClass($index)
@@ -600,7 +600,7 @@ PHP
     {
         $controlTokens = $this->getControlTokens();
 
-        for ($index = $tokens->count() - 1; 0 <= $index; --$index) {
+        for ($index = $tokens->count() - 1; $index >= 0; --$index) {
             $token = $tokens[$index];
 
             if (!$token->isGivenKind($controlTokens)) {
@@ -611,7 +611,7 @@ PHP
             $tokenAfterParenthesis = $tokens[$tokens->getNextMeaningfulToken($parenthesisEndIndex)];
 
             // if Token after parenthesis is { then we do not need to insert brace, but to fix whitespace before it
-            if ($tokenAfterParenthesis->equals('{') && self::LINE_SAME === $this->configuration['position_after_control_structures']) {
+            if ($tokenAfterParenthesis->equals('{') && $this->configuration['position_after_control_structures'] === self::LINE_SAME) {
                 $tokens->ensureWhitespaceAtIndex($parenthesisEndIndex + 1, 0, ' ');
 
                 continue;
@@ -644,7 +644,7 @@ PHP
     {
         $controlTokens = $this->getControlTokens();
 
-        for ($index = $tokens->count() - 1; 0 <= $index; --$index) {
+        for ($index = $tokens->count() - 1; $index >= 0; --$index) {
             $token = $tokens[$index];
 
             // Declare tokens don't follow the same rules are other control statements
@@ -657,7 +657,7 @@ PHP
                     $tokens->ensureWhitespaceAtIndex(
                         $index + 1,
                         0,
-                        self::LINE_NEXT === $this->configuration['position_after_control_structures'] && !$tokens[$nextNonWhitespaceIndex]->equals('(') ?
+                        $this->configuration['position_after_control_structures'] === self::LINE_NEXT && !$tokens[$nextNonWhitespaceIndex]->equals('(') ?
                             $this->whitespacesConfig->getLineEnding() . $this->detectIndent($tokens, $index)
                             : ' '
                     );
@@ -683,19 +683,19 @@ PHP
         while (true) {
             $whitespaceIndex = $tokens->getPrevTokenOfKind($index, [[T_WHITESPACE]]);
 
-            if (null === $whitespaceIndex) {
+            if ($whitespaceIndex === null) {
                 return '';
             }
 
             $whitespaceToken = $tokens[$whitespaceIndex];
 
-            if (false !== strpos($whitespaceToken->getContent(), "\n")) {
+            if (strpos($whitespaceToken->getContent(), "\n") !== false) {
                 break;
             }
 
             $prevToken = $tokens[$whitespaceIndex - 1];
 
-            if ($prevToken->isGivenKind([T_OPEN_TAG, T_COMMENT]) && "\n" === substr($prevToken->getContent(), -1)) {
+            if ($prevToken->isGivenKind([T_OPEN_TAG, T_COMMENT]) && substr($prevToken->getContent(), -1) === "\n") {
                 break;
             }
 
@@ -829,18 +829,18 @@ PHP
 
     private function getControlContinuationTokensForOpeningToken($openingTokenKind): array
     {
-        if (T_IF === $openingTokenKind) {
+        if ($openingTokenKind === T_IF) {
             return [
                 T_ELSE,
                 T_ELSEIF,
             ];
         }
 
-        if (T_DO === $openingTokenKind) {
+        if ($openingTokenKind === T_DO) {
             return [T_WHILE];
         }
 
-        if (T_TRY === $openingTokenKind) {
+        if ($openingTokenKind === T_TRY) {
             return [
                 T_CATCH,
                 T_FINALLY,
@@ -852,11 +852,11 @@ PHP
 
     private function getFinalControlContinuationTokensForOpeningToken($openingTokenKind): array
     {
-        if (T_IF === $openingTokenKind) {
+        if ($openingTokenKind === T_IF) {
             return [T_ELSE];
         }
 
-        if (T_TRY === $openingTokenKind) {
+        if ($openingTokenKind === T_TRY) {
             return [T_FINALLY];
         }
 
@@ -921,8 +921,8 @@ PHP
 
             // do not indent inline comments used to comment out unused code
             if (
-                (0 === strpos($nextToken->getContent(), '//' . $this->whitespacesConfig->getIndent()) || '//' === $nextToken->getContent())
-                && $previousToken->isWhitespace() && 1 === Preg::match('/\R$/', $previousToken->getContent())
+                (strpos($nextToken->getContent(), '//' . $this->whitespacesConfig->getIndent()) === 0 || $nextToken->getContent() === '//')
+                && $previousToken->isWhitespace() && Preg::match('/\R$/', $previousToken->getContent()) === 1
             ) {
                 return;
             }
@@ -950,7 +950,7 @@ PHP
     private function isMultilined(Tokens $tokens, $startParenthesisIndex, $endParenthesisIndex): bool
     {
         for ($i = $startParenthesisIndex; $i < $endParenthesisIndex; ++$i) {
-            if (false !== strpos($tokens[$i]->getContent(), "\n")) {
+            if (strpos($tokens[$i]->getContent(), "\n") !== false) {
                 return true;
             }
         }
@@ -977,14 +977,14 @@ PHP
             return false;
         }
 
-        if (0 === strpos($tokens[$index]->getContent(), '/*')) {
+        if (strpos($tokens[$index]->getContent(), '/*') === 0) {
             return true;
         }
 
         $firstCommentIndex = $index;
         while (true) {
             $i = $this->getSiblingContinuousSingleLineComment($tokens, $firstCommentIndex, false);
-            if (null === $i) {
+            if ($i === null) {
                 break;
             }
 
@@ -994,7 +994,7 @@ PHP
         $lastCommentIndex = $index;
         while (true) {
             $i = $this->getSiblingContinuousSingleLineComment($tokens, $lastCommentIndex, true);
-            if (null === $i) {
+            if ($i === null) {
                 break;
             }
 
@@ -1031,15 +1031,15 @@ PHP
                 $siblingIndex = $tokens->getPrevTokenOfKind($siblingIndex, [[T_COMMENT]]);
             }
 
-            if (null === $siblingIndex) {
+            if ($siblingIndex === null) {
                 return null;
             }
-        } while (0 === strpos($tokens[$siblingIndex]->getContent(), '/*'));
+        } while (strpos($tokens[$siblingIndex]->getContent(), '/*') === 0);
 
         $newLines = 0;
         for ($i = min($siblingIndex, $index) + 1, $max = max($siblingIndex, $index); $i < $max; ++$i) {
             if ($tokens[$i]->isWhitespace() && Preg::match('/\R/', $tokens[$i]->getContent())) {
-                if (1 === $newLines || Preg::match('/\R.*\R/', $tokens[$i]->getContent())) {
+                if ($newLines === 1 || Preg::match('/\R.*\R/', $tokens[$i]->getContent())) {
                     return null;
                 }
 

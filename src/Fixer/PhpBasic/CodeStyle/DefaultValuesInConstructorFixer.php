@@ -184,7 +184,7 @@ PHP,
 
             /** @var Token $item */
             foreach ($propertyTokens as $item) {
-                if (false !== strpos($item->getContent(), "\n")) {
+                if (strpos($item->getContent(), "\n") !== false) {
                     $itemIndentation = $item->getContent() . $this->whitespacesConfig->getIndent();
                     $tokens->insertSlices([++$index => [new Token([T_WHITESPACE, $itemIndentation])]]);
                 } else {
