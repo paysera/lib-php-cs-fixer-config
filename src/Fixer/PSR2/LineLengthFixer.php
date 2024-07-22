@@ -175,6 +175,7 @@ PHP
                     'hard_limit' => self::DEFAULT_HARD_LIMIT,
                 ])
                 ->getOption(),
-        ]);
+        ])
+            ;
     }
 }

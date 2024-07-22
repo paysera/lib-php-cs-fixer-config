@@ -177,7 +177,8 @@ PHP
                 ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
                 ->setDefault(self::LINE_SAME)
                 ->getOption(),
-        ]);
+        ])
+            ;
     }
 
     private function fixCommentBeforeBrace(Tokens $tokens)

@@ -110,7 +110,8 @@ PHP,
             ))
                 ->setAllowedTypes(['array', 'bool'])
                 ->getOption(),
-        ]);
+        ])
+            ;
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void

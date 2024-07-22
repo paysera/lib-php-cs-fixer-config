@@ -139,7 +139,8 @@ PHP,
             ))
                 ->setAllowedTypes(['array', 'bool'])
                 ->getOption(),
-        ]);
+        ])
+            ;
     }
 
     protected function applyFixOnContextualToken(ContextualToken $token)
