@@ -109,7 +109,7 @@ PHP,
                                 T_COMMENT,
                                 '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
                             ]),
-                        ]
+                        ],
                     ]);
                 }
             }
@@ -133,8 +133,10 @@ PHP,
             ) {
                 continue;
             }
+
             return false;
         }
+
         return true;
     }
 }

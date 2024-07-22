@@ -81,6 +81,7 @@ class ContextualToken extends Token implements ItemInterface
         while ($nextToken->isWhitespace()) {
             $nextToken = $nextToken->nextToken();
         }
+
         return $nextToken;
     }
 
@@ -90,6 +91,7 @@ class ContextualToken extends Token implements ItemInterface
         while ($nextToken->getContent() !== $content) {
             $nextToken = $nextToken->nextToken();
         }
+
         return $nextToken;
     }
 
@@ -108,6 +110,7 @@ class ContextualToken extends Token implements ItemInterface
         while ($previousToken->isWhitespace()) {
             $previousToken = $previousToken->previousToken();
         }
+
         return $previousToken;
     }
 
@@ -146,6 +149,7 @@ class ContextualToken extends Token implements ItemInterface
         if (preg_match('/^([\s\t]*)/', $codeBefore, $matches) !== 1) {
             throw new RuntimeException('Expected regexp to always match when searching for line indent');
         }
+
         return $matches[1];
     }
 

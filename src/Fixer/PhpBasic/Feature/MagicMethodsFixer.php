@@ -135,7 +135,7 @@ PHP,
             $insertIndex => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]),
-            ]
+            ],
         ]);
     }
 }

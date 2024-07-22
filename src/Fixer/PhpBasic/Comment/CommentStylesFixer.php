@@ -170,6 +170,7 @@ PHP,
                 }
             }
         }
+
         return null;
     }
 
@@ -187,6 +188,7 @@ PHP,
                 return $tokens->getPrevNonWhitespace($previousTokenIndex);
             }
         }
+
         return null;
     }
 

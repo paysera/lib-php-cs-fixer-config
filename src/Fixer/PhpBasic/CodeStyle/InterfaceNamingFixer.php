@@ -19,7 +19,7 @@ final class InterfaceNamingFixer extends AbstractFixer
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We always add suffix Interface to interfaces, even if interface name would be adjective.
 Risky for renaming interface name.
 TEXT
@@ -79,7 +79,7 @@ PHP,
             $tokens[$interfaceNameIndex] = new Token(
                 [
                     $tokens[$interfaceNameIndex]->getId(),
-                    $tokens[$interfaceNameIndex]->getContent() . self::INTERFACE_NAME
+                    $tokens[$interfaceNameIndex]->getContent() . self::INTERFACE_NAME,
                 ],
             );
 //            $tokens[$interfaceNameIndex]->setContent($tokens[$interfaceNameIndex]->getContent() . self::INTERFACE_NAME);

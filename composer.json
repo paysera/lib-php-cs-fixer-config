@@ -1,5 +1,5 @@
 {
-    "name": "viktorkulahin/lib-php-cs-fixer-config",
+    "name": "paysera/lib-php-cs-fixer-config",
     "description": "PHP CS Fixer config for Paysera conventions",
     "type": "library",
     "require": {

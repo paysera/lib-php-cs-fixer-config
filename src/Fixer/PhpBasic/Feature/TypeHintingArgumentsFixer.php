@@ -6,7 +6,6 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Util\InheritanceHelper;
 use PhpCsFixer\AbstractFixer;
-use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
@@ -133,6 +132,7 @@ PHP,
     private function methodImplementedFromInterface(int $functionTokenIndex, Tokens $tokens): bool
     {
         $method = $tokens[$tokens->getNextNonWhitespace($functionTokenIndex)];
+
         return $this->inheritanceHelper->isMethodFromInterface($method->getContent(), $tokens);
     }
 
@@ -196,7 +196,7 @@ PHP,
                             $i => [
                                 new Token([T_STRING, $argumentType]),
                                 new Token([T_WHITESPACE, ' ']),
-                            ]
+                            ],
                         ]);
                         $currentParenthesesEndIndex += 2;
                     }
@@ -232,7 +232,7 @@ PHP,
                                     new Token('='),
                                     new Token([T_WHITESPACE, ' ']),
                                     new Token([T_STRING, 'null']),
-                                ]
+                                ],
                             ]);
                         }
                     }

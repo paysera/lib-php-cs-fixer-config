@@ -145,7 +145,7 @@ PHP,
             ++$parenthesesEndIndex => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([T_LNUMBER, '0']),
-            ]
+            ],
         ]);
 
         return true;
@@ -180,6 +180,7 @@ PHP,
             } else {
                 $tokens->insertSlices([$notOperatorIndex + 1 => [new Token('!')]]);
             }
+
             return true;
         }
 

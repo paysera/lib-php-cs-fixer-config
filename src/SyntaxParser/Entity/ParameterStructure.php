@@ -26,6 +26,7 @@ class ParameterStructure
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -37,6 +38,7 @@ class ParameterStructure
     public function setDefaultValue(?string $defaultValue): self
     {
         $this->defaultValue = $defaultValue;
+
         return $this;
     }
 
@@ -48,6 +50,7 @@ class ParameterStructure
     public function setTypeHintContent(?string $typeHintContent): self
     {
         $this->typeHintContent = $typeHintContent;
+
         return $this;
     }
 
@@ -59,6 +62,7 @@ class ParameterStructure
     public function setTypeHintFullClass(?string $typeHintFullClass): self
     {
         $this->typeHintFullClass = $typeHintFullClass;
+
         return $this;
     }
 
@@ -70,6 +74,7 @@ class ParameterStructure
     public function setTypeHintItem(?ItemInterface $typeHintItem): self
     {
         $this->typeHintItem = $typeHintItem;
+
         return $this;
     }
 }

@@ -42,7 +42,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We don’t use public and dynamic properties. All used properties must be defined.
 
 We prefer private over protected as it constraints the scope - it’s easier to refactor,
@@ -282,8 +282,10 @@ PHP,
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PROTECTED_PROPERTIES_CONVENTION);
             }
+
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 

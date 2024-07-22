@@ -2,24 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file was copied from PHP CS Fixer core.
- *
- * Modified place is marked with BEGIN PATCH - END PATCH, additionally getName method is overwritten
- *
- * Separate class is needed as there's a bug with whitespace in elseif statements (it's cleared)
- */
-
-/*
- * This file is part of PHP CS Fixer.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Overwritten;
 
 use PhpCsFixer\AbstractFixer;
@@ -39,8 +21,6 @@ use PhpCsFixer\Tokenizer\TokensAnalyzer;
 
 /**
  * Fixer for rules defined in PSR2 ¶4.1, ¶4.4, ¶5.
- *
- * @author Dariusz Rumiński <dariusz.ruminski@gmail.com>
  */
 final class BracesFixer extends AbstractFixer implements ConfigurableFixerInterface, WhitespacesAwareFixerInterface
 {
@@ -69,7 +49,8 @@ final class BracesFixer extends AbstractFixer implements ConfigurableFixerInterf
         return new FixerDefinition(
             'The body of each structure MUST be enclosed by braces. Braces should be properly placed. Body of braces should be properly indented.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 
 class Foo {
@@ -98,7 +79,8 @@ class Foo {
 
 PHP
                 ),
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 $positive = function ($item) { return $item >= 0; };
 $negative = function ($item) {
@@ -108,7 +90,8 @@ PHP
                     ,
                     ['allow_single_line_closure' => true]
                 ),
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 
 class Foo
@@ -238,7 +221,7 @@ PHP
                 // we might be moving one white space next to another, these have to be merged
                 $tokens[$i] = $tokens[$i - 1];
                 if ($tokens[$i]->isWhitespace() && $tokens[$i + 1]->isWhitespace()) {
-                    $tokens[$i] = new Token([T_WHITESPACE, $tokens[$i]->getContent().$tokens[$i + 1]->getContent()]);
+                    $tokens[$i] = new Token([T_WHITESPACE, $tokens[$i]->getContent() . $tokens[$i + 1]->getContent()]);
                     $tokens->clearAt($i + 1);
                 }
             }
@@ -274,7 +257,7 @@ PHP
                 $index - 1,
                 1,
                 self::LINE_NEXT === $this->configuration['position_after_control_structures'] ?
-                    $this->whitespacesConfig->getLineEnding().$this->detectIndent($tokens, $index)
+                    $this->whitespacesConfig->getLineEnding() . $this->detectIndent($tokens, $index)
                     : ' '
             );
         }
@@ -369,7 +352,7 @@ PHP
 
             // fix indent near closing brace
             // BEGIN PATCH
-            $intendedWhitespace = $this->whitespacesConfig->getLineEnding().$indent;
+            $intendedWhitespace = $this->whitespacesConfig->getLineEnding() . $indent;
             $existingWhitespace = $tokens[$endBraceIndex - 1]->getContent();
             if (substr($existingWhitespace, -strlen($intendedWhitespace)) !== $intendedWhitespace) {
                 $tokens->ensureWhitespaceAtIndex($endBraceIndex - 1, 1, $this->whitespacesConfig->getLineEnding() . $indent);
@@ -473,7 +456,7 @@ PHP
                                 }
                             }
 
-                            $whitespace = $nextWhitespace.$this->whitespacesConfig->getLineEnding().$indent;
+                            $whitespace = $nextWhitespace . $this->whitespacesConfig->getLineEnding() . $indent;
 
                             if (!$nextNonWhitespaceNestToken->equals('}')) {
                                 $determineIsIndentableBlockContent = function ($contentIndex) use ($tokens) {
@@ -534,7 +517,7 @@ PHP
 
             // fix indent near opening brace
             if (isset($tokens[$startBraceIndex + 2]) && $tokens[$startBraceIndex + 2]->equals('}')) {
-                $tokens->ensureWhitespaceAtIndex($startBraceIndex + 1, 0, $this->whitespacesConfig->getLineEnding().$indent);
+                $tokens->ensureWhitespaceAtIndex($startBraceIndex + 1, 0, $this->whitespacesConfig->getLineEnding() . $indent);
             } else {
                 $nextToken = $tokens[$startBraceIndex + 1];
                 $nextNonWhitespaceToken = $tokens[$tokens->getNextNonWhitespace($startBraceIndex)];
@@ -547,7 +530,7 @@ PHP
                     $this->ensureWhitespaceAtIndexAndIndentMultilineComment(
                         $tokens,
                         $startBraceIndex + 1,
-                        $this->whitespacesConfig->getLineEnding().$indent.$this->whitespacesConfig->getIndent()
+                        $this->whitespacesConfig->getLineEnding() . $indent . $this->whitespacesConfig->getIndent()
                     );
                 }
             }
@@ -556,7 +539,7 @@ PHP
                 if (self::LINE_SAME === $this->configuration['position_after_functions_and_oop_constructs'] && !$tokens[$tokens->getPrevNonWhitespace($startBraceIndex)]->isComment()) {
                     $ensuredWhitespace = ' ';
                 } else {
-                    $ensuredWhitespace = $this->whitespacesConfig->getLineEnding().$indent;
+                    $ensuredWhitespace = $this->whitespacesConfig->getLineEnding() . $indent;
                 }
 
                 $tokens->ensureWhitespaceAtIndex($startBraceIndex - 1, 1, $ensuredWhitespace);
@@ -599,7 +582,7 @@ PHP
                     ) {
                         $ensuredWhitespace = ' ';
                     } else {
-                        $ensuredWhitespace = $this->whitespacesConfig->getLineEnding().$indent;
+                        $ensuredWhitespace = $this->whitespacesConfig->getLineEnding() . $indent;
                     }
 
                     $tokens->ensureWhitespaceAtIndex($startBraceIndex - 1, 1, $ensuredWhitespace);
@@ -675,7 +658,7 @@ PHP
                         $index + 1,
                         0,
                         self::LINE_NEXT === $this->configuration['position_after_control_structures'] && !$tokens[$nextNonWhitespaceIndex]->equals('(') ?
-                            $this->whitespacesConfig->getLineEnding().$this->detectIndent($tokens, $index)
+                            $this->whitespacesConfig->getLineEnding() . $this->detectIndent($tokens, $index)
                             : ' '
                     );
                 }
@@ -938,7 +921,7 @@ PHP
 
             // do not indent inline comments used to comment out unused code
             if (
-                (0 === strpos($nextToken->getContent(), '//'.$this->whitespacesConfig->getIndent()) || '//' === $nextToken->getContent())
+                (0 === strpos($nextToken->getContent(), '//' . $this->whitespacesConfig->getIndent()) || '//' === $nextToken->getContent())
                 && $previousToken->isWhitespace() && 1 === Preg::match('/\R$/', $previousToken->getContent())
             ) {
                 return;
@@ -947,8 +930,8 @@ PHP
             $tokens[$nextTokenIndex] = new Token([
                 $nextToken->getId(),
                 Preg::replace(
-                    '/(\R)'.$this->detectIndent($tokens, $nextTokenIndex).'/',
-                    '$1'.Preg::replace('/^.*\R([ \t]*)$/s', '$1', $whitespace),
+                    '/(\R)' . $this->detectIndent($tokens, $nextTokenIndex) . '/',
+                    '$1' . Preg::replace('/^.*\R([ \t]*)$/s', '$1', $whitespace),
                     $nextToken->getContent()
                 ),
             ]);

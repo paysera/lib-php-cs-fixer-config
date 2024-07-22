@@ -66,7 +66,7 @@ PHP,
                                 '// TODO: "' . $traitName . '" - ' . self::CONVENTION,
                             ]),
                             new Token([T_WHITESPACE, "\n"]),
-                        ]
+                        ],
                     ]);
                     break;
                 }

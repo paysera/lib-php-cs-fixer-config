@@ -53,7 +53,7 @@ PHP
                             'hard_limit' => 40,
                         ],
                     ],
-                )
+                ),
             ],
             null,
             'Paysera recommendation.'

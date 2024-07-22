@@ -216,6 +216,7 @@ PHP,
         }
         $this->insertUseStatement($lastNamespaceToken, $fullClassName, $importAs);
         $importedClasses->registerImport($className, $fullClassName);
+
         return $className;
     }
 
@@ -296,6 +297,7 @@ PHP,
         ) {
             $token = $token->nextToken();
         }
+
         return $token->previousToken();
     }
 }

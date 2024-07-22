@@ -82,6 +82,7 @@ PHP,
         if ($tokens[$constantTokenKey]->isGivenKind([T_FUNCTION])) {
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 
@@ -93,6 +94,7 @@ PHP,
 
         $string = ucwords($string);
         $string = strtr($string, [' ' => '']);
+
         return lcfirst($string);
     }
 

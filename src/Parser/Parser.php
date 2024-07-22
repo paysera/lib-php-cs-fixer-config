@@ -73,6 +73,7 @@ class Parser
                 if (count($contents) > 0) {
                     return $this->buildConstructItem($prefixItem, $contents, $token);
                 }
+
                 return new SimpleItemList([$prefixItem, $token]);
             } elseif ($abortOnToken !== null && $token->getContent() === $abortOnToken) {
                 return null;
@@ -162,6 +163,7 @@ class Parser
             }
 
             $itemList->replaceWith($replacedItem);
+
             return $replacedItem;
         }
 
@@ -195,6 +197,7 @@ class Parser
         $postfixItem = new EmptyToken();
         $item->lastToken()->insertAfter($postfixItem);
         $wrappedItem->addPostfixItem($postfixItem);
+
         return $wrappedItem;
     }
 
@@ -235,6 +238,7 @@ class Parser
         if ($postfixWhitespace !== null) {
             $regroupedItem->addPostfixWhitespaceItem($postfixWhitespace);
         }
+
         return $regroupedItem;
     }
 }

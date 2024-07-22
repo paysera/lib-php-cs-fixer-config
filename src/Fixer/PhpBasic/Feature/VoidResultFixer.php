@@ -19,7 +19,7 @@ final class VoidResultFixer extends AbstractFixer
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We always return something or return nothing. If method does not return anything (“returns” void),
 we do not return null, false or any other value in that case.
 

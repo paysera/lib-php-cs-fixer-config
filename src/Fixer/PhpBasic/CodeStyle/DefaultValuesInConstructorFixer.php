@@ -177,7 +177,7 @@ PHP,
                     new Token([T_WHITESPACE, $indentation]),
                     new Token([T_VARIABLE, '$this']),
                     new Token([T_OBJECT_OPERATOR, '->']),
-                    new Token([T_STRING, str_replace('$', '', $name)])
+                    new Token([T_STRING, str_replace('$', '', $name)]),
                 ],
             ]);
             $index += 4;
@@ -216,6 +216,7 @@ PHP,
     private function isConstructor(int $key, Tokens $tokens, Token $token): bool
     {
         $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
+
         return
             $tokens[$key]->isGivenKind(T_STRING)
             && $token->getContent() === self::CONSTRUCT
@@ -242,7 +243,7 @@ PHP,
                 new Token('{'),
                 new Token([T_WHITESPACE, $indentation]),
                 new Token('}'),
-            ]
+            ],
         ]);
 
         return $openingCurlyBrace;
@@ -259,7 +260,7 @@ PHP,
                 new Token('('),
                 new Token(')'),
                 new Token(';'),
-            ]
+            ],
         ]);
 
         return $index + 7;

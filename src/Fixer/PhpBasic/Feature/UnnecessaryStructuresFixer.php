@@ -140,7 +140,7 @@ PHP,
                 $insertIndex + 1 => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, '// TODO: "' . $conditionalStatement . '" - ' . self::CONVENTION]),
-                ]
+                ],
             ]);
         }
     }

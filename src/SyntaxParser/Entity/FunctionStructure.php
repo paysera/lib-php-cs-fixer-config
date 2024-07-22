@@ -39,6 +39,7 @@ class FunctionStructure
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -50,6 +51,7 @@ class FunctionStructure
     public function setContentsItem(ItemInterface $contentsItem): self
     {
         $this->contentsItem = $contentsItem;
+
         return $this;
     }
 
@@ -61,6 +63,7 @@ class FunctionStructure
     public function setFirstToken(ContextualToken $firstToken): self
     {
         $this->firstToken = $firstToken;
+
         return $this;
     }
 
@@ -72,6 +75,7 @@ class FunctionStructure
     public function setKeywords(array $keywords): self
     {
         $this->keywords = $keywords;
+
         return $this;
     }
 
@@ -89,6 +93,7 @@ class FunctionStructure
     public function setParameters(array $parameters): self
     {
         $this->parameters = $parameters;
+
         return $this;
     }
 
@@ -100,6 +105,7 @@ class FunctionStructure
     public function setPhpDoc(DocBlock $phpDoc): self
     {
         $this->phpDoc = $phpDoc;
+
         return $this;
     }
 }

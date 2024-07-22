@@ -136,9 +136,10 @@ PHP,
         $tokens->insertSlices([
             $endOfLineIndex + 1 => [
                 new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION],
+                new Token(
+                    [T_COMMENT, '// TODO: "' . $tokens[$functionIndex]->getContent() . '" - ' . self::CONVENTION],
                 ),
-            ]
+            ],
         ]);
     }
 }

@@ -42,7 +42,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We use singular for namespaces: Service, Bundle, Entity, Controller etc.
 Exception: if English word does not have singular form.
 
@@ -142,7 +142,7 @@ PHP,
                 $insertIndex + 1 => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
-                ]
+                ],
             ]);
         }
     }

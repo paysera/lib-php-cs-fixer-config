@@ -29,6 +29,7 @@ class ClassStructure
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -40,6 +41,7 @@ class ClassStructure
     public function setFirstToken(ContextualToken $firstToken): self
     {
         $this->firstToken = $firstToken;
+
         return $this;
     }
 
@@ -58,6 +60,7 @@ class ClassStructure
     public function setMethods(array $methods): self
     {
         $this->methods = $methods;
+
         return $this;
     }
 
@@ -80,6 +83,7 @@ class ClassStructure
     public function setImportedClasses(ImportedClasses $importedClasses): self
     {
         $this->importedClasses = $importedClasses;
+
         return $this;
     }
 }

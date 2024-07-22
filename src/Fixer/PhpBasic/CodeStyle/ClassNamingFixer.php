@@ -46,7 +46,7 @@ final class ClassNamingFixer extends AbstractFixer implements ConfigurableFixerI
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We use nouns for class names.
 For services we use some suffix to represent the job of that service, usually *er:
 manager
@@ -181,6 +181,7 @@ PHP,
 
             return false;
         }
+
         return true;
     }
 

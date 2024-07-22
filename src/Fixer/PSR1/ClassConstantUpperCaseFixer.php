@@ -80,6 +80,7 @@ PHP,
         if ($tokens[$constantTokenKey]->isGivenKind(T_CONST)) {
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 }

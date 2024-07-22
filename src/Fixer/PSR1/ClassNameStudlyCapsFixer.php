@@ -76,6 +76,7 @@ PHP,
         if ($tokens[$classTokenKey]->isGivenKind([T_CLASS, T_INTERFACE, T_TRAIT])) {
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 

@@ -237,7 +237,7 @@ PHP,
                     new Token('('),
                     new Token([T_WHITESPACE, ' ']),
                     new Token(')'),
-                ]
+                ],
             ]);
             $overrideIndex = $insertionIndex + 3;
             $insertionIndex += 4;
@@ -272,6 +272,7 @@ PHP,
 
         $returnStatement['BoolCondition'] = $tokens[$boolIndex]->getContent();
         $returnStatement['SemicolonIndex'] = $semicolonIndex;
+
         return $returnStatement;
     }
 

@@ -96,8 +96,8 @@ PHP,
                             $indent,
                             1,
                         ),
-                    ])
-                ]
+                    ]),
+                ],
             ]);
         }
 
@@ -119,6 +119,7 @@ PHP,
                 return $tokens[$i - 1]->getContent();
             }
         }
+
         return null;
     }
 }

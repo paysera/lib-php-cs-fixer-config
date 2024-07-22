@@ -24,6 +24,7 @@ class ImportedClasses
     {
         $this->classMap[$importedAs] = ltrim($className, '\\');
         $this->lowercasedUsage[mb_strtolower($importedAs)] = $importedAs;
+
         return $this;
     }
 
@@ -35,6 +36,7 @@ class ImportedClasses
     public function setCurrentNamespace(?string $currentNamespace): self
     {
         $this->currentNamespace = $currentNamespace;
+
         return $this;
     }
 
@@ -56,6 +58,7 @@ class ImportedClasses
     public function getImportedAs(string $fullClassName): ?string
     {
         $key = array_search(ltrim($fullClassName, '\\'), $this->classMap, true);
+
         return $key === false ? null : $key;
     }
 }

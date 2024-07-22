@@ -237,6 +237,7 @@ PHP,
             $tokens[] = new ContextualToken([T_NS_SEPARATOR, '\\']);
             $tokens[] = new ContextualToken([T_STRING, $part]);
         }
+
         return $tokens;
     }
 

@@ -236,6 +236,7 @@ PHP,
                 $constructArguments[$tokens[$i]->getContent()] = $tokens[$previousTokenIndex]->getContent();
             }
         }
+
         return $constructArguments;
     }
 
@@ -257,6 +258,7 @@ PHP,
                 return $this->getPropertyValues($tokens, $key, $previousPreviousTokenIndex);
             }
         }
+
         return null;
     }
 
@@ -270,6 +272,7 @@ PHP,
         } else {
             $property['DocBlockInsertIndex'] = $previousTokenIndex - 1;
         }
+
         return $property;
     }
 

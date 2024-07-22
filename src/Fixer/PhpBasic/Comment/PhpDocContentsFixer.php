@@ -396,6 +396,7 @@ PHP,
             array_splice($lines, count($lines) - 1, 0, $missingReturn);
             $tokens[$docBlockIndex]->setContent(implode('', $lines));
         }
+
         return new DocBlock($tokens[$docBlockIndex]->getContent());
     }
 
