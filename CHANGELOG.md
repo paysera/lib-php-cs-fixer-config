@@ -11,6 +11,11 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 2.5.2
+### Added
+
+- Support for doctrine/inflector `^2.0`
+
 ## 2.5.1
 ### Changed
 

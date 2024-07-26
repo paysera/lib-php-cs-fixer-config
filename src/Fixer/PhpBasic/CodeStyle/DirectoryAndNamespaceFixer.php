@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
@@ -20,6 +21,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
 
     private $exclusions;
     private $serviceNames;
+    private $inflector;
 
     public function __construct()
     {
@@ -33,6 +35,31 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
         $this->serviceNames = [
             'Manager',
         ];
+        $this->initializeInflector();
+    }
+
+    private function initializeInflector()
+    {
+        if (class_exists('Doctrine\Inflector\InflectorFactory')) {
+            // Doctrine Inflector v2
+            $this->inflector = InflectorFactory::create()->build();
+        } elseif (class_exists('Doctrine\Common\Inflector\Inflector')) {
+            // Doctrine Inflector v1
+            $this->inflector = new Inflector();
+        } else {
+            throw new \RuntimeException('Doctrine Inflector is not available');
+        }
+    }
+
+    private function singularize($word)
+    {
+        if (method_exists($this->inflector, 'singularize')) {
+            // Doctrine Inflector v2
+            return $this->inflector->singularize($word);
+        } else {
+            // Doctrine Inflector v1
+            return Inflector::singularize($word);
+        }
     }
 
     public function getDefinition()
@@ -111,7 +138,7 @@ PHP
             if ($tokens[$index]->isGivenKind(T_STRING)) {
                 $namespaceName = $tokens[$index]->getContent();
                 if (
-                    $namespaceName !== Inflector::singularize($namespaceName)
+                    $namespaceName !== $this->singularize($namespaceName)
                     && !in_array($namespaceName, $this->exclusions, true)
                 ) {
                     $this->insertComment($tokens, $semicolonIndex, $namespaceName, self::SINGULAR_CONVENTION);
