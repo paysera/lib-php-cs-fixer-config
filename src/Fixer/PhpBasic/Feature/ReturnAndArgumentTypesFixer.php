@@ -1,5 +1,6 @@
 <?php
 
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -28,6 +29,7 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
 
     private array $scalarTypes;
     private array $strictValues;
+    private Inflector $inflector;
 
     public function __construct()
     {
@@ -49,6 +51,31 @@ final class ReturnAndArgumentTypesFixer extends AbstractFixer implements Whitesp
             T_DNUMBER,
             T_LNUMBER,
         ];
+        $this->initializeInflector();
+    }
+
+    private function initializeInflector()
+    {
+        if (class_exists('Doctrine\Inflector\InflectorFactory')) {
+            // Doctrine Inflector v2
+            $this->inflector = InflectorFactory::create()->build();
+        } elseif (class_exists('Doctrine\Common\Inflector\Inflector')) {
+            // Doctrine Inflector v1
+            $this->inflector = new Inflector();
+        } else {
+            throw new \RuntimeException('Doctrine Inflector is not available');
+        }
+    }
+
+    private function pluralize($word)
+    {
+        if (method_exists($this->inflector, 'pluralize')) {
+            // Doctrine Inflector v2
+            return $this->inflector->pluralize($word);
+        } else {
+            // Doctrine Inflector v1
+            return Inflector::pluralize($word);
+        }
     }
 
     // Excluding class namespaces by passing int|Entity by PhpBasic convention `3.17.3. Passing ID`
@@ -267,7 +294,7 @@ PHP,
 
             $typeWord = trim($type, ' []');
 
-            return $typeWord === Inflector::pluralize($typeWord);
+            return $typeWord === $this->pluralize($typeWord);
         });
         if (count($arrayTypes) === $typeCount) {
             return null;
