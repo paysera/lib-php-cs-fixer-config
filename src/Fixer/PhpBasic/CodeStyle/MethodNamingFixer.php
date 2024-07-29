@@ -93,29 +93,32 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if (
-                $token->isGivenKind(T_STRING)
-                && $tokens[$key + 1]->equals('(')
-                && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-                && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            ) {
-                $functionName = $tokens[$key]->getContent();
-                $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
-                $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
-                $returnType = null;
-                if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
-                    $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
-                    $returnType = $tokens[$typeIndex]->getContent();
-                    $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
+            if ($functionTokenIndex && $visibilityTokenIndex) {
+                if (
+                    $token->isGivenKind(T_STRING)
+                    && $tokens[$key + 1]->equals('(')
+                    && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
+                    && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                ) {
+                    $functionName = $tokens[$key]->getContent();
+                    $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
+                    $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+
+                    $returnType = null;
+                    if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
+                        $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                        $returnType = $tokens[$typeIndex]->getContent();
+                        $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
+                    }
+
+                    if (!$tokens[$nextIndex]->equals('{')) {
+                        continue;
+                    }
+
+                    $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
                 }
-
-                if (!$tokens[$nextIndex]->equals('{')) {
-                    continue;
-                }
-
-                $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
             }
         }
     }

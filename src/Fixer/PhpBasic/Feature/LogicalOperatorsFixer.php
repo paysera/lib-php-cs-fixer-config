@@ -8,6 +8,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
+use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
@@ -66,9 +67,9 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_LOGICAL_AND)) {
-                $tokens->overrideRange($key, $key, [T_BOOLEAN_AND, '&&']);
+                $tokens[$key] = new Token([T_BOOLEAN_AND, '&&']);
             } elseif ($token->isGivenKind(T_LOGICAL_OR)) {
-                $tokens->overrideRange($key, $key, [T_BOOLEAN_OR, '||']);
+                $tokens[$key] = new Token([T_BOOLEAN_OR, '||']);
             }
         }
     }

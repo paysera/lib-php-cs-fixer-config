@@ -275,12 +275,7 @@ PHP,
         );
     }
 
-    /**
-     * @param ItemInterface $item
-     * @param string|null $whitespaceBefore
-     * @param bool $forceWhitespace
-     */
-    private function fixWhitespaceBefore(ItemInterface $item, $whitespaceBefore, bool $forceWhitespace)
+    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace)
     {
         $firstToken = $item->firstToken();
         if ($firstToken->isWhitespace()) {
@@ -290,12 +285,7 @@ PHP,
         }
     }
 
-    /**
-     * @param ItemInterface $item
-     * @param string|null $whitespaceAfter
-     * @param bool $forceWhitespace
-     */
-    private function fixWhitespaceAfter(ItemInterface $item, $whitespaceAfter, bool $forceWhitespace)
+    private function fixWhitespaceAfter(ItemInterface $item, ?string $whitespaceAfter, bool $forceWhitespace): void
     {
         $lastToken = $item->lastToken();
         if ($lastToken->isWhitespace()) {

@@ -209,6 +209,11 @@ PHP,
 
     /**
      * @param Token[] $ifStatementConditionTokens
+     * @param Tokens $tokens
+     * @param int $key
+     * @param string $returnCondition
+     * @param int $endIndex
+     * @param bool $assignCondition
      */
     private function fixIfStatement(
         Tokens $tokens,

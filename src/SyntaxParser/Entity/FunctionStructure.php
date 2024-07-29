@@ -23,7 +23,7 @@ class FunctionStructure
      */
     private array $parameters;
 
-    private ?DocBlock $phpDoc;
+    private ?DocBlock $phpDoc = null;
 
     public function __construct()
     {

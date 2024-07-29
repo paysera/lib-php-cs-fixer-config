@@ -172,6 +172,7 @@ class ClassStructureParser
         $typeHintContent = null;
         $typeHintItem = null;
         $defaultValue = null;
+
         if (count($itemGroup) === 1) {
             $name = $itemGroup[0]->getContent();
         } elseif (count($itemGroup) === 2) {

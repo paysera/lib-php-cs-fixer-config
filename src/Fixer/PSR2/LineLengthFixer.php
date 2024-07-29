@@ -21,7 +21,9 @@ use SplFileInfo;
 
 final class LineLengthFixer extends AbstractFixer implements ConfigurableFixerInterface
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const DEFAULT_SOFT_LIMIT = 120;
     public const DEFAULT_HARD_LIMIT = 80;
@@ -84,7 +86,7 @@ PHP
 
     public function configure(array $configuration = null): void
     {
-        $this->configure($configuration);
+        $this->configureConfigurableFixerTrait($configuration);
 
         if ($this->configuration['limits'] === true) {
             $this->softLimit = self::DEFAULT_SOFT_LIMIT;
@@ -110,6 +112,7 @@ PHP
         $currentLineLength = 0;
         $firstLineToken = $token;
         $previousMatches = null;
+
         while ($token !== null) {
             if (preg_match('/^([^\n]*)(.*?\n.*?)([^\n]*)$/', $token->getContent(), $matches) === 1) {
                 $currentLineLength += mb_strlen($matches[1]);

@@ -1,26 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\DefaultValuesInConstructorFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use PhpCsFixer\FixerFactory;
 
 final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
-     * @param string $expected
-     * @param null|string $input
-     *
      * @dataProvider provideCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
-
         $this->doTest($expected, $input);
     }
 
-    public function provideCases()
+    public function provideCases(): array
     {
         $data = [
             [
@@ -345,7 +343,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
 
         ];
 
-        if(
+        if (
             (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION >= 4)
             || PHP_MAJOR_VERSION > 7
         ) {
@@ -402,13 +400,12 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
             ];
 
             $data = array_merge($data, $php74);
-
         }
 
         return $data;
     }
 
-    public function createFixerFactory()
+    public function createFixerFactory(): FixerFactory
     {
         $fixerFactory = parent::createFixerFactory();
         $fixerFactory->registerCustomFixers([
@@ -418,7 +415,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
         return $fixerFactory;
     }
 
-    protected function getFixerName()
+    protected function getFixerName(): string
     {
         return 'Paysera/php_basic_code_style_default_values_in_constructor';
     }

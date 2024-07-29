@@ -9,7 +9,7 @@ class ImportedClasses
     /**
      * @var string|null
      */
-    private ?string $currentNamespace;
+    private ?string $currentNamespace = null;
 
     private array $classMap;
     private array $lowercasedUsage;

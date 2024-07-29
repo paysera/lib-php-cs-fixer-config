@@ -37,8 +37,6 @@ PHP,
                 ),
             ],
             null,
-            null,
-            null,
             'Paysera recommendation.',
         );
     }

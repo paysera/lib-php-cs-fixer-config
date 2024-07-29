@@ -8,22 +8,22 @@ use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 
 class ParameterStructure
 {
-    private ?string $name;
+    private ?string $name = null;
 
-    private ?string $typeHintContent;
+    private ?string $typeHintContent = null;
 
-    private ?string $typeHintFullClass;
+    private ?string $typeHintFullClass = null;
 
-    private ?ItemInterface $typeHintItem;
+    private ?ItemInterface $typeHintItem = null;
 
-    private ?string $defaultValue;
+    private ?string $defaultValue = null;
 
     public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 

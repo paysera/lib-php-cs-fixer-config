@@ -40,7 +40,7 @@ PHP,
                 ),
             ],
             null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
@@ -200,7 +200,7 @@ PHP,
     private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token): bool
     {
         $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
-        $subsequentToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
+        $subsequentToken = $nextMeaningfulToken ? $tokens->getNextNonWhitespace($nextMeaningfulToken) : null;
 
         return (
             $token->equals(';')

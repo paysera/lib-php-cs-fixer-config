@@ -17,11 +17,12 @@ use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 
 final class IgnorableFixerDecorator implements
-//    DefinedFixerInterface,
     ConfigurableFixerInterface,
     WhitespacesAwareFixerInterface
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const IGNORE_ANNOTATION = '@php-cs-fixer-ignore';
 
@@ -34,21 +35,7 @@ final class IgnorableFixerDecorator implements
 
     public function getDefinition(): FixerDefinitionInterface
     {
-//        if ($this->innerFixer instanceof DefinedFixerInterface) {
         return $this->innerFixer->getDefinition();
-//        }
-
-//        return new FixerDefinition(
-//            'Description is not available.',
-//            [
-//                new CodeSample(
-//                    <<<'PHP'
-//<?php // @php-cs-fixer-ignore my_test_fixer'
-//
-//PHP,
-//                )
-//            ],
-//        );
     }
 
     public function isCandidate(Tokens $tokens): bool

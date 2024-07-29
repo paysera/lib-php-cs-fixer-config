@@ -55,4 +55,4 @@ before_script:
 
 script:
     - bin/phpunit
-    - if [[ "$WITH_CS" == "true" ]]; then bin/php-cs-fixer fix --config=.php_cs_risky -v --dry-run --stop-on-violation --using-cache=no --path-mode=intersection "${COMMIT_SCA_FILES[@]}"; fi
+    - if [[ "$WITH_CS" == "true" ]]; then bin/php-cs-fixer fix --config=php-cs-risky.php -v --dry-run --stop-on-violation --using-cache=no --path-mode=intersection "${COMMIT_SCA_FILES[@]}"; fi

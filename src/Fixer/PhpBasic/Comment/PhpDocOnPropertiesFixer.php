@@ -77,7 +77,7 @@ PHP,
         // Collecting __construct function info
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
             if (
                 $tokens[$key]->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
@@ -244,7 +244,8 @@ PHP,
     {
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
+            $previousPreviousTokenIndex =
+                $previousTokenIndex ? $tokens->getPrevNonWhitespace($previousTokenIndex) : null;
             if (
                 $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$previousPreviousTokenIndex]->isGivenKind(T_COMMENT)

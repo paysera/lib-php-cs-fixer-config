@@ -22,7 +22,9 @@ use Exception;
 
 final class TypeHintingFixer extends AbstractContextualTokenFixer
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const CONVENTION = 'PhpBasic convention 3.18: We always type hint narrowest possible interface';
     public const CONSTRUCT = '__construct';
@@ -122,6 +124,8 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
+        $this->configureConfigurableFixerTrait($configuration);
+
         if ($this->configuration['exceptions'] === true) {
             return;
         }

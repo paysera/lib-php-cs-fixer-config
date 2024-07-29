@@ -17,11 +17,10 @@ class ContextualTokenBuilder
      */
     public function buildFromTokens($tokens): ContextualToken
     {
-        /** @var ContextualToken $firstContextualToken */
         $firstContextualToken = null;
-        /** @var ContextualToken $previousContextualToken */
         $previousContextualToken = null;
-        foreach ($tokens as $key => $token) {
+
+        foreach ($tokens as $token) {
             $contextualToken = new ContextualToken($token->getPrototype());
             if ($previousContextualToken !== null) {
                 $previousContextualToken->setNextContextualToken($contextualToken);

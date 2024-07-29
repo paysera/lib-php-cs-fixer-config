@@ -20,8 +20,9 @@ use Exception;
 
 final class VisibilityPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    use ConfigurableFixerTrait;
-
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
     public const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
     public const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
     public const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
@@ -115,6 +116,8 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
+        $this->configureConfigurableFixerTrait($configuration);
+
         if ($this->configuration['excluded_parents'] === true) {
             return;
         }

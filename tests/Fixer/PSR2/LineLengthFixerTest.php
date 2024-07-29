@@ -5,6 +5,7 @@ namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR2;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use PhpCsFixer\FixerFactory;
 
 final class LineLengthFixerTest extends AbstractPayseraFixerTestCase
 {
@@ -51,7 +52,7 @@ function main($a)
         ];
     }
 
-    protected function createFixerFactory()
+    protected function createFixerFactory(): FixerFactory
     {
         $fixerFactory = parent::createFixerFactory();
         $fixerFactory->registerCustomFixers([
@@ -60,7 +61,7 @@ function main($a)
         return $fixerFactory;
     }
 
-    protected function getFixerName()
+    protected function getFixerName(): string
     {
         return 'Paysera/psr_2_line_length';
     }

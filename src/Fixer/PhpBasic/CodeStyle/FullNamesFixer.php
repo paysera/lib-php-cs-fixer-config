@@ -136,7 +136,7 @@ PHP,
                 $replacement = preg_replace($pattern, $key . ' $' . lcfirst($key), $replacement);
             }
         }
-        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), '$' . $replacement]);
+        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $replacement]);
 //        $tokens[$docBlockIndex]->setContent($replacement);
     }
 

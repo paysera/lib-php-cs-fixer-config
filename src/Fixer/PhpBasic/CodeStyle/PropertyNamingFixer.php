@@ -26,6 +26,7 @@ final class PropertyNamingFixer extends AbstractFixer
 
         $this->invalidPropertyVerbs = [
             'check',
+            'Check',
         ];
         $this->invalidPropertyPrefixes = [
             'is',

@@ -175,11 +175,14 @@ PHP,
                 }
 
                 $phpDocToken->setContent(
+                    [
+                    $phpDocToken->getToken()->getId(),
                     preg_replace(
                         '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
                         '$1' . $importedAs . '$2',
                         $phpDocToken->getContent(),
                     ),
+                ],
                 );
             }
         }

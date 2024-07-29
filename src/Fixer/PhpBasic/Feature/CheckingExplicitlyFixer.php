@@ -103,8 +103,8 @@ PHP,
             return;
         }
 
-        $tokens->overrideRange($zeroIndex, $zeroIndex, [new Token([T_CONSTANT_ENCAPSED_STRING, "''"])]);
-        $tokens->overrideRange($greaterIndex, $greaterIndex, [new Token([T_IS_NOT_IDENTICAL, '!=='])]);
+        $tokens[$zeroIndex] = new Token([T_CONSTANT_ENCAPSED_STRING, "''"]);
+        $tokens[$greaterIndex] = new Token([T_IS_NOT_IDENTICAL, '!==']);
         $tokens->clearRange($key, $key);
     }
 
@@ -119,7 +119,7 @@ PHP,
         }
     }
 
-    private function tryFixNotEmptyToCount(Tokens $tokens, $key)
+    private function tryFixNotEmptyToCount(Tokens $tokens, $key): bool
     {
         $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
         $negation = false;

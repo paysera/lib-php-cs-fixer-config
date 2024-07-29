@@ -87,7 +87,7 @@ PHP,
 
             // Get function docBlock
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
             if (
                 $tokens[$key]->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -123,7 +123,7 @@ PHP,
             } else {
                 preg_match('#\/\*(.*?)\*\/#', $commentContent, $match);
                 if (isset($match[1])) {
-                    $tokens[$key]->setContent('//' . $match[1]);
+                    $tokens[$key] = new Token([$tokens[$key]->getId(), '//' . $match[1]]);
                 }
             }
         }
@@ -226,7 +226,7 @@ PHP,
     {
         $replacement = preg_replace('#\s\*\s#', ' ', $docBlockContent);
         $replacement = preg_replace('#\s+#', ' ', $replacement);
-        $tokens[$key]->setContent($replacement);
+        $tokens[$key] = new Token([$tokens[$key]->getId(), $replacement]);
     }
 
     private function convertToMultiLineDocBlock(Tokens $tokens, int $docBlockIndex, string $docBlockContent, string $indent)
@@ -237,13 +237,13 @@ PHP,
             $innerLines = preg_split('#(?=@)#', $innerContent);
             $innerLines = array_filter($innerLines);
             $innerLines = array_map('trim', $innerLines);
-            foreach ($innerLines as $key => &$line) {
+            foreach ($innerLines as &$line) {
                 $line = $indent . '* ' . $line . "\n";
             }
             $docBlockLines[] = "/**\n";
             $docBlockLines = array_merge($docBlockLines, $innerLines);
             $docBlockLines[] = $indent . '*/';
-            $tokens[$docBlockIndex]->setContent(implode('', $docBlockLines));
+            $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $docBlockLines)]);
         }
     }
 }

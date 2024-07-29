@@ -43,12 +43,16 @@ class ImportedClassesParser
     public function getNamespace(Tokens $tokens): string
     {
         $namespaceIndex = $tokens->getNextTokenOfKind(0, [[T_NAMESPACE]]);
-        $namespaceEndIndex = $tokens->getNextTokenOfKind($namespaceIndex, [';']);
+        $namespaceEndIndex = $namespaceIndex ? $tokens->getNextTokenOfKind($namespaceIndex, [';']) : null;
 
-        return $tokens->generatePartialCode(
-            $tokens->getNextMeaningfulToken($namespaceIndex),
-            $tokens->getPrevMeaningfulToken($namespaceEndIndex)
-        );
+        if($namespaceIndex && $namespaceEndIndex) {
+            return $tokens->generatePartialCode(
+                $tokens->getNextMeaningfulToken($namespaceIndex),
+                $tokens->getPrevMeaningfulToken($namespaceEndIndex)
+            );
+        }
+
+        return '';
     }
 
     public function parseUseStatementFromTokens(int $start, Tokens $tokens, ImportedClasses $importedClasses)

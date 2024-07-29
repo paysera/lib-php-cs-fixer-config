@@ -89,7 +89,7 @@ PHP,
     {
         foreach ($tokens as $key => $token) {
             $functionIndex = $tokens->getNextMeaningfulToken($key);
-            $functionNameIndex = $tokens->getNextMeaningfulToken($functionIndex);
+            $functionNameIndex = $functionIndex ? $tokens->getNextMeaningfulToken($functionIndex) : null;
 
             if (
                 $token->isGivenKind(T_STATIC)

@@ -9,11 +9,11 @@ final class ComparisonOrderFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @param string $expected
-     * @param null|string $input
+     * @param string|null $input
      *
      * @dataProvider provideCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $this->fixer->configure([
             'equal' => false,
@@ -23,7 +23,7 @@ final class ComparisonOrderFixerTest extends AbstractPayseraFixerTestCase
         $this->doTest($expected, $input);
     }
 
-    public function provideCases()
+    public function provideCases(): array
     {
         return [
             [
@@ -251,7 +251,7 @@ final class ComparisonOrderFixerTest extends AbstractPayseraFixerTestCase
         ];
     }
 
-    public function getFixerName()
+    public function getFixerName(): string
     {
         return 'yoda_style';
     }

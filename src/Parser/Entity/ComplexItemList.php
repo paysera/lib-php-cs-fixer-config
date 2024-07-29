@@ -123,7 +123,7 @@ class ComplexItemList implements ItemInterface
 
     /**
      * This method is used for detecting new lines inside other elements
-     * Separated elements, if they have new lines, are indented and each of them is in it's own line
+     * Separated elements, if they have new lines, are indented and each of them is in its own line
      */
     public function isSplitIntoSeveralLines(): bool
     {

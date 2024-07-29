@@ -8,6 +8,6 @@ if (file_exists($autoload)) {
 }
 
 return (new Paysera\PhpCsFixerConfig\Config\PayseraConventionsConfig())
-    ->setDefaultFinder()
+    ->setDefaultFinder(['src'], ['Overwritten'])
     ->setRecommendedRules()
 ;
