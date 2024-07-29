@@ -283,9 +283,9 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_logical_operators' => true,
             'Paysera/php_basic_feature_type_hinting_arguments' => true,
             'Paysera/php_basic_feature_unnecessary_variables' => true,
-            'Paysera/php_basic_feature_comparing_to_boolean' => true,
+//            'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_code_style_default_values_in_constructor' => true,
-            'Paysera/php_basic_feature_type_hinting' => true,
+//            'Paysera/php_basic_feature_type_hinting' => true,
         ];
     }
 

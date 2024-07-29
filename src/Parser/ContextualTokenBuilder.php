@@ -12,7 +12,7 @@ use PhpCsFixer\Tokenizer\Tokens;
 class ContextualTokenBuilder
 {
     /**
-     * @param Token[]|Tokens $tokens
+     * @param Token[]|Tokens|array $tokens
      * @return ContextualToken
      */
     public function buildFromTokens($tokens): ContextualToken
