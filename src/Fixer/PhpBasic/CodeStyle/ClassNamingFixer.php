@@ -195,7 +195,7 @@ PHP,
                 }
             }
 
-            return preg_match('#\w+(er\b|or\b)#', $className);
+            return preg_match('#\w+(er\b|or\b)#', $className) === 1;
         }
 
         return true;
