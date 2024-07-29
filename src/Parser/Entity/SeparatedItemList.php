@@ -24,6 +24,8 @@ class SeparatedItemList extends ComplexItemList implements ItemInterface
 
     /**
      * @param array|ItemInterface[] $items
+     * @param string $type
+     * @return SeparatedItemList
      */
     public function addSeparatorGroup(array $items, string $type = TypedItem::TYPE_SEPARATOR): self
     {

@@ -56,7 +56,10 @@ class Parser
      *
      * When grouping, simple lists (in the same indentation above) are re-grouped by the separators
      *
-     * @throws RuntimeException
+     * @param ItemInterface $prefixItem
+     * @param string $endTokenValue
+     * @param null|string $abortOnToken
+     * @return ItemInterface|null
      */
     private function groupItems(
         ItemInterface $prefixItem,

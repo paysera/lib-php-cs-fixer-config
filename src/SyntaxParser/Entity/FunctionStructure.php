@@ -23,12 +23,13 @@ class FunctionStructure
      */
     private array $parameters;
 
-    private ?DocBlock $phpDoc = null;
+    private ?DocBlock $phpDoc;
 
     public function __construct()
     {
         $this->keywords = [];
         $this->parameters = [];
+        $this->phpDoc = null;
     }
 
     public function getName(): ?string

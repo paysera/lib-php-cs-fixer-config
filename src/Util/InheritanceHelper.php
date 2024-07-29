@@ -57,6 +57,8 @@ class InheritanceHelper
     }
 
     /**
+     * @param Tokens $tokens
+     * @return ReflectionClass|null
      * @throws ReflectionException
      */
     private function getReflection(Tokens $tokens): ?ReflectionClass

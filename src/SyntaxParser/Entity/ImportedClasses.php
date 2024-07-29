@@ -9,7 +9,7 @@ class ImportedClasses
     /**
      * @var string|null
      */
-    private ?string $currentNamespace = null;
+    private ?string $currentNamespace;
 
     private array $classMap;
     private array $lowercasedUsage;
@@ -18,6 +18,7 @@ class ImportedClasses
     {
         $this->classMap = [];
         $this->lowercasedUsage = [];
+        $this->currentNamespace = null;
     }
 
     public function registerImport(string $importedAs, string $className): self

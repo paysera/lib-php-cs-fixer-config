@@ -189,7 +189,8 @@ PHP
                 ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
                 ->setDefault(self::LINE_SAME)
                 ->getOption(),
-        ]);
+        ])
+            ;
     }
 
     private function fixCommentBeforeBrace(Tokens $tokens)
@@ -417,9 +418,9 @@ PHP
                         if ($nextLineCanBeIndented || $i === $startBraceIndex) {
                             $nextToken = $tokens[$nestIndex + 1];
                             $nextLineCanBeIndented = $nextToken->isWhitespace() && Preg::match(
-                                    '/\R/',
-                                    $nextToken->getContent(),
-                                ) === true;
+                                '/\R/',
+                                $nextToken->getContent(),
+                            ) === true;
                         }
                     }
 
@@ -439,19 +440,19 @@ PHP
                      */
                     if (
                         !($nextNonWhitespaceNestToken->isComment() && (
-                                !$tokens[$nextNonWhitespaceNestIndex - 1]->isWhitespace()
+                            !$tokens[$nextNonWhitespaceNestIndex - 1]->isWhitespace()
                                 || !Preg::match('/\R/', $tokens[$nextNonWhitespaceNestIndex - 1]->getContent())
-                            )) &&
+                        )) &&
                         !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equalsAny(
-                                [';', ',', ']', [CT::T_ARRAY_SQUARE_BRACE_CLOSE]],
-                            )) &&
+                            [';', ',', ']', [CT::T_ARRAY_SQUARE_BRACE_CLOSE]],
+                        )) &&
                         !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equals('(')) &&
                         !($nestToken->equals('}') && $tokens[$nestIndex - 1]->equalsAny(
-                                ['"', "'", [T_CONSTANT_ENCAPSED_STRING]],
-                            )) &&
+                            ['"', "'", [T_CONSTANT_ENCAPSED_STRING]],
+                        )) &&
                         !($tokens[$nestIndex - 1]->isGivenKind(
-                                T_END_HEREDOC,
-                            ) && $nextNonWhitespaceNestToken->isGivenKind(T_CLOSE_TAG))
+                            T_END_HEREDOC,
+                        ) && $nextNonWhitespaceNestToken->isGivenKind(T_CLOSE_TAG))
                     ) {
                         if (
                             (
@@ -552,9 +553,9 @@ PHP
                 if (
                     !$nextNonWhitespaceToken->isComment()
                     || ($nextToken->isWhitespace() && substr_count(
-                            $nextToken->getContent(),
-                            "\n",
-                        ) === 1) // preserve blank lines
+                        $nextToken->getContent(),
+                        "\n",
+                    ) === 1) // preserve blank lines
                 ) {
                     $this->ensureWhitespaceAtIndexAndIndentMultilineComment(
                         $tokens,
@@ -566,8 +567,8 @@ PHP
 
             if ($token->isGivenKind($classyTokens) && !$tokensAnalyzer->isAnonymousClass($index)) {
                 if ($this->configuration['position_after_functions_and_oop_constructs'] === self::LINE_SAME && !$tokens[$tokens->getPrevNonWhitespace(
-                        $startBraceIndex,
-                    )]->isComment()) {
+                    $startBraceIndex,
+                )]->isComment()) {
                     $ensuredWhitespace = ' ';
                 } else {
                     $ensuredWhitespace = $this->whitespacesConfig->getLineEnding() . $indent;
@@ -601,10 +602,10 @@ PHP
                 }
 
                 if (!$isAnonymousClass && $prevToken->isWhitespace() && strpos(
-                        $prevToken->getContent(),
-                        "\n",
-                    ) !== false) {
-                    if (!$tokens[$startBraceIndex - 2]->isComment()) {
+                    $prevToken->getContent(),
+                    "\n",
+                ) !== false) {
+                    if (!$tokens[$startBraceIndex - 2]->isComment()) { // TODO: "if" - PhpBasic convention 3.10: We avoid unnecessary structures
                         $tokens->ensureWhitespaceAtIndex($startBraceIndex - 1, 1, ' ');
                     }
                 } else {
@@ -630,6 +631,8 @@ PHP
             // reset loop limit due to collection change
             $limit = count($tokens);
         }
+
+        return false;
     }
 
     private function fixMissingControlBraces(Tokens $tokens)
@@ -648,8 +651,8 @@ PHP
 
             // if Token after parenthesis is { then we do not need to insert brace, but to fix whitespace before it
             if ($tokenAfterParenthesis->equals(
-                    '{',
-                ) && $this->configuration['position_after_control_structures'] === self::LINE_SAME) {
+                '{',
+            ) && $this->configuration['position_after_control_structures'] === self::LINE_SAME) {
                 $tokens->ensureWhitespaceAtIndex($parenthesisEndIndex + 1, 0, ' ');
 
                 continue;
@@ -779,8 +782,8 @@ PHP
                     $nextIndex = $tokens->getNextMeaningfulToken($endIndex);
                     $nextToken = isset($nextIndex) ? $tokens[$nextIndex] : null;
                     if ($nextToken && $nextToken->isGivenKind(
-                            $this->getControlContinuationTokensForOpeningToken($openingTokenKind),
-                        )) {
+                        $this->getControlContinuationTokensForOpeningToken($openingTokenKind),
+                    )) {
                         $parenthesisEndIndex = $this->findParenthesisEnd($tokens, $nextIndex);
 
                         $endIndex = $this->findStatementEnd($tokens, $parenthesisEndIndex);
@@ -938,9 +941,9 @@ PHP
             // do not indent inline comments used to comment out unused code
             if (
                 (strpos(
-                        $nextToken->getContent(),
-                        '//' . $this->whitespacesConfig->getIndent(),
-                    ) === 0 || $nextToken->getContent() === '//')
+                    $nextToken->getContent(),
+                    '//' . $this->whitespacesConfig->getIndent(),
+                ) === 0 || $nextToken->getContent() === '//')
                 && $previousToken->isWhitespace() && Preg::match('/\R$/', $previousToken->getContent()) === true
             ) {
                 return;
@@ -977,6 +980,9 @@ PHP
      * Indentation of a comment is not changed when the comment is part of a
      * multi-line message whose lines are all single-line comments and at least
      * one line has meaningful content.
+     * @param Tokens $tokens
+     * @param int $index
+     * @return bool
      */
     private function isCommentWithFixableIndentation(Tokens $tokens, int $index): bool
     {

@@ -49,6 +49,7 @@ class ClassStructureParser
 
     /**
      * @return array|FunctionStructure[]
+     * @param ContextualToken $token
      */
     public function parseFunctionStructures(ContextualToken $token): array
     {

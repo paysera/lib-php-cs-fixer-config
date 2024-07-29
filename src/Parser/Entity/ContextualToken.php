@@ -11,8 +11,8 @@ use PhpCsFixer\Tokenizer\Token;
 class ContextualToken implements ItemInterface
 {
     private Token $token;
-    private ?ContextualToken $previousContextualToken = null;
-    private ?ContextualToken $nextContextualToken = null;
+    private ?ContextualToken $previousContextualToken;
+    private ?ContextualToken $nextContextualToken;
 
     public function __construct($tokenAbstract)
     {
@@ -21,11 +21,11 @@ class ContextualToken implements ItemInterface
         } else {
             $this->token = new Token($tokenAbstract);
         }
+
+        $this->previousContextualToken = null;
+        $this->nextContextualToken = null;
     }
 
-    /**
-     * @return $this
-     */
     public function setNextContextualToken(ContextualToken $contextualToken): self
     {
         $this->nextContextualToken = $contextualToken;

@@ -96,8 +96,7 @@ PHP,
             $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
             if ($functionTokenIndex && $visibilityTokenIndex) {
-                if (
-                    $token->isGivenKind(T_STRING)
+                if ($token->isGivenKind(T_STRING)
                     && $tokens[$key + 1]->equals('(')
                     && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                     && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])

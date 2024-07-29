@@ -59,7 +59,7 @@ use RuntimeException;
  */
 class PayseraConventionsConfig extends Config
 {
-    private ?array $migrationModeRules = null;
+    private ?array $migrationModeRules;
 
     public function __construct()
     {
@@ -110,6 +110,7 @@ class PayseraConventionsConfig extends Config
             new BracesFixer(),
             new DefaultValuesInConstructorFixer(),
         ]));
+        $this->migrationModeRules = null;
     }
 
     private function decorateWithIgnorable(array $fixers): array
@@ -374,9 +375,7 @@ class PayseraConventionsConfig extends Config
                 'comment_types' => ['hash'],
             ],
             'single_quote' => true,
-            'space_after_semicolon' => [
-                'remove_in_empty_for_expressions' => true,
-            ],
+            'space_after_semicolon' => false,
             'standardize_increment' => true,
             'standardize_not_equals' => true,
             'ternary_operator_spaces' => true,
