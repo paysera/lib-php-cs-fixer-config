@@ -25,8 +25,7 @@ we do not return null, false or any other value in that case.
 
 If method must return some value, we always specify what to return, even when returning null.
 
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

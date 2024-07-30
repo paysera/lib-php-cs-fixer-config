@@ -53,8 +53,7 @@ final class ReusingVariablesFixer extends AbstractFixer
             <<<'TEXT'
 We do not set value to variable passed as an argument.
 We do not change the type of the variable.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -182,7 +181,7 @@ PHP,
         $comment = '// TODO: "' . $variableName . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
                 ],

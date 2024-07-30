@@ -31,8 +31,7 @@ has nothing to do with what we are trying to check here, even if it gives us nee
 For example, we use count($array) > 0 to check if array is not empty and not !empty($array),
 as we do not want to check whether $array is 0, false, \'\' or even not defined at all
 (in which case IDE would possibly hide some warnings that could help noticing possible bugs).
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

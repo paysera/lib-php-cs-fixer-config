@@ -22,8 +22,7 @@ final class InterfaceNamingFixer extends AbstractFixer
             <<<'TEXT'
 We always add suffix Interface to interfaces, even if interface name would be adjective.
 Risky for renaming interface name.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

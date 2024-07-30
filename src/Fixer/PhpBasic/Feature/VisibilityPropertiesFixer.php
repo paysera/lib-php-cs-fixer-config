@@ -51,8 +51,7 @@ find usages, plan possible changes in code. Also IDE can warn about unused metho
 
 We use protected when we intend some property or method to be overwritten if necessary.
 
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -128,15 +127,16 @@ PHP,
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return new FixerConfigurationResolver([
+        return
+            new FixerConfigurationResolver([
             (new FixerOptionBuilder(
                 'excluded_parents',
                 'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
             ))
                 ->setAllowedTypes(['array', 'bool'])
                 ->getOption(),
-        ])
-            ;
+            ])
+        ;
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void

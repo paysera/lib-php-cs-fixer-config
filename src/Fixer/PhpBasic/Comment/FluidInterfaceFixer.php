@@ -26,8 +26,7 @@ final class FluidInterfaceFixer extends AbstractFixer implements WhitespacesAwar
             <<<'TEXT'
 If method returns $this, we use @return $this that IDE could guess correct type
 if we use this method for objects of sub-classes.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

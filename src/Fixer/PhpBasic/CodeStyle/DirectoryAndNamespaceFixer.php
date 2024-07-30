@@ -51,8 +51,7 @@ We put them together with services by related functionality (no ServiceInterface
 
 We use abstractions for namespaces, not service names.
 For example, UserMerge or UserMerging, not UserMergeManager.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -139,7 +138,7 @@ PHP,
         $commentIndex = $tokens->getNextNonWhitespace($insertIndex);
         if ($commentIndex === null || !$tokens[$commentIndex]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
                 ],

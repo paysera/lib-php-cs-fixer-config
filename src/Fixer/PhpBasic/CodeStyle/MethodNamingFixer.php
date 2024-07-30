@@ -46,8 +46,7 @@ for other getters, set* for setters, add* for adders, remove* for removers.
 
 We always make correct English phrase from method names,
 this is more important that naming method to \'is\' + propertyName.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -96,7 +95,8 @@ PHP,
             $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
             if ($functionTokenIndex && $visibilityTokenIndex) {
-                if ($token->isGivenKind(T_STRING)
+                if (
+                    $token->isGivenKind(T_STRING)
                     && $tokens[$key + 1]->equals('(')
                     && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                     && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
@@ -172,7 +172,7 @@ PHP,
         $comment = '// TODO: ' . self::BOOL_FUNCTION_COMMENT;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
                 ],

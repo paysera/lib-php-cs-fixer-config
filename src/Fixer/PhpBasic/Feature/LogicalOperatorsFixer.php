@@ -20,8 +20,7 @@ final class LogicalOperatorsFixer extends AbstractFixer
             <<<'TEXT'
 Use `&&` and `||` logical operators instead of `and` and `or`.
 Risky, if lower precedence was used intentionally.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

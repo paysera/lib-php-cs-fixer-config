@@ -38,8 +38,7 @@ final class FullNamesFixer extends AbstractFixer
             <<<'TEXT'
 We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
 Risky for possible local variable duplicate renaming.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

@@ -58,8 +58,7 @@ If argument is not optional, but just nullable, we can type hint it with default
 but when using, we pass null explicitly.
 
 Risky, because of type hint copy from docBlock.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

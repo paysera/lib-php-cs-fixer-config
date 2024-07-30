@@ -48,8 +48,7 @@ If we use phpdoc comment, it must contain all information about parameters,
 return type and exceptions that the method throws.
 
 If method does not return anything, we skip @return comment.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

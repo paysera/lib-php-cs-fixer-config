@@ -42,8 +42,7 @@ We do use static methods only in these cases:
 * to create an entity for fluent interface, if PHP version in the project is lower than 5.4.
     We use (new Entity())->set(\'a\') in 5.4 or above
 * to give available values for some field of an entity, used in validation.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -103,7 +102,7 @@ PHP,
                     && !$tokens[$curlyBraceStartIndex - 2]->isGivenKind(T_COMMENT)
                 ) {
                     $tokens->insertSlices([
-                        $curlyBraceStartIndex - 1 => [
+                        ($curlyBraceStartIndex - 1) => [
                             new Token([T_WHITESPACE, ' ']),
                             new Token([
                                 T_COMMENT,

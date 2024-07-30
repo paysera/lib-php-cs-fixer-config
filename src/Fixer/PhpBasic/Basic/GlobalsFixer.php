@@ -118,7 +118,7 @@ PHP,
     private function addGlobalUsageWarning(Tokens $tokens, $key, $tokenIndex)
     {
         $tokens->insertSlices([
-            $tokenIndex + 1 => [
+            ($tokenIndex + 1) => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([
                     T_COMMENT,

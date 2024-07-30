@@ -46,8 +46,7 @@ If class has a namespace, we use `use` statements instead of providing full name
 This applies to php-doc comments, too.
 
 Does not process namespace without root. Example: Some\Entity\Operation.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -176,13 +175,13 @@ PHP,
 
                 $phpDocToken->setContent(
                     [
-                    $phpDocToken->getToken()->getId(),
-                    preg_replace(
-                        '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
-                        '$1' . $importedAs . '$2',
-                        $phpDocToken->getContent(),
-                    ),
-                ],
+                        $phpDocToken->getToken()->getId(),
+                        preg_replace(
+                            '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
+                            '$1' . $importedAs . '$2',
+                            $phpDocToken->getContent(),
+                        ),
+                    ],
                 );
             }
         }

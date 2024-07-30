@@ -237,7 +237,7 @@ PHP,
             $overrideIndex = $insertionIndex;
         } else {
             $tokens->insertSlices([
-                $insertionIndex + 1 => [
+                ($insertionIndex + 1) => [
                     new Token('!'),
                     new Token('('),
                     new Token([T_WHITESPACE, ' ']),

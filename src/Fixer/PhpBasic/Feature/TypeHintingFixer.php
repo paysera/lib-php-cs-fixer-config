@@ -136,15 +136,16 @@ PHP,
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return new FixerConfigurationResolver([
+        return
+            new FixerConfigurationResolver([
             (new FixerOptionBuilder(
                 'exceptions',
                 'Sets the exceptions for which usage of narrowest interface could be skipped.',
             ))
                 ->setAllowedTypes(['array', 'bool'])
                 ->getOption(),
-        ])
-            ;
+            ])
+        ;
     }
 
     protected function applyFixOnContextualToken(ContextualToken $token)

@@ -148,7 +148,7 @@ PHP,
                     $indentation,
                 );
                 $tokens->insertSlices([
-                    $index + 3 => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
+                    ($index + 3) => [new Token([T_WHITESPACE, $endOfDeclarationNewLine->getContent()])],
                 ]);
 
                 if ($tokens[$index]->equals('{')) {
@@ -173,7 +173,7 @@ PHP,
     ): void {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
             $tokens->insertSlices([
-                $index + 1 => [
+                ($index + 1) => [
                     new Token([T_WHITESPACE, $indentation]),
                     new Token([T_VARIABLE, '$this']),
                     new Token([T_OBJECT_OPERATOR, '->']),
@@ -221,7 +221,8 @@ PHP,
             $tokens[$key]->isGivenKind(T_STRING)
             && $token->getContent() === self::CONSTRUCT
             && $tokens[$key + 1]->equals('(')
-            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION);
+            && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
+        ;
     }
 
     private function insertConstructTokensAndReturnOpeningBraceIndex(
@@ -252,7 +253,7 @@ PHP,
     private function insertParentConstructAndReturnIndex(Tokens $tokens, int $index, string $indentation): int
     {
         $tokens->insertSlices([
-            $index + 1 => [
+            ($index + 1) => [
                 new Token([T_WHITESPACE, $indentation]),
                 new Token([T_STRING, 'parent']),
                 new Token([T_DOUBLE_COLON, '::']),

@@ -221,6 +221,7 @@ class PayseraConventionsConfig extends Config
     {
         return [
             'Paysera/psr_1_file_side_effects' => true,
+            //Strange behavior, need more testing.
 //            'Paysera/psr_2_line_length' => ['limits' => ['soft_limit' => 120]],
             'Paysera/php_basic_basic_globals' => true,
             'Paysera/php_basic_basic_single_class_per_file' => true,
@@ -261,6 +262,7 @@ class PayseraConventionsConfig extends Config
             'psr_autoloading' => true,
             'error_suppression' => true,
             // exceptions
+            //Works in different way
 //            'is_null' => ['use_yoda_style' => false],
             'is_null' => true,
             'yoda_style' => ['equal' => false, 'identical' => false, 'less_and_greater' => false],
@@ -283,8 +285,10 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_logical_operators' => true,
             'Paysera/php_basic_feature_type_hinting_arguments' => true,
             'Paysera/php_basic_feature_unnecessary_variables' => true,
+            //Doesn't work correctly with declaring class members in constructor. Need refactor of parsing functionality.
 //            'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_code_style_default_values_in_constructor' => true,
+            //Doesn't work correctly with declaring class members in constructor. Need refactor of parsing functionality.
 //            'Paysera/php_basic_feature_type_hinting' => true,
         ];
     }
@@ -455,7 +459,7 @@ class PayseraConventionsConfig extends Config
 
             // other custom rules
             'Paysera/php_basic_code_style_chained_method_calls' => true,
-//            'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
+            'Paysera/php_basic_code_style_splitting_in_several_lines' => true,
             'Paysera/php_basic_comment_comment_styles' => true,
             'Paysera/php_basic_comment_fluid_interface' => true,
             'Paysera/php_basic_feature_comparing_to_null' => true,

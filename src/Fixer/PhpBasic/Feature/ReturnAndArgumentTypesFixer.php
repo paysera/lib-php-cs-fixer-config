@@ -70,8 +70,7 @@ For example, we can*not* return boolean|string or SuccessResult|FailureResult
 if they do, we document to return that interface instead).
 
 We can return SomeClass|null or string|null.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -300,7 +299,7 @@ PHP,
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, '// ' . $comment]),
                 ],

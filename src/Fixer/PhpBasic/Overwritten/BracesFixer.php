@@ -89,8 +89,7 @@ $positive = function ($item) { return $item >= 0; };
 $negative = function ($item) {
                 return $item < 0; };
 
-PHP
-                    ,
+PHP,
                     ['allow_single_line_closure' => true],
                 ),
                 new CodeSample(
@@ -123,8 +122,7 @@ class Foo
     }
 }
 
-PHP
-                    ,
+PHP,
                     ['position_after_functions_and_oop_constructs' => self::LINE_SAME],
                 ),
             ],
@@ -160,37 +158,38 @@ PHP
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return new FixerConfigurationResolver([
-            (new FixerOptionBuilder(
-                'allow_single_line_closure',
-                'Whether single line lambda notation should be allowed.',
-            ))
+        return
+            new FixerConfigurationResolver([
+                (new FixerOptionBuilder(
+                    'allow_single_line_closure',
+                    'Whether single line lambda notation should be allowed.',
+                ))
                 ->setAllowedTypes(['bool'])
                 ->setDefault(false)
                 ->getOption(),
-            (new FixerOptionBuilder(
-                'position_after_functions_and_oop_constructs',
-                'whether the opening brace should be placed on "next" or "same" line after classy constructs (non-anonymous classes, interfaces, traits, methods and non-lambda functions).',
-            ))
-                ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
-                ->setDefault(self::LINE_NEXT)
-                ->getOption(),
-            (new FixerOptionBuilder(
-                'position_after_control_structures',
-                'whether the opening brace should be placed on "next" or "same" line after control structures.',
-            ))
-                ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
-                ->setDefault(self::LINE_SAME)
-                ->getOption(),
-            (new FixerOptionBuilder(
-                'position_after_anonymous_constructs',
-                'whether the opening brace should be placed on "next" or "same" line after anonymous constructs (anonymous classes and lambda functions).',
-            ))
-                ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
-                ->setDefault(self::LINE_SAME)
-                ->getOption(),
-        ])
-            ;
+                (new FixerOptionBuilder(
+                    'position_after_functions_and_oop_constructs',
+                    'whether the opening brace should be placed on "next" or "same" line after classy constructs (non-anonymous classes, interfaces, traits, methods and non-lambda functions).',
+                ))
+                    ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
+                    ->setDefault(self::LINE_NEXT)
+                    ->getOption(),
+                (new FixerOptionBuilder(
+                    'position_after_control_structures',
+                    'whether the opening brace should be placed on "next" or "same" line after control structures.',
+                ))
+                        ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
+                        ->setDefault(self::LINE_SAME)
+                        ->getOption(),
+                (new FixerOptionBuilder(
+                    'position_after_anonymous_constructs',
+                    'whether the opening brace should be placed on "next" or "same" line after anonymous constructs (anonymous classes and lambda functions).',
+                ))
+                            ->setAllowedValues([self::LINE_NEXT, self::LINE_SAME])
+                            ->setDefault(self::LINE_SAME)
+                            ->getOption(),
+            ])
+        ;
     }
 
     private function fixCommentBeforeBrace(Tokens $tokens)
@@ -204,8 +203,8 @@ PHP
             if ($token->isGivenKind($controlTokens)) {
                 $prevIndex = $this->findParenthesisEnd($tokens, $index);
             } elseif (
-                ($token->isGivenKind(T_FUNCTION) && $tokensAnalyzer->isLambda($index)) ||
-                ($token->isGivenKind(T_CLASS) && $tokensAnalyzer->isAnonymousClass($index))
+                ($token->isGivenKind(T_FUNCTION) && $tokensAnalyzer->isLambda($index))
+                || ($token->isGivenKind(T_CLASS) && $tokensAnalyzer->isAnonymousClass($index))
             ) {
                 $prevIndex = $tokens->getNextTokenOfKind($index, ['{']);
                 $prevIndex = $tokens->getPrevMeaningfulToken($prevIndex);
@@ -441,16 +440,16 @@ PHP
                     if (
                         !($nextNonWhitespaceNestToken->isComment() && (
                             !$tokens[$nextNonWhitespaceNestIndex - 1]->isWhitespace()
-                                || !Preg::match('/\R/', $tokens[$nextNonWhitespaceNestIndex - 1]->getContent())
-                        )) &&
-                        !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equalsAny(
+                            || !Preg::match('/\R/', $tokens[$nextNonWhitespaceNestIndex - 1]->getContent())
+                        ))
+                        && !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equalsAny(
                             [';', ',', ']', [CT::T_ARRAY_SQUARE_BRACE_CLOSE]],
-                        )) &&
-                        !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equals('(')) &&
-                        !($nestToken->equals('}') && $tokens[$nestIndex - 1]->equalsAny(
+                        ))
+                        && !($nestToken->equals('}') && $nextNonWhitespaceNestToken->equals('('))
+                        && !($nestToken->equals('}') && $tokens[$nestIndex - 1]->equalsAny(
                             ['"', "'", [T_CONSTANT_ENCAPSED_STRING]],
-                        )) &&
-                        !($tokens[$nestIndex - 1]->isGivenKind(
+                        ))
+                        && !($tokens[$nestIndex - 1]->isGivenKind(
                             T_END_HEREDOC,
                         ) && $nextNonWhitespaceNestToken->isGivenKind(T_CLOSE_TAG))
                     ) {
@@ -696,7 +695,7 @@ PHP
 
                 if (!$tokens[$nextNonWhitespaceIndex]->equals(':')) {
                     $tokens->ensureWhitespaceAtIndex(
-                        $index + 1,
+                        ($index + 1),
                         0,
                         $this->configuration['position_after_control_structures'] === self::LINE_NEXT && !$tokens[$nextNonWhitespaceIndex]->equals(
                             '(',
@@ -916,8 +915,8 @@ PHP
         // eg: `declare(ticks=1){` => `declare(ticks=1) {`
         // eg: `declare(ticks=1)   {` => `declare(ticks=1) {`
         if (
-            !$tokens[$startBraceIndex - 1]->isWhitespace() ||
-            $tokens[$startBraceIndex - 1]->isWhitespace(" \t")
+            !$tokens[$startBraceIndex - 1]->isWhitespace()
+            || $tokens[$startBraceIndex - 1]->isWhitespace(" \t")
         ) {
             $tokens->ensureWhitespaceAtIndex($startBraceIndex - 1, 1, ' ');
         }
@@ -944,7 +943,8 @@ PHP
                     $nextToken->getContent(),
                     '//' . $this->whitespacesConfig->getIndent(),
                 ) === 0 || $nextToken->getContent() === '//')
-                && $previousToken->isWhitespace() && Preg::match('/\R$/', $previousToken->getContent()) === true
+                && $previousToken->isWhitespace()
+                && Preg::match('/\R$/', $previousToken->getContent()) === true
             ) {
                 return;
             }

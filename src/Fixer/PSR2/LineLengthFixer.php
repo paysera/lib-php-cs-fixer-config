@@ -47,8 +47,7 @@ PHP,
 <?php 
 echo "something"."something"."something"."something"."some"."until here ->";
 
-PHP
-                    ,
+PHP,
                     [
                         'limits' => [
                             'soft_limit' => 60,
@@ -58,7 +57,7 @@ PHP
                 ),
             ],
             null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
@@ -170,15 +169,21 @@ PHP
 
     public function createConfigurationDefinition(): FixerConfigurationResolverInterface
     {
-        return new FixerConfigurationResolver([
-            (new FixerOptionBuilder('limits', 'Set hard and soft limits of line length, e.g. `["soft_limit" => 120, "hard_limit" => 80]`.'))
-                ->setAllowedTypes(['array', 'bool'])
-                ->setDefault([
-                    'soft_limit' => self::DEFAULT_SOFT_LIMIT,
-                    'hard_limit' => self::DEFAULT_HARD_LIMIT,
-                ])
-                ->getOption(),
-        ])
-            ;
+        return
+            new FixerConfigurationResolver(
+                [
+                    (new FixerOptionBuilder(
+                        'limits',
+                        'Set hard and soft limits of line length, e.g. `["soft_limit" => 120, "hard_limit" => 80]`.',
+                    ))
+                    ->setAllowedTypes(['array', 'bool'])
+                    ->setDefault([
+                        'soft_limit' => self::DEFAULT_SOFT_LIMIT,
+                        'hard_limit' => self::DEFAULT_HARD_LIMIT,
+                    ])
+                    ->getOption(),
+                ],
+            )
+        ;
     }
 }

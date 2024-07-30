@@ -35,8 +35,7 @@ final class AssignmentsInConditionsFixer extends AbstractFixer implements Whites
             <<<'TEXT'
 We do not use assignments inside conditional statements.
 Exception: in a while loop condition.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -122,7 +121,7 @@ PHP,
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token(
                         [T_COMMENT, '// TODO: "' . $tokens[$variableIndex]->getContent() . '" - ' . self::CONVENTION],

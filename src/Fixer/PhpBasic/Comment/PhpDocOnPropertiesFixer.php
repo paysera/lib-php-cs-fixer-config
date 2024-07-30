@@ -31,8 +31,7 @@ PhpDoc can cause warnings to be silenced.
 
 We may add PhpDoc on properties that are injected via constructor and are scalar,
 but this is not necessary as IDE gets the type from constructor’s PhpDoc.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -154,7 +153,8 @@ PHP,
         return
             isset($constructFunction['DocBlock'])
             && isset($property['Variable'])
-            && preg_match('#\\' . $property['Variable'] . '#', $constructFunction['DocBlock']);
+            && preg_match('#\\' . $property['Variable'] . '#', $constructFunction['DocBlock'])
+        ;
     }
 
     private function isPropertyAssignedFromArgument(array $property, array $constructFunction): bool
@@ -165,21 +165,24 @@ PHP,
                 $constructFunction['Assignments'][$property['Variable']],
                 array_keys($constructFunction['ConstructArguments']),
                 true,
-            );
+            )
+        ;
     }
 
     private function isPropertyAssignedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']], ['new', 'array'], true);
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new', 'array'], true)
+        ;
     }
 
     private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
-            && in_array($constructFunction['Assignments'][$property['Variable']], ['new'], true);
+            && in_array($constructFunction['Assignments'][$property['Variable']], ['new'], true)
+        ;
     }
 
     private function getConstructAssignments(Tokens $tokens, int $constructIndex): array
@@ -281,7 +284,7 @@ PHP,
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . self::MISSING_DOC_BLOCK_CONVENTION;
         $tokens->insertSlices([
-            $insertIndex + 1 => [
+            ($insertIndex + 1) => [
                 new Token([T_COMMENT, $comment]),
                 new Token([
                     T_WHITESPACE,

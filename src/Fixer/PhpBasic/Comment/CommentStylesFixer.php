@@ -23,8 +23,7 @@ We use multi-line /** */ comments for method, property and class annotations.
 We use single-line /** @var Class $object */ annotation for local variables.
 We can use // single line comments in the code.
 We do not use /* */ or # comments at all.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'

@@ -60,8 +60,7 @@ registry
 resolver
 We do not use service as a suffix, as this does not represent anything (for example PageService).
 We use object names only for entities, not for services (for example Page).
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -132,9 +131,9 @@ PHP,
         return new FixerConfigurationResolver(
             [
                 (new FixerOptionBuilder('service_suffixes', 'Set valid and invalid suffixes for Class names.'))
-                    ->setAllowedTypes(['array', 'bool'])
-                    ->setDefault(false)
-                    ->getOption(),
+                ->setAllowedTypes(['array', 'bool'])
+                ->setDefault(false)
+                ->getOption(),
             ],
         );
     }
@@ -206,7 +205,7 @@ PHP,
         $comment = '// TODO: "' . $className . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getPrevNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_COMMENT, $comment]),
                     new Token([T_WHITESPACE, $tokens[$insertIndex]->getContent()]),
                 ],
