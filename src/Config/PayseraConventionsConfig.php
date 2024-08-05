@@ -59,7 +59,7 @@ use RuntimeException;
  */
 class PayseraConventionsConfig extends Config
 {
-    private ?array $migrationModeRules;
+    private array $migrationModeRules;
 
     public function __construct()
     {
@@ -110,7 +110,7 @@ class PayseraConventionsConfig extends Config
             new BracesFixer(),
             new DefaultValuesInConstructorFixer(),
         ]));
-        $this->migrationModeRules = null;
+        $this->migrationModeRules = [];
     }
 
     private function decorateWithIgnorable(array $fixers): array
@@ -144,7 +144,7 @@ class PayseraConventionsConfig extends Config
     public function getRules(): array
     {
         $rules = parent::getRules();
-        if ($this->migrationModeRules === null) {
+        if (count($this->migrationModeRules) === 0) {
             return $rules;
         }
 

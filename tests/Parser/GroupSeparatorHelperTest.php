@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Parser;
@@ -19,7 +20,7 @@ class GroupSeparatorHelperTest extends TestCase
      *
      * @dataProvider provider
      */
-    public function testRegroupListBySeparator(ItemInterface $expected = null, array $itemList, string $separator)
+    public function testRegroupListBySeparator(?ItemInterface $expected, array $itemList, string $separator)
     {
         $helper = new GroupSeparatorHelper();
 
@@ -28,7 +29,7 @@ class GroupSeparatorHelperTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function provider()
+    public function provider(): array
     {
         $list1 = [' ', '$a', ' ', '&&', ' ', '$b', ' ', '||', ' ', '$c', ' '];
         $tokenList1 = $this->mapToTokens($list1);
@@ -80,7 +81,7 @@ class GroupSeparatorHelperTest extends TestCase
 
     private function mapToTokens(array $list): array
     {
-        return array_map(function($content) {
+        return array_map(function ($content) {
             return new ContextualToken($content);
         }, $list);
     }
