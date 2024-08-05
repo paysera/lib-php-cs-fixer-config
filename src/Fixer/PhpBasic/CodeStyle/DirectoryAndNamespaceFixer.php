@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 
-use Doctrine\Common\Inflector\Inflector;
+use Paysera\PhpCsFixerConfig\Util\Inflector;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
@@ -20,6 +20,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
 
     private $exclusions;
     private $serviceNames;
+    private $inflector;
 
     public function __construct()
     {
@@ -111,7 +112,7 @@ PHP
             if ($tokens[$index]->isGivenKind(T_STRING)) {
                 $namespaceName = $tokens[$index]->getContent();
                 if (
-                    $namespaceName !== Inflector::singularize($namespaceName)
+                    $namespaceName !== (new Inflector())->singularize($namespaceName)
                     && !in_array($namespaceName, $this->exclusions, true)
                 ) {
                     $this->insertComment($tokens, $semicolonIndex, $namespaceName, self::SINGULAR_CONVENTION);

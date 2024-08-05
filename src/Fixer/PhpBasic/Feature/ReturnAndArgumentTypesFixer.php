@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
-use Doctrine\Common\Inflector\Inflector;
+use Paysera\PhpCsFixerConfig\Util\Inflector;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
@@ -276,7 +276,7 @@ PHP
 
             $typeWord = trim($type, ' []');
 
-            return $typeWord === Inflector::pluralize($typeWord);
+            return $typeWord === (new Inflector())->pluralize($typeWord);
         });
         if (count($arrayTypes) === $typeCount) {
             return null;
