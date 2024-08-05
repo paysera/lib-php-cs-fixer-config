@@ -22,6 +22,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
 
     private array $exclusions;
     private array $serviceNames;
+    private Inflector $inflector;
 
     public function __construct()
     {
