@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Util;
 
+use Doctrine\Common\Inflector\Inflector as DoctrineInflectorV1;
 use Doctrine\Inflector\InflectorFactory;
 use RuntimeException;
 
@@ -24,13 +25,13 @@ class Inflector
 
         if (class_exists('Doctrine\Common\Inflector\Inflector')) {
             // Doctrine Inflector v1
-            return new \Doctrine\Common\Inflector\Inflector();
+            return new DoctrineInflectorV1();
         }
 
         throw new RuntimeException('Doctrine Inflector is not available');
     }
 
-    public function pluralize($word)
+    public function pluralize(string $word): string
     {
         if (method_exists($this->inflector, 'pluralize')) {
             // Doctrine Inflector v2
@@ -38,10 +39,10 @@ class Inflector
         }
 
         // Doctrine Inflector v1
-        return \Doctrine\Common\Inflector\Inflector::pluralize($word);
+        return DoctrineInflectorV1::pluralize($word);
     }
 
-    public function singularize($word)
+    public function singularize(string $word): string
     {
         if (method_exists($this->inflector, 'singularize')) {
             // Doctrine Inflector v2
@@ -49,6 +50,6 @@ class Inflector
         }
 
         // Doctrine Inflector v1
-        return \Doctrine\Common\Inflector\Inflector::singularize($word);
+        return DoctrineInflectorV1::singularize($word);
     }
 }
