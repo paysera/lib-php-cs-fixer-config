@@ -31,8 +31,7 @@ has nothing to do with what we are trying to check here, even if it gives us nee
 For example, we use count($array) > 0 to check if array is not empty and not !empty($array),
 as we do not want to check whether $array is 0, false, \'\' or even not defined at all
 (in which case IDE would possibly hide some warnings that could help noticing possible bugs).
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -103,8 +102,8 @@ PHP,
             return;
         }
 
-        $tokens->overrideAt($zeroIndex, new Token([T_CONSTANT_ENCAPSED_STRING, "''"]));
-        $tokens->overrideAt($greaterIndex, new Token([T_IS_NOT_IDENTICAL, '!==']));
+        $tokens[$zeroIndex] = new Token([T_CONSTANT_ENCAPSED_STRING, "''"]);
+        $tokens[$greaterIndex] = new Token([T_IS_NOT_IDENTICAL, '!==']);
         $tokens->clearRange($key, $key);
     }
 
@@ -119,7 +118,7 @@ PHP,
         }
     }
 
-    private function tryFixNotEmptyToCount(Tokens $tokens, $key)
+    private function tryFixNotEmptyToCount(Tokens $tokens, $key): bool
     {
         $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
         $negation = false;
@@ -145,7 +144,7 @@ PHP,
             ++$parenthesesEndIndex => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([T_LNUMBER, '0']),
-            ]
+            ],
         ]);
 
         return true;
@@ -180,6 +179,7 @@ PHP,
             } else {
                 $tokens->insertSlices([$notOperatorIndex + 1 => [new Token('!')]]);
             }
+
             return true;
         }
 

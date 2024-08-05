@@ -19,11 +19,13 @@ class InheritanceHelper
             return false;
         }
 
-        foreach ($reflection->getInterfaces() as $interface) {
-            $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-            foreach ($methods as $method) {
-                if ($method->getName() === $methodName) {
-                    return true;
+        if ($reflection !== null) {
+            foreach ($reflection->getInterfaces() as $interface) {
+                $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+                foreach ($methods as $method) {
+                    if ($method->getName() === $methodName) {
+                        return true;
+                    }
                 }
             }
         }
@@ -39,13 +41,14 @@ class InheritanceHelper
             return false;
         }
 
-        while ($parent = $reflection->getParentClass()) {
-            $parents[] = $parent->getName();
-            $reflection = $parent;
-            $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-            foreach ($properties as $property) {
-                if ($property->getName() === $propertyName) {
-                    return true;
+        if ($reflection !== null) {
+            while ($parent = $reflection->getParentClass()) {
+                $reflection = $parent;
+                $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+                foreach ($properties as $property) {
+                    if ($property->getName() === $propertyName) {
+                        return true;
+                    }
                 }
             }
         }
@@ -54,9 +57,11 @@ class InheritanceHelper
     }
 
     /**
+     * @param Tokens $tokens
+     * @return ReflectionClass|null
      * @throws ReflectionException
      */
-    private function getReflection(Tokens $tokens)
+    private function getReflection(Tokens $tokens): ?ReflectionClass
     {
         $fqcn = null;
 
@@ -78,7 +83,7 @@ class InheritanceHelper
         }
 
         if ($fqcn === null) {
-            return false;
+            return null;
         }
 
         return new ReflectionClass($fqcn);

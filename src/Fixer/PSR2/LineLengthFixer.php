@@ -16,13 +16,14 @@ use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class LineLengthFixer extends AbstractFixer implements ConfigurableFixerInterface
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const DEFAULT_SOFT_LIMIT = 120;
     public const DEFAULT_HARD_LIMIT = 80;
@@ -46,18 +47,17 @@ PHP,
 <?php 
 echo "something"."something"."something"."something"."some"."until here ->";
 
-PHP
-                    ,
+PHP,
                     [
                         'limits' => [
                             'soft_limit' => 60,
                             'hard_limit' => 40,
                         ],
                     ],
-                )
+                ),
             ],
             null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
@@ -85,6 +85,8 @@ PHP
 
     public function configure(array $configuration = null): void
     {
+        $this->configureConfigurableFixerTrait($configuration);
+
         if ($this->configuration['limits'] === true) {
             $this->softLimit = self::DEFAULT_SOFT_LIMIT;
             $this->hardLimit = self::DEFAULT_HARD_LIMIT;
@@ -109,6 +111,7 @@ PHP
         $currentLineLength = 0;
         $firstLineToken = $token;
         $previousMatches = null;
+
         while ($token !== null) {
             if (preg_match('/^([^\n]*)(.*?\n.*?)([^\n]*)$/', $token->getContent(), $matches) === 1) {
                 $currentLineLength += mb_strlen($matches[1]);
@@ -166,14 +169,21 @@ PHP
 
     public function createConfigurationDefinition(): FixerConfigurationResolverInterface
     {
-        return new FixerConfigurationResolver([
-            (new FixerOptionBuilder('limits', 'Set hard and soft limits of line length, e.g. `["soft_limit" => 120, "hard_limit" => 80]`.'))
-                ->setAllowedTypes(['array', 'bool'])
-                ->setDefault([
-                    'soft_limit' => self::DEFAULT_SOFT_LIMIT,
-                    'hard_limit' => self::DEFAULT_HARD_LIMIT,
-                ])
-                ->getOption(),
-        ]);
+        return
+            new FixerConfigurationResolver(
+                [
+                    (new FixerOptionBuilder(
+                        'limits',
+                        'Set hard and soft limits of line length, e.g. `["soft_limit" => 120, "hard_limit" => 80]`.',
+                    ))
+                    ->setAllowedTypes(['array', 'bool'])
+                    ->setDefault([
+                        'soft_limit' => self::DEFAULT_SOFT_LIMIT,
+                        'hard_limit' => self::DEFAULT_HARD_LIMIT,
+                    ])
+                    ->getOption(),
+                ],
+            )
+        ;
     }
 }

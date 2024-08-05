@@ -17,7 +17,9 @@ use SplFileInfo;
 
 final class FileSideEffectsFixer extends AbstractFixer
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const CONVENTION = '/* TODO: A file should declare new symbols (classes, functions, constants, etc.)
     and cause no other side effects, or it should execute logic with side effects, but should not do both. */';
@@ -39,8 +41,7 @@ final class FileSideEffectsFixer extends AbstractFixer
             <<<'TEXT'
 Ensures a file declare new symbols and causes no other side effects,
 or executes logic with side effects, but not both.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -63,7 +64,7 @@ PHP,
                 ),
             ],
             null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
@@ -90,6 +91,8 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
+        $this->configureConfigurableFixerTrait($configuration);
+
         if ($this->configuration['side_effects'] === true) {
             return;
         }
@@ -103,14 +106,16 @@ PHP,
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return new FixerConfigurationResolver([
+        return
+            new FixerConfigurationResolver([
             (new FixerOptionBuilder(
                 'side_effects',
                 'Set forbidden functions and tokens, e.g. `["functions" => ["print_r"], "tokens" => [T_ECHO]]`.',
             ))
                 ->setAllowedTypes(['array', 'bool'])
                 ->getOption(),
-        ]);
+            ])
+        ;
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void

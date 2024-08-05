@@ -48,8 +48,7 @@ final class MagicMethodsFixer extends AbstractFixer
             <<<'TEXT'
 We do not use __toString method for main functionality, only for debugging purposes.
 It applies to all magic methods except __construct().
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -135,7 +134,7 @@ PHP,
             $insertIndex => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([T_COMMENT, '// TODO: "' . $methodName . '" - ' . $convention]),
-            ]
+            ],
         ]);
     }
 }

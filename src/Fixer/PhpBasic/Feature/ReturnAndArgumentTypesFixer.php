@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
-use Paysera\PhpCsFixerConfig\Util\Inflector;
+use Doctrine\Common\Inflector\Inflector;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
@@ -70,8 +70,7 @@ For example, we can*not* return boolean|string or SuccessResult|FailureResult
 if they do, we document to return that interface instead).
 
 We can return SomeClass|null or string|null.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -94,7 +93,6 @@ class Sample
 }
 
 PHP,
-
                 ),
             ],
             null,
@@ -130,7 +128,7 @@ PHP,
             }
 
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -203,7 +201,7 @@ PHP,
         }
     }
 
-    private function validateDocBlockTypes(Tokens $tokens, int $docBlockIndex, string $classNamespace)
+    private function validateDocBlockTypes(Tokens $tokens, int $docBlockIndex, ?string $classNamespace)
     {
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         $annotations = $docBlock->getAnnotationsOfType(['return', 'param']);
@@ -269,7 +267,7 @@ PHP,
 
             $typeWord = trim($type, ' []');
 
-            return $typeWord === (new Inflector())->pluralize($typeWord);
+            return $typeWord === Inflector::pluralize($typeWord);
         });
         if (count($arrayTypes) === $typeCount) {
             return null;
@@ -294,17 +292,17 @@ PHP,
         $lines[$returnAnnotation->getEnd()] = new Line(
             $replacement . $warning . $this->whitespacesConfig->getLineEnding(),
         );
-        $tokens[$docBlockIndex]->setContent(implode('', $lines));
+        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), implode('', $lines)]);
     }
 
     private function insertComment(Tokens $tokens, int $insertIndex, string $comment)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, '// ' . $comment]),
-                ]
+                ],
             ]);
         }
     }

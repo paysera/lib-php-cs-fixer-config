@@ -17,7 +17,6 @@ use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
-use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
@@ -176,6 +175,7 @@ PHP,
             if ($prefixWhitespaceItem->lastToken()->getContent() !== $content) {
                 $prefixWhitespaceToken->replaceWith(new ContextualToken($content));
             }
+
             return;
         }
 
@@ -184,6 +184,7 @@ PHP,
         $prefixItem = $itemList->getFirstPrefixItem();
         if ($prefixItem !== null) {
             $prefixItem->lastToken()->insertAfter($token);
+
             return;
         }
 
@@ -217,6 +218,7 @@ PHP,
             if ($postfixWhitespaceToken->getContent() !== $content) {
                 $postfixWhitespaceToken->replaceWith(new ContextualToken($content));
             }
+
             return;
         }
 
@@ -225,6 +227,7 @@ PHP,
         $postfixItem = $itemList->getFirstPostfixItem();
         if ($postfixItem !== null) {
             $postfixItem->firstToken()->insertBefore($token);
+
             return;
         }
 
@@ -272,12 +275,7 @@ PHP,
         );
     }
 
-    /**
-     * @param ItemInterface $item
-     * @param string|null $whitespaceBefore
-     * @param bool $forceWhitespace
-     */
-    private function fixWhitespaceBefore(ItemInterface $item, $whitespaceBefore, bool $forceWhitespace)
+    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace)
     {
         $firstToken = $item->firstToken();
         if ($firstToken->isWhitespace()) {
@@ -287,12 +285,7 @@ PHP,
         }
     }
 
-    /**
-     * @param ItemInterface $item
-     * @param string|null $whitespaceAfter
-     * @param bool $forceWhitespace
-     */
-    private function fixWhitespaceAfter(ItemInterface $item, $whitespaceAfter, bool $forceWhitespace)
+    private function fixWhitespaceAfter(ItemInterface $item, ?string $whitespaceAfter, bool $forceWhitespace): void
     {
         $lastToken = $item->lastToken();
         if ($lastToken->isWhitespace()) {
@@ -306,6 +299,7 @@ PHP,
     {
         if ($replacement === null) {
             $token->previousToken()->setNextContextualToken($token->getNextToken());
+
             return;
         }
 

@@ -22,7 +22,6 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
 
     private array $exclusions;
     private array $serviceNames;
-    private $inflector;
 
     public function __construct()
     {
@@ -43,7 +42,7 @@ final class DirectoryAndNamespaceFixer extends AbstractFixer
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We use singular for namespaces: Service, Bundle, Entity, Controller etc.
 Exception: if English word does not have singular form.
 
@@ -52,8 +51,7 @@ We put them together with services by related functionality (no ServiceInterface
 
 We use abstractions for namespaces, not service names.
 For example, UserMerge or UserMerging, not UserMergeManager.
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -140,10 +138,10 @@ PHP,
         $commentIndex = $tokens->getNextNonWhitespace($insertIndex);
         if ($commentIndex === null || !$tokens[$commentIndex]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
-                ]
+                ],
             ]);
         }
     }

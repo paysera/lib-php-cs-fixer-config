@@ -8,19 +8,22 @@ use Paysera\PhpCsFixerConfig\Parser\Exception\NoMoreTokensException;
 use RuntimeException;
 use PhpCsFixer\Tokenizer\Token;
 
-class ContextualToken extends Token implements ItemInterface
+class ContextualToken implements ItemInterface
 {
+    private Token $token;
     private ?ContextualToken $previousContextualToken;
-
     private ?ContextualToken $nextContextualToken;
 
-    public function __construct($token)
+    public function __construct($tokenAbstract)
     {
-        if (is_string($token) && trim($token, " \t\n\r\0\x0B") === '' && $token !== '') {
-            parent::__construct([T_WHITESPACE, $token]);
+        if (is_string($tokenAbstract) && trim($tokenAbstract, " \t\n\r\0\x0B") === '' && $tokenAbstract !== '') {
+            $this->token = new Token([T_WHITESPACE, $tokenAbstract]);
         } else {
-            parent::__construct($token);
+            $this->token = new Token($tokenAbstract);
         }
+
+        $this->previousContextualToken = null;
+        $this->nextContextualToken = null;
     }
 
     public function setNextContextualToken(ContextualToken $contextualToken): self
@@ -29,6 +32,11 @@ class ContextualToken extends Token implements ItemInterface
         $contextualToken->previousContextualToken = $this;
 
         return $this;
+    }
+
+    public function setContent($tokenAbstract)
+    {
+        $this->token = new Token($tokenAbstract);
     }
 
     public function replaceWith(ContextualToken $contextualToken)
@@ -66,7 +74,7 @@ class ContextualToken extends Token implements ItemInterface
         return $this->nextContextualToken;
     }
 
-    public function nextToken(): ContextualToken
+    public function nextToken(): ?ContextualToken
     {
         if ($this->nextContextualToken === null) {
             throw new NoMoreTokensException('No more tokens');
@@ -81,6 +89,7 @@ class ContextualToken extends Token implements ItemInterface
         while ($nextToken->isWhitespace()) {
             $nextToken = $nextToken->nextToken();
         }
+
         return $nextToken;
     }
 
@@ -90,10 +99,11 @@ class ContextualToken extends Token implements ItemInterface
         while ($nextToken->getContent() !== $content) {
             $nextToken = $nextToken->nextToken();
         }
+
         return $nextToken;
     }
 
-    public function previousToken(): ContextualToken
+    public function previousToken(): ?ContextualToken
     {
         if ($this->previousContextualToken === null) {
             throw new RuntimeException('No more tokens');
@@ -105,9 +115,10 @@ class ContextualToken extends Token implements ItemInterface
     public function previousNonWhitespaceToken(): ContextualToken
     {
         $previousToken = $this->previousToken();
-        while ($previousToken->isWhitespace()) {
+        while ($previousToken->getToken()->isWhitespace()) {
             $previousToken = $previousToken->previousToken();
         }
+
         return $previousToken;
     }
 
@@ -146,12 +157,16 @@ class ContextualToken extends Token implements ItemInterface
         if (preg_match('/^([\s\t]*)/', $codeBefore, $matches) !== 1) {
             throw new RuntimeException('Expected regexp to always match when searching for line indent');
         }
+
         return $matches[1];
     }
 
+    /**
+     * @param ContextualToken $item
+     */
     public function equalsToItem(ItemInterface $item): bool
     {
-        return $item instanceof $this && $this instanceof $item && $this->equals($item);
+        return $item instanceof $this && $this instanceof $item && $this->token->equals($item->getToken());
     }
 
     /**
@@ -174,5 +189,35 @@ class ContextualToken extends Token implements ItemInterface
             $insertAfterThis->insertAfter($token);
             $insertAfterThis = $token;
         }
+    }
+
+    public function getContent(): string
+    {
+        return $this->token->getContent();
+    }
+
+    public function getToken(): Token
+    {
+        return $this->token;
+    }
+
+    public function isGivenKind($possibleKind): bool
+    {
+        return $this->token->isGivenKind($possibleKind);
+    }
+
+    public function getPrototype()
+    {
+        return $this->token->getPrototype();
+    }
+
+    public function isWhitespace(?string $whitespaces = " \t\n\r\0\x0B"): bool
+    {
+        return $this->token->isWhitespace($whitespaces);
+    }
+
+    public function isComment(): bool
+    {
+        return $this->token->isComment();
     }
 }

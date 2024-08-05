@@ -105,6 +105,7 @@ PHP,
             || (
                 !(preg_match('|[^a-zA-Z]|', substr($string, 1)) > 0)
                 && !(preg_match('/^[a-z]/', $string) === 0)
-            );
+            )
+        ;
     }
 }

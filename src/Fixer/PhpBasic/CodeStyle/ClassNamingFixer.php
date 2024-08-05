@@ -18,7 +18,9 @@ use SplFileInfo;
 
 final class ClassNamingFixer extends AbstractFixer implements ConfigurableFixerInterface
 {
-    use ConfigurableFixerTrait;
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
 
     public const CONVENTION = 'PhpBasic convention 2.5.2: For services suffix has to represent the job of that service';
     public const SERVICE = 'Service';
@@ -46,7 +48,7 @@ final class ClassNamingFixer extends AbstractFixer implements ConfigurableFixerI
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We use nouns for class names.
 For services we use some suffix to represent the job of that service, usually *er:
 manager
@@ -58,8 +60,7 @@ registry
 resolver
 We do not use service as a suffix, as this does not represent anything (for example PageService).
 We use object names only for entities, not for services (for example Page).
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
                     <<<'PHP'
@@ -73,6 +74,20 @@ class SampleService
 }
 
 PHP,
+                ),
+                new CodeSample(
+                    <<<'PHP'
+<?php
+
+namespace App\Service;
+
+class SampleSmthor
+{
+
+}
+
+PHP,
+                    ['service_suffixes' => ['invalid' => ['Smthor']]],
                 ),
             ],
             null,
@@ -98,6 +113,8 @@ PHP,
 
     public function configure(array $configuration = null): void
     {
+        $this->configureConfigurableFixerTrait($configuration);
+
         if ($this->configuration['service_suffixes'] === true) {
             return;
         }
@@ -111,12 +128,14 @@ PHP,
 
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        return new FixerConfigurationResolver([
-            (new FixerOptionBuilder('service_suffixes', 'Set valid and invalid suffixes for Class names.'))
+        return new FixerConfigurationResolver(
+            [
+                (new FixerOptionBuilder('service_suffixes', 'Set valid and invalid suffixes for Class names.'))
                 ->setAllowedTypes(['array', 'bool'])
                 ->setDefault(false)
                 ->getOption(),
-        ]);
+            ],
+        );
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
@@ -163,10 +182,6 @@ PHP,
     private function isClassNameValid(string $className, string $classNamespace): bool
     {
         if ($classNamespace === self::SERVICE) {
-            if (preg_match('#\w+(er\b|or\b)#', $className)) {
-                return true;
-            }
-
             foreach ($this->validServiceSuffixes as $validServiceSuffix) {
                 if (preg_match('#' . $validServiceSuffix . '\b#', $className)) {
                     return true;
@@ -179,8 +194,9 @@ PHP,
                 }
             }
 
-            return false;
+            return preg_match('#\w+(er\b|or\b)#', $className) === 1;
         }
+
         return true;
     }
 
@@ -189,7 +205,7 @@ PHP,
         $comment = '// TODO: "' . $className . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getPrevNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_COMMENT, $comment]),
                     new Token([T_WHITESPACE, $tokens[$insertIndex]->getContent()]),
                 ],

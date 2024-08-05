@@ -26,6 +26,7 @@ final class PropertyNamingFixer extends AbstractFixer
 
         $this->invalidPropertyVerbs = [
             'check',
+            'Check',
         ];
         $this->invalidPropertyPrefixes = [
             'is',
@@ -117,10 +118,10 @@ PHP,
         $comment = '// TODO: "' . $propertyName . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                $insertIndex + 1 => [
+                ($insertIndex + 1) => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
-                ]
+                ],
             ]);
         }
     }
