@@ -74,7 +74,6 @@ PHP,
                 }
 
                 $tokens[$index] = new Token([$token->getId(), implode($lines)]);
-//                $token->setContent(implode($lines));
             }
         }
     }
