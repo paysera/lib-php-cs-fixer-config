@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer;
@@ -12,12 +13,14 @@ use Paysera\PhpCsFixerConfig\Tests\Fixtures\ReplaceContentsFixer;
 class IgnorableFixerDecoratorTest extends AbstractPayseraFixerTestCase
 {
     /**
+     * @dataProvider provideFixCases
+     *
      * @param string $expected
      * @param string|null $input
      *
-     * @dataProvider provideFixCases
+     * @throws Exception
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $filename = __DIR__ . '/tmp/input.php';
         if (file_put_contents($filename, $input ?? $expected) === false) {
@@ -30,7 +33,7 @@ class IgnorableFixerDecoratorTest extends AbstractPayseraFixerTestCase
         }
     }
 
-    public function provideFixCases()
+    public function provideFixCases(): array
     {
         return [
             [
@@ -45,12 +48,12 @@ class IgnorableFixerDecoratorTest extends AbstractPayseraFixerTestCase
         ];
     }
 
-    protected function createFixer()
+    protected function createFixer(): IgnorableFixerDecorator
     {
         return new IgnorableFixerDecorator(new ReplaceContentsFixer());
     }
 
-    protected function getFixerName()
+    protected function getFixerName(): string
     {
         return 'my_test_fixer';
     }

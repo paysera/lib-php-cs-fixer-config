@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer;
@@ -15,7 +16,7 @@ use SplFileInfo;
  */
 abstract class AbstractContextualTokenFixer extends AbstractFixer
 {
-    protected $contextualTokenBuilder;
+    protected ContextualTokenBuilder $contextualTokenBuilder;
 
     public function __construct()
     {
@@ -24,7 +25,7 @@ abstract class AbstractContextualTokenFixer extends AbstractFixer
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
         $firstToken = (new EmptyToken())->setNextContextualToken($token);

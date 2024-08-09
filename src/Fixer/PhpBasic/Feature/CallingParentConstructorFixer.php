@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,20 +7,22 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class CallingParentConstructorFixer extends AbstractFixer
 {
-    const PARENT = 'parent';
-    const CONSTRUCT = '__construct';
+    public const PARENT = 'parent';
+    public const CONSTRUCT = '__construct';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'If we need to call parent constructor, we do it as first statement in constructor.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample extends ParentClass
 {
@@ -30,32 +33,30 @@ class Sample extends ParentClass
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_calling_parent_constructor';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (
@@ -70,12 +71,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     */
-    private function fixParentConstructPosition(Tokens $tokens, $startIndex, $endIndex)
+    private function fixParentConstructPosition(Tokens $tokens, int $startIndex, int $endIndex)
     {
         $thisBeforeParentConstructor = false;
         for ($i = $startIndex; $i < $endIndex; $i++) {
@@ -99,23 +95,19 @@ PHP
                 $oldIndexStart = $i + count($parentStatement) - 1;
                 $oldIndexEnd = $oldIndexStart + count($parentStatement) - 1;
                 $tokens->clearRange($oldIndexStart, $oldIndexEnd);
+
                 return;
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $statementStartIndex
-     * @param int $statementEndIndex
-     * @return array
-     */
-    private function getParentStatement(Tokens $tokens, $statementStartIndex, $statementEndIndex)
+    private function getParentStatement(Tokens $tokens, int $statementStartIndex, int $statementEndIndex): array
     {
         $argumentTokens = [];
         for ($i = $statementStartIndex - 1; $i <= $statementEndIndex; $i++) {
             $argumentTokens[] = $tokens[$i];
         }
+
         return $argumentTokens;
     }
 }

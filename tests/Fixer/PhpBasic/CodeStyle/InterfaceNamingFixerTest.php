@@ -1,25 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\CodeStyle;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\InterfaceNamingFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use PhpCsFixer\FixerFactory;
 
 final class InterfaceNamingFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
-     * @param string $expected
-     * @param null|string $input
-     *
      * @dataProvider provideCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $this->doTest($expected, $input);
     }
 
-    public function provideCases()
+    public function provideCases(): array
     {
         return [
             [
@@ -57,7 +56,7 @@ final class InterfaceNamingFixerTest extends AbstractPayseraFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
+    public function createFixerFactory(): FixerFactory
     {
         $fixerFactory = parent::createFixerFactory();
         $fixerFactory->registerCustomFixers([
@@ -66,7 +65,7 @@ final class InterfaceNamingFixerTest extends AbstractPayseraFixerTestCase
         return $fixerFactory;
     }
 
-    public function getFixerName()
+    public function getFixerName(): string
     {
         return 'Paysera/php_basic_code_style_interface_naming';
     }

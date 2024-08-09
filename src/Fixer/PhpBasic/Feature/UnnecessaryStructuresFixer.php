@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -7,34 +8,34 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class UnnecessaryStructuresFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const CONVENTION = 'PhpBasic convention 3.10: We avoid unnecessary structures';
+    public const CONVENTION = 'PhpBasic convention 3.10: We avoid unnecessary structures';
 
-    /**
-     * @var array
-     */
-    private $conditionalStatements;
+    private array $conditionalStatements;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->conditionalStatements = [
             T_IF,
             T_ELSEIF,
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We avoid unnecessary structures.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -48,23 +49,23 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_unnecessary_structures';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound($this->conditionalStatements);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if (!$tokens[$key]->isGivenKind($this->conditionalStatements)) {
@@ -86,7 +87,7 @@ PHP
     {
         $parentEndCurlyBraceIndex = $tokens->findBlockEnd(
             Tokens::BLOCK_TYPE_CURLY_BRACE,
-            $parentStartCurlyBraceIndex
+            $parentStartCurlyBraceIndex,
         );
 
         $childEndCurlyBraceIndex = $tokens->getPrevMeaningfulToken($parentEndCurlyBraceIndex);
@@ -101,13 +102,13 @@ PHP
                 if ($curlyBraceStartIndex !== null) {
                     $curlyBraceEndIndex = $tokens->findBlockEnd(
                         Tokens::BLOCK_TYPE_CURLY_BRACE,
-                        $curlyBraceStartIndex
+                        $curlyBraceStartIndex,
                     );
                     if ($curlyBraceEndIndex === $childEndCurlyBraceIndex) {
                         $this->insertComment(
                             $tokens,
                             $tokens[$conditionalStatementIndex]->getContent(),
-                            $curlyBraceStartIndex
+                            $curlyBraceStartIndex,
                         );
                         break;
                     }
@@ -116,12 +117,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return int|null
-     */
-    private function getStatementCurlyBraceStart(Tokens $tokens, $key)
+    private function getStatementCurlyBraceStart(Tokens $tokens, int $key): ?int
     {
         $startParenthesesIndex = $tokens->getNextMeaningfulToken($key);
         if (!$tokens[$startParenthesesIndex]->equals('(')) {
@@ -137,18 +133,15 @@ PHP
         return $curlyBraceStartIndex;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param string $conditionalStatement
-     * @param int $insertIndex
-     */
-    private function insertComment(Tokens $tokens, $conditionalStatement, $insertIndex)
+    private function insertComment(Tokens $tokens, string $conditionalStatement, int $insertIndex)
     {
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, '// TODO: "' . $conditionalStatement . '" - ' . self::CONVENTION]),
-            ]]);
+            $tokens->insertSlices([
+                ($insertIndex + 1) => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, '// TODO: "' . $conditionalStatement . '" - ' . self::CONVENTION]),
+                ],
+            ]);
         }
     }
 }

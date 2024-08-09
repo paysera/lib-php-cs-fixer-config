@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -12,18 +13,20 @@ use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class NamespacesAndUseStatementsFixer extends AbstractFixer
 {
-    private $docBlockAnnotations;
-    private $importedClassesParser;
-    private $contextualTokenBuilder;
+    private array $docBlockAnnotations;
+    private ImportedClassesParser $importedClassesParser;
+    private ContextualTokenBuilder $contextualTokenBuilder;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
         $this->importedClassesParser = new ImportedClassesParser();
         $this->docBlockAnnotations = [
@@ -35,17 +38,18 @@ final class NamespacesAndUseStatementsFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
-        return new FixerDefinition(<<<TEXT
+        return new FixerDefinition(
+            <<<TEXT
 If class has a namespace, we use `use` statements instead of providing full namespace.
 This applies to php-doc comments, too.
 
 Does not process namespace without root. Example: Some\Entity\Operation.
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 
 namespace Some\Something;
@@ -61,37 +65,35 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Risky as class can be imported or aliased with same name as another class inside that namespace.'
+            'Risky as class can be imported or aliased with same name as another class inside that namespace.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_namespaces_and_use_statements';
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return 70;
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_NAMESPACE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $token = $this->contextualTokenBuilder->buildFromTokens($tokens);
 
@@ -113,13 +115,16 @@ PHP
         $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
 
-    private function processToken(ContextualToken $token, ImportedClasses $importedClasses, ContextualToken $lastNamespaceToken = null)
-    {
+    private function processToken(
+        ContextualToken $token,
+        ImportedClasses $importedClasses,
+        ContextualToken $lastNamespaceToken = null
+    ) {
         if ($token->isGivenKind(T_DOC_COMMENT) && $lastNamespaceToken !== null) {
             $this->fixDocBlockContent(
                 $token,
                 $lastNamespaceToken,
-                $importedClasses
+                $importedClasses,
             );
         }
 
@@ -153,7 +158,7 @@ PHP
             '#(?<=' . implode('|', $this->docBlockAnnotations) . ')\s(\\\[\w\\\]*\\\?(\w*))\s#',
             $content,
             $matches,
-            PREG_SET_ORDER
+            PREG_SET_ORDER,
         );
         if (count($matches) === 0) {
             return;
@@ -168,11 +173,16 @@ PHP
                     continue;
                 }
 
-                $phpDocToken->setContent(preg_replace(
-                    '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
-                    '$1' . $importedAs . '$2',
-                    $phpDocToken->getContent()
-                ));
+                $phpDocToken->setContent(
+                    [
+                        $phpDocToken->getToken()->getId(),
+                        preg_replace(
+                            '/(\s)' . preg_quote($fullClassName, '/') . '(\s)/',
+                            '$1' . $importedAs . '$2',
+                            $phpDocToken->getContent(),
+                        ),
+                    ],
+                );
             }
         }
     }
@@ -208,6 +218,7 @@ PHP
         }
         $this->insertUseStatement($lastNamespaceToken, $fullClassName, $importAs);
         $importedClasses->registerImport($className, $fullClassName);
+
         return $className;
     }
 
@@ -275,7 +286,7 @@ PHP
         }
     }
 
-    private function findWhitespaceTokenAfterLastUseStatement(ContextualToken $possibleUseToken)
+    private function findWhitespaceTokenAfterLastUseStatement(ContextualToken $possibleUseToken): ContextualToken
     {
         $token = $possibleUseToken->nextToken();
         while (
@@ -288,6 +299,7 @@ PHP
         ) {
             $token = $token->nextToken();
         }
+
         return $token->previousToken();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
@@ -24,7 +25,7 @@ interface ItemInterface
      *
      * @return string
      */
-    public function getContent();
+    public function getContent(): string;
 
     /**
      * Whether this item equals another in means of structure and content

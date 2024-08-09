@@ -1,17 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
 
 class ConstructItem implements ItemInterface
 {
-    private $prefixItem;
-    private $postfixItem;
+    private ItemInterface $prefixItem;
+    private ItemInterface $postfixItem;
 
-    /**
-     * @var ItemInterface
-     */
-    private $contentItem;
+    private ItemInterface $contentItem;
 
     public function __construct(ItemInterface $prefixItem, ItemInterface $contentItem, ItemInterface $postfixItem)
     {
@@ -30,25 +28,16 @@ class ConstructItem implements ItemInterface
         return $this->prefixItem->firstToken();
     }
 
-    /**
-     * @return ItemInterface
-     */
     public function getPrefixItem(): ItemInterface
     {
         return $this->prefixItem;
     }
 
-    /**
-     * @return ItemInterface
-     */
     public function getPostfixItem(): ItemInterface
     {
         return $this->postfixItem;
     }
 
-    /**
-     * @return ItemInterface
-     */
     public function getContentItem(): ItemInterface
     {
         return $this->contentItem;
@@ -75,7 +64,7 @@ class ConstructItem implements ItemInterface
         return $this->contentItem->isSplitIntoSeveralLines();
     }
 
-    public function getContent()
+    public function getContent(): string
     {
         return $this->prefixItem->getContent() . $this->contentItem->getContent() . $this->postfixItem->getContent();
     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Config;
@@ -48,6 +49,7 @@ use Paysera\PhpCsFixerConfig\Fixer\PSR1\FileSideEffectsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FunctionNameCamelCaseFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PSR2\LineLengthFixer;
 use PhpCsFixer\Config;
+use PhpCsFixer\ConfigInterface;
 use PhpCsFixer\Finder;
 use PhpCsFixer\Fixer\FixerInterface;
 use RuntimeException;
@@ -57,10 +59,7 @@ use RuntimeException;
  */
 class PayseraConventionsConfig extends Config
 {
-    /**
-     * @var null|array
-     */
-    private $migrationModeRules;
+    private array $migrationModeRules;
 
     public function __construct()
     {
@@ -111,9 +110,10 @@ class PayseraConventionsConfig extends Config
             new BracesFixer(),
             new DefaultValuesInConstructorFixer(),
         ]));
+        $this->migrationModeRules = [];
     }
 
-    private function decorateWithIgnorable(array $fixers)
+    private function decorateWithIgnorable(array $fixers): array
     {
         return array_map(function (FixerInterface $fixer) {
             return new IgnorableFixerDecorator($fixer);
@@ -123,7 +123,7 @@ class PayseraConventionsConfig extends Config
     public function setDefaultFinder(
         array $in = ['src'],
         array $exclude = ['tests', 'Tests', 'test', 'Test']
-    ) {
+    ): PayseraConventionsConfig {
         $finder = Finder::create()
             ->in($in)
             ->exclude($exclude)
@@ -134,7 +134,7 @@ class PayseraConventionsConfig extends Config
         return $this;
     }
 
-    public function enableMigrationMode(array $rules)
+    public function enableMigrationMode(array $rules): PayseraConventionsConfig
     {
         $this->migrationModeRules = $rules;
 
@@ -144,7 +144,7 @@ class PayseraConventionsConfig extends Config
     public function getRules(): array
     {
         $rules = parent::getRules();
-        if ($this->migrationModeRules === null) {
+        if (count($this->migrationModeRules) === 0) {
             return $rules;
         }
 
@@ -156,7 +156,7 @@ class PayseraConventionsConfig extends Config
 
         return array_merge(
             $rules,
-            array_combine($disabledRules, array_fill(0, count($disabledRules), false))
+            array_combine($disabledRules, array_fill(0, count($disabledRules), false)),
         );
     }
 
@@ -166,54 +166,63 @@ class PayseraConventionsConfig extends Config
         $rulesUnconfigured = array_diff($enabledRules, array_keys($this->migrationModeRules));
         if (count($rulesUnconfigured) > 0) {
             $configuration = "    '" . implode("' => false,\n    '", $rulesUnconfigured) . "' => false,\n";
-            throw new RuntimeException(sprintf(
-                "You have to configure all rules for migration, please configure these:\n\n%s",
-                $configuration
-            ));
+            throw new RuntimeException(
+                sprintf(
+                    "You have to configure all rules for migration, please configure these:\n\n%s",
+                    $configuration,
+                ),
+            );
         }
     }
 
-    public function setSafeRules(array $rules = [])
+    public function setSafeRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(false)
-            ->setRules(array_merge(
-                $this->getSafeRules(),
-                $rules
-            ))
+            ->setRules(
+                array_merge(
+                    $this->getSafeRules(),
+                    $rules,
+                ),
+            )
         ;
     }
 
-    public function setRiskyRules(array $rules = [])
+    public function setRiskyRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(true)
-            ->setRules(array_merge(
-                $this->getSafeRules(),
-                $this->getRiskyRules(),
-                $rules
-            ))
+            ->setRules(
+                array_merge(
+                    $this->getSafeRules(),
+                    $this->getRiskyRules(),
+                    $rules,
+                ),
+            )
         ;
     }
 
-    public function setRecommendedRules(array $rules = [])
+    public function setRecommendedRules(array $rules = []): ConfigInterface
     {
         return $this
             ->setRiskyAllowed(true)
-            ->setRules(array_merge(
-                $this->getSafeRules(),
-                $this->getRiskyRules(),
-                $this->getRecommendedRules(),
-                $rules
-            ))
+            ->setRules(
+                array_merge(
+                    $this->getSafeRules(),
+                    $this->getRiskyRules(),
+                    $this->getRecommendedRules(),
+                    $rules,
+                ),
+            )
         ;
     }
 
-    private function getRecommendedRules()
+    private function getRecommendedRules(): array
     {
         return [
             'Paysera/psr_1_file_side_effects' => true,
-            'Paysera/psr_2_line_length' => ['soft_limit' => 120],
+            //Strange behavior, need more testing.
+//            'Paysera/psr_2_line_length' => ['limits' => ['soft_limit' => 120]],
             'Paysera/php_basic_basic_globals' => true,
             'Paysera/php_basic_basic_single_class_per_file' => true,
             'Paysera/php_basic_code_style_class_naming' => true,
@@ -236,7 +245,7 @@ class PayseraConventionsConfig extends Config
         ];
     }
 
-    private function getRiskyRules()
+    private function getRiskyRules(): array
     {
         return [
             // Symfony:risky
@@ -250,10 +259,13 @@ class PayseraConventionsConfig extends Config
                 'use_escape_sequences_in_strings' => false,
             ],
             'php_unit_construct' => true,
-            'psr4' => true,
-            'silenced_deprecation_error' => true,
+            'psr_autoloading' => true,
+            'error_suppression' => true,
             // exceptions
-            'is_null' => ['use_yoda_style' => false],
+            //Works in different way
+//            'is_null' => ['use_yoda_style' => false],
+            'is_null' => true,
+            'yoda_style' => ['equal' => false, 'identical' => false, 'less_and_greater' => false],
             'self_accessor' => false,
 
             // other base rules
@@ -273,13 +285,15 @@ class PayseraConventionsConfig extends Config
             'Paysera/php_basic_feature_logical_operators' => true,
             'Paysera/php_basic_feature_type_hinting_arguments' => true,
             'Paysera/php_basic_feature_unnecessary_variables' => true,
-            'Paysera/php_basic_feature_comparing_to_boolean' => true,
+            //Doesn't work correctly with declaring class members in constructor. Need refactor of parsing functionality.
+//            'Paysera/php_basic_feature_comparing_to_boolean' => true,
             'Paysera/php_basic_code_style_default_values_in_constructor' => true,
-            'Paysera/php_basic_feature_type_hinting' => true,
+            //Doesn't work correctly with declaring class members in constructor. Need refactor of parsing functionality.
+//            'Paysera/php_basic_feature_type_hinting' => true,
         ];
     }
 
-    private function getSafeRules()
+    private function getSafeRules(): array
     {
         return [
             // PSR1, PSR2 and Symfony
@@ -288,14 +302,14 @@ class PayseraConventionsConfig extends Config
             'blank_line_after_namespace' => true,
             'elseif' => true,
             'function_declaration' => true,
-            'indentation_type' => true,
+//            'indentation_type' => true,
             'line_ending' => true,
-            'lowercase_constants' => true,
+            'constant_case' => ['case' => 'lower'],
             'lowercase_keywords' => true,
             'no_break_comment' => true,
             'no_closing_tag' => true,
             'no_spaces_after_function_name' => true,
-            'no_spaces_inside_parenthesis' => true,
+            'spaces_inside_parentheses' => false,
             'no_trailing_whitespace' => true,
             'no_trailing_whitespace_in_comment' => true,
             'single_blank_line_at_eof' => true,
@@ -306,19 +320,23 @@ class PayseraConventionsConfig extends Config
             'visibility_required' => true,
 
             'binary_operator_spaces' => true,
-            'class_attributes_separation' => ['elements' => ['method']],
+            'class_attributes_separation' => [
+                'elements' => [
+                    'method' => 'one',
+                ],
+            ],
             'class_definition' => [
-                'multiLineExtendsEachSingleLine' => true,
-                'singleItemSingleLine' => true,
+                'multi_line_extends_each_single_line' => true,
+                'single_item_single_line' => true,
             ],
             'declare_equal_normalize' => true,
-            'function_typehint_space' => true,
+            'type_declaration_spaces' => true,
             'include' => true,
             'lowercase_cast' => true,
             'magic_constant_casing' => true,
-            'method_argument_space' => true,
+            'method_argument_space' => false,
             'native_function_casing' => true,
-            'new_with_braces' => true,
+            'new_with_parentheses' => true,
             'no_blank_lines_after_class_opening' => true,
             'no_blank_lines_after_phpdoc' => true,
             'no_empty_comment' => true,
@@ -330,9 +348,8 @@ class PayseraConventionsConfig extends Config
             'no_multiline_whitespace_around_double_arrow' => true,
             'no_short_bool_cast' => true,
             'no_spaces_around_offset' => true,
-            'no_trailing_comma_in_list_call' => true,
-            'no_trailing_comma_in_singleline_array' => true,
-            'no_unneeded_curly_braces' => true,
+            'no_trailing_comma_in_singleline' => true,
+            'no_unneeded_braces' => true,
             'no_unneeded_final_method' => true,
             'no_unused_imports' => true,
             'no_whitespace_before_comma_in_array' => true,
@@ -356,19 +373,17 @@ class PayseraConventionsConfig extends Config
             'return_type_declaration' => true,
             'semicolon_after_instruction' => true,
             'short_scalar_cast' => true,
-            'single_blank_line_before_namespace' => true,
+            'blank_lines_before_namespace' => true,
             'single_class_element_per_statement' => true,
             'single_line_comment_style' => [
                 'comment_types' => ['hash'],
             ],
             'single_quote' => true,
-            'space_after_semicolon' => [
-                'remove_in_empty_for_expressions' => true,
-            ],
+            'space_after_semicolon' => false,
             'standardize_increment' => true,
             'standardize_not_equals' => true,
             'ternary_operator_spaces' => true,
-            'trailing_comma_in_multiline_array' => true,
+            'trailing_comma_in_multiline' => ['elements' => ['arrays']],
             'trim_array_spaces' => true,
             'unary_operator_spaces' => true,
             'whitespace_after_comma_in_array' => true,
@@ -376,7 +391,7 @@ class PayseraConventionsConfig extends Config
             // exceptions
             'increment_style' => ['style' => 'post'],
             'blank_line_after_opening_tag' => false,
-            'blank_line_before_statement' => null,
+            'blank_line_before_statement' => ['statements' => ['return']],
             'cast_spaces' => false,
             'concat_space' => ['spacing' => 'one'],
             'no_singleline_whitespace_before_semicolons' => false,
@@ -386,47 +401,60 @@ class PayseraConventionsConfig extends Config
             'yoda_style' => false,
             'phpdoc_to_comment' => false,
             'phpdoc_no_alias_tag' => false,
-            'phpdoc_inline_tag' => false,
+            'general_phpdoc_tag_rename' => false,
+            'phpdoc_inline_tag_normalizer' => false,
+            'phpdoc_tag_type' => false,
             'no_unneeded_control_parentheses' => false, // works too aggressively with large structures
-            'no_extra_blank_lines' => ['tokens' => [ // don't use curly_brace_block to allow splitting elseif blocks
-                'extra',
-                'parenthesis_brace_block',
-                'square_brace_block',
-                'throw',
-                'use',
-            ]],
-            'Paysera/php_basic_braces' => [ // temporary overwritten from "braces" fixer
-                'allow_single_line_closure' => true,
+            'no_extra_blank_lines' => [
+                'tokens' => [ // don't use curly_brace_block to allow splitting elseif blocks
+                    'extra',
+                    'parenthesis_brace_block',
+                    'square_brace_block',
+                    'throw',
+                    'use',
+                ],
             ],
+            //no error but is it necessary
+//            'Paysera/php_basic_braces' => [ // temporary overwritten from "braces" fixer
+//                'allow_single_line_closure' => true,
+//            ],
 
             // other base rules
             'no_useless_else' => true,
-            'blank_line_before_return' => false,
             'phpdoc_order' => false,
             'phpdoc_add_missing_param_annotation' => [
                 'only_untyped' => false,
             ],
-            'pre_increment' => false,
-            'no_multiline_whitespace_before_semicolons' => false,
+            'multiline_whitespace_before_semicolons' => false,
             'ordered_imports' => false,
             'array_syntax' => ['syntax' => 'short'],
-            'general_phpdoc_annotation_remove' => ['author', 'namespace', 'date', 'inheritdoc', 'package'],
+            'general_phpdoc_annotation_remove' => [
+                'annotations' => [
+                    'author',
+                    'namespace',
+                    'date',
+                    'inheritdoc',
+                    'package',
+                ],
+            ],
             'header_comment' => ['header' => ''],
             'heredoc_to_nowdoc' => true,
-            'linebreak_after_opening_tag' => true,
+            'linebreak_after_opening_tag' => false,
             'no_useless_return' => true,
             'strict_comparison' => false,
             'strict_param' => false,
             'ordered_class_elements' => [
-                'use_trait',
-                'constant',
-                'property_static',
-                'property',
-                'construct',
-                'destruct',
-                'magic',
-                'method_static',
-                'method',
+                'order' => [
+                    'use_trait',
+                    'constant',
+                    'property_static',
+                    'property',
+                    'construct',
+                    'destruct',
+                    'magic',
+                    'method_static',
+                    'method',
+                ],
             ],
 
             // other custom rules

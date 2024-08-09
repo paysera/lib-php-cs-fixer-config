@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
@@ -13,7 +14,7 @@ class ComplexItemList implements ItemInterface
     /**
      * @var TypedItem[]
      */
-    protected $typedItemList;
+    protected array $typedItemList;
 
     public function __construct()
     {
@@ -30,28 +31,28 @@ class ComplexItemList implements ItemInterface
         return reset($this->typedItemList)->getItem()->firstToken();
     }
 
-    public function getContent()
+    public function getContent(): string
     {
         return array_reduce($this->typedItemList, function (string $result, TypedItem $item) {
             return $result . $item->getItem()->getContent();
         }, '');
     }
 
-    public function addPrefixItem(ItemInterface $prefixItem)
+    public function addPrefixItem(ItemInterface $prefixItem): ComplexItemList
     {
         $this->addItemAtEnd($prefixItem, TypedItem::TYPE_PREFIX);
 
         return $this;
     }
 
-    public function addPrefixWhitespaceItem(ItemInterface $prefixItem)
+    public function addPrefixWhitespaceItem(ItemInterface $prefixItem): ComplexItemList
     {
         $this->addItemAtEnd($prefixItem, TypedItem::TYPE_PREFIX_WHITESPACE);
 
         return $this;
     }
 
-    public function addContentItemGroup(array $items)
+    public function addContentItemGroup(array $items): ComplexItemList
     {
         $groupedItem = count($items) === 1 ? $items[0] : new SimpleItemList($items);
         $this->addContentItem($groupedItem);
@@ -59,21 +60,21 @@ class ComplexItemList implements ItemInterface
         return $this;
     }
 
-    public function addContentItem(ItemInterface $item)
+    public function addContentItem(ItemInterface $item): ComplexItemList
     {
         $this->addItemAtEnd($item, TypedItem::TYPE_CONTENT);
 
         return $this;
     }
 
-    public function addPostfixWhitespaceItem(ItemInterface $postfixItem)
+    public function addPostfixWhitespaceItem(ItemInterface $postfixItem): ComplexItemList
     {
         $this->addItemAtEnd($postfixItem, TypedItem::TYPE_POSTFIX_WHITESPACE);
 
         return $this;
     }
 
-    public function addPostfixItem(ItemInterface $postfixItem)
+    public function addPostfixItem(ItemInterface $postfixItem): ComplexItemList
     {
         $this->addItemAtEnd($postfixItem, TypedItem::TYPE_POSTFIX);
 
@@ -122,7 +123,7 @@ class ComplexItemList implements ItemInterface
 
     /**
      * This method is used for detecting new lines inside other elements
-     * Separated elements, if they have new lines, are indented and each of them is in it's own line
+     * Separated elements, if they have new lines, are indented and each of them is in its own line
      */
     public function isSplitIntoSeveralLines(): bool
     {
@@ -138,22 +139,22 @@ class ComplexItemList implements ItemInterface
         return false;
     }
 
-    public function getFirstPrefixWhitespaceItem()
+    public function getFirstPrefixWhitespaceItem(): ?ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_PREFIX_WHITESPACE);
     }
 
-    public function getFirstPrefixItem()
+    public function getFirstPrefixItem(): ?ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_PREFIX);
     }
 
-    public function getFirstPostfixWhitespaceItem()
+    public function getFirstPostfixWhitespaceItem(): ?ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_POSTFIX_WHITESPACE);
     }
 
-    public function getFirstPostfixItem()
+    public function getFirstPostfixItem(): ?ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_POSTFIX);
     }
@@ -179,11 +180,7 @@ class ComplexItemList implements ItemInterface
         }
     }
 
-    /**
-     * @param string $type
-     * @return ItemInterface
-     */
-    protected function getFirstItemOfType(string $type)
+    protected function getFirstItemOfType(string $type): ?ItemInterface
     {
         foreach ($this->getItemsOfType($type) as $item) {
             return $item;

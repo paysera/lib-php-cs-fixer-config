@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
@@ -8,17 +9,14 @@ use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
 final class StrictComparisonParameterFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
-     * @param string $expected
-     * @param null|string $input
-     *
      * @dataProvider provideCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $this->doTest($expected, $input);
     }
 
-    public function provideCases()
+    public function provideCases(): array
     {
         return [
             [
@@ -38,7 +36,7 @@ final class StrictComparisonParameterFixerTest extends AbstractPayseraFixerTestC
         ];
     }
 
-    public function getFixerName()
+    public function getFixerName(): string
     {
         return 'strict_param';
     }

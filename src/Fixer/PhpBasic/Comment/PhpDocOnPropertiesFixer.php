@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Comment;
@@ -7,6 +8,7 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
@@ -14,10 +16,10 @@ use SplFileInfo;
 
 final class PhpDocOnPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const MISSING_DOC_BLOCK_CONVENTION = 'PhpBasic convention 4.3: Missing DocBlock';
-    const CONSTRUCT = '__construct';
+    public const MISSING_DOC_BLOCK_CONVENTION = 'PhpBasic convention 4.3: Missing DocBlock';
+    public const CONSTRUCT = '__construct';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -29,10 +31,10 @@ PhpDoc can cause warnings to be silenced.
 
 We may add PhpDoc on properties that are injected via constructor and are scalar,
 but this is not necessary as IDE gets the type from constructor’s PhpDoc.
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -44,39 +46,37 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_comment_php_doc_on_properties';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_PUBLIC, T_PROTECTED, T_PRIVATE]);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $constructFunction = [];
         // Collecting __construct function info
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
             if (
                 $tokens[$key]->isGivenKind(T_STRING)
                 && $token->getContent() === self::CONSTRUCT
@@ -130,7 +130,7 @@ PHP
         }
     }
 
-    private function canPropertyTypeBeGuessed(array $property, array $constructFunction)
+    private function canPropertyTypeBeGuessed(array $property, array $constructFunction): bool
     {
         return (
             $this->isPropertyDefinedInDocBlock($property, $constructFunction)
@@ -139,7 +139,7 @@ PHP
         );
     }
 
-    private function isPropertyTypeKnownExactly(array $property, array $constructFunction)
+    private function isPropertyTypeKnownExactly(array $property, array $constructFunction): bool
     {
         return (
             $this->isPropertyDefinedInDocBlock($property, $constructFunction)
@@ -148,12 +148,7 @@ PHP
         );
     }
 
-    /**
-     * @param array $property
-     * @param array $constructFunction
-     * @return bool
-     */
-    private function isPropertyDefinedInDocBlock($property, $constructFunction)
+    private function isPropertyDefinedInDocBlock(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['DocBlock'])
@@ -162,24 +157,19 @@ PHP
         ;
     }
 
-    /**
-     * @param array $property
-     * @param array $constructFunction
-     * @return bool
-     */
-    private function isPropertyAssignedFromArgument($property, $constructFunction)
+    private function isPropertyAssignedFromArgument(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
             && in_array(
                 $constructFunction['Assignments'][$property['Variable']],
                 array_keys($constructFunction['ConstructArguments']),
-                true
+                true,
             )
         ;
     }
 
-    private function isPropertyAssignedInConstructor(array $property, array $constructFunction)
+    private function isPropertyAssignedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
@@ -187,7 +177,7 @@ PHP
         ;
     }
 
-    private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction)
+    private function isPropertyInstantiatedInConstructor(array $property, array $constructFunction): bool
     {
         return
             isset($constructFunction['Assignments'][$property['Variable']])
@@ -195,12 +185,7 @@ PHP
         ;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $constructIndex
-     * @return array
-     */
-    private function getConstructAssignments(Tokens $tokens, $constructIndex)
+    private function getConstructAssignments(Tokens $tokens, int $constructIndex): array
     {
         $curlyBracesStartIndex = $tokens->getNextTokenOfKind($constructIndex, ['{']);
         $curlyBracesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBracesStartIndex);
@@ -238,12 +223,7 @@ PHP
         return $assignments;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $parenthesesStartIndex
-     * @return array
-     */
-    private function getConstructArguments(Tokens $tokens, $parenthesesStartIndex)
+    private function getConstructArguments(Tokens $tokens, int $parenthesesStartIndex): array
     {
         $constructArguments = [];
         $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $parenthesesStartIndex);
@@ -259,19 +239,16 @@ PHP
                 $constructArguments[$tokens[$i]->getContent()] = $tokens[$previousTokenIndex]->getContent();
             }
         }
+
         return $constructArguments;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return array|null
-     */
-    private function getProperty(Tokens $tokens, $key)
+    private function getProperty(Tokens $tokens, int $key): ?array
     {
         if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
             $previousTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $previousPreviousTokenIndex = $tokens->getPrevNonWhitespace($previousTokenIndex);
+            $previousPreviousTokenIndex =
+                $previousTokenIndex ? $tokens->getPrevNonWhitespace($previousTokenIndex) : null;
             if (
                 $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$previousPreviousTokenIndex]->isGivenKind(T_COMMENT)
@@ -285,16 +262,11 @@ PHP
                 return $this->getPropertyValues($tokens, $key, $previousPreviousTokenIndex);
             }
         }
+
         return null;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param int $previousTokenIndex
-     * @return array
-     */
-    private function getPropertyValues(Tokens $tokens, $key, $previousTokenIndex)
+    private function getPropertyValues(Tokens $tokens, int $key, int $previousTokenIndex): array
     {
         $property['Index'] = $key;
         $property['Variable'] = $tokens[$key]->getContent();
@@ -304,19 +276,15 @@ PHP
         } else {
             $property['DocBlockInsertIndex'] = $previousTokenIndex - 1;
         }
+
         return $property;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $propertyName
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $propertyName)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $propertyName)
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . self::MISSING_DOC_BLOCK_CONVENTION;
         $tokens->insertSlices([
-            $insertIndex + 1 => [
+            ($insertIndex + 1) => [
                 new Token([T_COMMENT, $comment]),
                 new Token([
                     T_WHITESPACE,
@@ -326,7 +294,7 @@ PHP
         ]);
     }
 
-    private function hasCommentAdditionalData(Token $docBlockToken)
+    private function hasCommentAdditionalData(Token $docBlockToken): bool
     {
         return preg_match('/[^\s\*\/].*@var|@var.*\n[^\s\*\/]|@var.*\|/s', $docBlockToken->getContent()) === 1;
     }

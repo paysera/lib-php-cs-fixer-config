@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Util;
@@ -10,12 +11,7 @@ use ReflectionProperty;
 
 class InheritanceHelper
 {
-    /**
-     * @param string $methodName
-     * @param Tokens $tokens
-     * @return bool
-     */
-    public function isMethodFromInterface($methodName, Tokens $tokens)
+    public function isMethodFromInterface(string $methodName, Tokens $tokens): bool
     {
         try {
             $reflection = $this->getReflection($tokens);
@@ -23,11 +19,36 @@ class InheritanceHelper
             return false;
         }
 
-        foreach ($reflection->getInterfaces() as $interface) {
-            $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-            foreach ($methods as $method) {
-                if ($method->getName() === $methodName) {
-                    return true;
+        if ($reflection !== null) {
+            foreach ($reflection->getInterfaces() as $interface) {
+                $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+                foreach ($methods as $method) {
+                    if ($method->getName() === $methodName) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function isPropertyInherited(string $propertyName, Tokens $tokens): bool
+    {
+        try {
+            $reflection = $this->getReflection($tokens);
+        } catch (ReflectionException $exception) {
+            return false;
+        }
+
+        if ($reflection !== null) {
+            while ($parent = $reflection->getParentClass()) {
+                $reflection = $parent;
+                $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+                foreach ($properties as $property) {
+                    if ($property->getName() === $propertyName) {
+                        return true;
+                    }
                 }
             }
         }
@@ -36,34 +57,11 @@ class InheritanceHelper
     }
 
     /**
-     * @param string $propertyName
      * @param Tokens $tokens
-     * @return bool
+     * @return ReflectionClass|null
+     * @throws ReflectionException
      */
-    public function isPropertyInherited($propertyName, Tokens $tokens)
-    {
-        try {
-            $reflection = $this->getReflection($tokens);
-        } catch (ReflectionException $exception) {
-            return false;
-        }
-        $parents = [];
-
-        while ($parent = $reflection->getParentClass()) {
-            $parents[] = $parent->getName();
-            $reflection = $parent;
-            $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-            foreach ($properties as $property) {
-                if ($property->getName() === $propertyName) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private function getReflection(Tokens $tokens)
+    private function getReflection(Tokens $tokens): ?ReflectionClass
     {
         $fqcn = null;
 
@@ -85,7 +83,7 @@ class InheritanceHelper
         }
 
         if ($fqcn === null) {
-            return false;
+            return null;
         }
 
         return new ReflectionClass($fqcn);

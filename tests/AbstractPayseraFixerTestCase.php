@@ -1,24 +1,22 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests;
 
 use PhpCsFixer\FixerFactory;
-use PhpCsFixer\RuleSet;
-use PhpCsFixer\Tests\Test\AbstractFixerTestCase;
+use PhpCsFixer\RuleSet\RuleSet;
 use UnexpectedValueException;
+
+use function count;
+use function sprintf;
+
 
 abstract class AbstractPayseraFixerTestCase extends AbstractFixerTestCase
 {
-    /**
-     * @return string
-     */
-    abstract protected function getFixerName();
+    abstract protected function getFixerName(): string;
 
-    /**
-     * @return FixerFactory
-     */
-    protected function createFixerFactory()
+    protected function createFixerFactory(): FixerFactory
     {
         return (new FixerFactory())->registerBuiltInFixers();
     }
@@ -26,14 +24,10 @@ abstract class AbstractPayseraFixerTestCase extends AbstractFixerTestCase
     protected function createFixer()
     {
         $fixerClassName = $this->getFixerClassName();
-
-        return new $fixerClassName();
+        return $this->fixer = new $fixerClassName();
     }
 
-    /**
-     * @return string
-     */
-    private function getFixerClassName()
+    private function getFixerClassName(): string
     {
         try {
             $fixers = $this
@@ -45,15 +39,15 @@ abstract class AbstractPayseraFixerTestCase extends AbstractFixerTestCase
             throw new UnexpectedValueException(
                 'Cannot determine fixer class, perhaps you forget to override `getFixerName` or `createFixerFactory` method?',
                 0,
-                $exception
+                $exception,
             );
         }
         if (1 !== count($fixers)) {
             throw new UnexpectedValueException(
                 sprintf(
                     'Determine fixer class should result in one fixer, got "%d". Perhaps you configured the fixer to "false" ?',
-                    count($fixers)
-                )
+                    count($fixers),
+                ),
             );
         }
 

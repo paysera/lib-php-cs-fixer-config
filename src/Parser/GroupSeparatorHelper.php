@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser;
@@ -24,7 +25,7 @@ class GroupSeparatorHelper
      * @param string $separator
      * @return SeparatedItemList|null
      */
-    public function regroupListBySeparator(array $itemList, string $separator)
+    public function regroupListBySeparator(array $itemList, string $separator): ?SeparatedItemList
     {
         $list = new SeparatedItemList($separator);
 

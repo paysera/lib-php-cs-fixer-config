@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -15,38 +16,38 @@ use Paysera\PhpCsFixerConfig\SyntaxParser\Entity\FunctionStructure;
 use Paysera\PhpCsFixerConfig\SyntaxParser\ImportedClassesParser;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
 use RuntimeException;
 
 final class ComparingToBooleanFixer extends AbstractContextualTokenFixer
 {
-    /**
-     * @var array
-     */
-    const BOOL_CONSTANTS = [
+    public const BOOL_CONSTANTS = [
         'true',
         'false',
     ];
 
-    private $parser;
-    private $classStructureParser;
+    private Parser $parser;
+    private ClassStructureParser $classStructureParser;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->parser = new Parser(new GroupSeparatorHelper());
         $this->classStructureParser = new ClassStructureParser(
             new Parser(new GroupSeparatorHelper()),
-            new ImportedClassesParser()
+            new ImportedClassesParser(),
         );
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We do not use true/false keywords when checking variable which is already boolean.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -66,33 +67,31 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_comparing_to_boolean';
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run after `ComparisonOrderFixer`
         return -10;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_IS_IDENTICAL, T_IS_NOT_IDENTICAL]);
     }
@@ -102,10 +101,12 @@ PHP
         $functionStructures = $this->classStructureParser->parseFunctionStructures($token);
 
         foreach ($functionStructures as $function) {
-            $boolVariables = array_unique(array_merge(
-                $this->getBoolVariablesFromPhpDoc($function),
-                $this->getBoolVariablesFromArguments($function)
-            ));
+            $boolVariables = array_unique(
+                array_merge(
+                    $this->getBoolVariablesFromPhpDoc($function),
+                    $this->getBoolVariablesFromArguments($function),
+                ),
+            );
 
             $this->fixBooleanComparisons($function->getContentsItem(), $boolVariables);
         }
@@ -125,7 +126,7 @@ PHP
             $contentItems = iterator_to_array($complexItemList->getContentItems());
             if (count($contentItems) !== 2) {
                 throw new RuntimeException(
-                    sprintf('Expected 2 content items for comparison, got %s', count($contentItems))
+                    sprintf('Expected 2 content items for comparison, got %s', count($contentItems)),
                 );
             }
 

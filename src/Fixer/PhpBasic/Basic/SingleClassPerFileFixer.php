@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Basic;
@@ -6,20 +7,22 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Basic;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class SingleClassPerFileFixer extends AbstractFixer
 {
-    const CONVENTION = 'PhpBasic convention 1.3: Only one class/interface can be declared per file';
+    public const CONVENTION = 'PhpBasic convention 1.3: Only one class/interface can be declared per file';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'Checks if there is one class per file.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
     class ClassOne
     {
@@ -28,33 +31,31 @@ final class SingleClassPerFileFixer extends AbstractFixer
     {
     }
 
-PHP
+PHP,
                 ),
             ],
-            null,
-            null,
             null,
             'Paysera recommendation.'
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_basic_single_class_per_file';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound(Token::getClassyTokenKinds());
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $tokenCount = $tokens->count();
         $classCount = 0;

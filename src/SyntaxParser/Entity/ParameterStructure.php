@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\SyntaxParser\Entity;
@@ -7,118 +8,82 @@ use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 
 class ParameterStructure
 {
-    /**
-     * @var string|null
-     */
-    private $name;
+    private ?string $name;
 
-    /**
-     * @var string|null
-     */
-    private $typeHintContent;
+    private ?string $typeHintContent;
 
-    /**
-     * @var string|null
-     */
-    private $typeHintFullClass;
+    private ?string $typeHintFullClass;
 
-    /**
-     * @var ItemInterface|null
-     */
-    private $typeHintItem;
+    private ?ItemInterface $typeHintItem;
 
-    /**
-     * @var string|null
-     */
-    private $defaultValue;
+    private ?string $defaultValue;
 
-    /**
-     * @return string|null
-     */
-    public function getName()
+    public function __construct()
+    {
+        $this->name = null;
+        $this->typeHintContent = null;
+        $this->typeHintFullClass = null;
+        $this->typeHintItem = null;
+        $this->defaultValue = null;
+    }
+
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     * @return $this
-     */
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getDefaultValue()
+    public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
     }
 
-    /**
-     * @param string|null $defaultValue
-     * @return $this
-     */
-    public function setDefaultValue($defaultValue): self
+    public function setDefaultValue(?string $defaultValue): self
     {
         $this->defaultValue = $defaultValue;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getTypeHintContent()
+    public function getTypeHintContent(): ?string
     {
         return $this->typeHintContent;
     }
 
-    /**
-     * @param string|null $typeHintContent
-     * @return $this
-     */
-    public function setTypeHintContent($typeHintContent): self
+    public function setTypeHintContent(?string $typeHintContent): self
     {
         $this->typeHintContent = $typeHintContent;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getTypeHintFullClass()
+    public function getTypeHintFullClass(): ?string
     {
         return $this->typeHintFullClass;
     }
 
-    /**
-     * @param string|null $typeHintFullClass
-     * @return $this
-     */
-    public function setTypeHintFullClass($typeHintFullClass): self
+    public function setTypeHintFullClass(?string $typeHintFullClass): self
     {
         $this->typeHintFullClass = $typeHintFullClass;
+
         return $this;
     }
 
-    /**
-     * @return ItemInterface|null
-     */
-    public function getTypeHintItem()
+    public function getTypeHintItem(): ?ItemInterface
     {
         return $this->typeHintItem;
     }
 
-    /**
-     * @param ItemInterface|null $typeHintItem
-     * @return $this
-     */
-    public function setTypeHintItem($typeHintItem): self
+    public function setTypeHintItem(?ItemInterface $typeHintItem): self
     {
         $this->typeHintItem = $typeHintItem;
+
         return $this;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\SyntaxParser;
@@ -21,16 +22,13 @@ class ClassStructureParserTest extends TestCase
      * Tests only functionally with real code. Also does not assert anything about tokens themselves, just the
      * structure and the string contents
      *
-     * @param ClassStructure|null $expected
-     * @param string $input
-     *
      * @dataProvider provider
      */
-    public function testParseClassStructure($expected, string $input)
+    public function testParseClassStructure(?ClassStructure $expected, string $input)
     {
         $classStructureParser = new ClassStructureParser(
             new Parser(new GroupSeparatorHelper()),
-            new ImportedClassesParser()
+            new ImportedClassesParser(),
         );
         $contextualTokenBuilder = new ContextualTokenBuilder();
         $contextualToken = $contextualTokenBuilder->buildFromTokens(Tokens::fromCode($input));
@@ -44,13 +42,19 @@ class ClassStructureParserTest extends TestCase
             $method = $methods[$i];
             $this->assertSame($expectedMethod->getName(), $method->getName());
             $this->assertSame($expectedMethod->getKeywords(), $method->getKeywords());
-            $this->assertEquals($expectedMethod->getParameters(), array_map(function(ParameterStructure $parameter) {
-                return $parameter->setTypeHintItem(null);
-            }, $method->getParameters()));
+            $this->assertEquals(
+                $expectedMethod->getParameters(),
+                array_map(
+                    function (ParameterStructure $parameter) {
+                        return $parameter->setTypeHintItem(null);
+                    },
+                    array_filter($method->getParameters()),
+                ),
+            );
         }
     }
 
-    public function provider()
+    public function provider(): array
     {
         return [
             [

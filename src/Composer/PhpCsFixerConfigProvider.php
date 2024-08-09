@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Composer;
@@ -17,19 +18,16 @@ class PhpCsFixerConfigProvider
     {
         $fileSystem = new Filesystem();
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/.php_cs',
-            '.php_cs',
-            false
+            __DIR__ . '/../../defaults/php-cs-fixer.php',
+            'php-cs-fixer.php',
         );
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/.php_cs_risky',
-            '.php_cs_risky',
-            false
+            __DIR__ . '/../../defaults/php-cs-fixer-risky.php',
+            'php-cs-fixer-risky.php',
         );
         $fileSystem->copy(
-            __DIR__ . '/../../defaults/.php_cs_safe',
-            '.php_cs_safe',
-            false
+            __DIR__ . '/../../defaults/php-cs-fixer-safe.php',
+            'php-cs-fixer-safe.php',
         );
     }
 }

@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Parser;
 
+use Generator;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ComplexItemList;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ContextualToken;
 use Paysera\PhpCsFixerConfig\Parser\ContextualTokenBuilder;
@@ -34,7 +36,7 @@ class ParserTest extends TestCase
         $this->assertTokensEqual($expected, $result);
     }
 
-    public function provider()
+    public function provider(): Generator
     {
         yield 'Single item' => [
             (new ComplexItemList())
