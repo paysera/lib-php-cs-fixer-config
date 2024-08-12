@@ -81,7 +81,6 @@ PHP,
                     $tokens[$interfaceNameIndex]->getContent() . self::INTERFACE_NAME,
                 ],
             );
-//            $tokens[$interfaceNameIndex]->setContent($tokens[$interfaceNameIndex]->getContent() . self::INTERFACE_NAME);
         }
     }
 }

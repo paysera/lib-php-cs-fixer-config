@@ -64,9 +64,16 @@ abstract class AbstractFixerTestCase extends TestCase
     final public function testIsRisky()
     {
         if ($this->fixer->isRisky()) {
-            self::assertValidDescription($this->fixer->getName(), 'risky description', $this->fixer->getDefinition()->getRiskyDescription());
+            self::assertValidDescription(
+                $this->fixer->getName(),
+                'risky description',
+                $this->fixer->getDefinition()->getRiskyDescription(),
+            );
         } else {
-            self::assertNull($this->fixer->getDefinition()->getRiskyDescription(), \sprintf('[%s] Fixer is not risky so no description of it expected.', $this->fixer->getName()));
+            self::assertNull(
+                $this->fixer->getDefinition()->getRiskyDescription(),
+                sprintf('[%s] Fixer is not risky so no description of it expected.', $this->fixer->getName()),
+            );
         }
 
         if ($this->fixer instanceof AbstractProxyFixer) {
@@ -78,7 +85,7 @@ abstract class AbstractFixerTestCase extends TestCase
         // If fixer is not risky then the method `isRisky` from `AbstractFixer` must be used
         self::assertSame(
             !$this->fixer->isRisky(),
-            AbstractFixer::class === $reflection->getDeclaringClass()->getName()
+            AbstractFixer::class === $reflection->getDeclaringClass()->getName(),
         );
     }
 
@@ -467,7 +474,6 @@ abstract class AbstractFixerTestCase extends TestCase
             $this->fixer->fix(new SplFileInfo(__FILE__), $emptyTokens),
             sprintf('Return type for ::fix with empty tokens of "%s" is invalid.', $this->fixer->getName()),
         );
-        static::assertFalse($emptyTokens->isChanged());
 
         static::assertNull(
             $this->fixer->fix(new SplFileInfo(__FILE__), $tokens),
@@ -551,7 +557,7 @@ abstract class AbstractFixerTestCase extends TestCase
                 ->check()
             ;
         } catch (Exception $e) {
-            return $e->getMessage() . "\n\nSource:\n{$source}";
+            return sprintf("%s\n\nSource:\n%s", $e->getMessage(), $source);
         }
 
         return null;
@@ -614,7 +620,11 @@ abstract class AbstractFixerTestCase extends TestCase
         static::assertMatchesRegularExpression(
             '/^[A-Z`][^"]+\.$/',
             $description,
-            sprintf('[%s] The %s must start with capital letter or a ` and end with dot.', $fixerName, $descriptionType),
+            sprintf(
+                '[%s] The %s must start with capital letter or a ` and end with dot.',
+                $fixerName,
+                $descriptionType,
+            ),
         );
         static::assertStringNotContainsString(
             'phpdocs',

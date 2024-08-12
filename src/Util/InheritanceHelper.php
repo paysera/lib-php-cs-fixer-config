@@ -19,13 +19,15 @@ class InheritanceHelper
             return false;
         }
 
-        if ($reflection !== null) {
-            foreach ($reflection->getInterfaces() as $interface) {
-                $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-                foreach ($methods as $method) {
-                    if ($method->getName() === $methodName) {
-                        return true;
-                    }
+        if ($reflection === null) {
+            return false;
+        }
+
+        foreach ($reflection->getInterfaces() as $interface) {
+            $methods = $interface->getMethods(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+            foreach ($methods as $method) {
+                if ($method->getName() === $methodName) {
+                    return true;
                 }
             }
         }
@@ -41,14 +43,16 @@ class InheritanceHelper
             return false;
         }
 
-        if ($reflection !== null) {
-            while ($parent = $reflection->getParentClass()) {
-                $reflection = $parent;
-                $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-                foreach ($properties as $property) {
-                    if ($property->getName() === $propertyName) {
-                        return true;
-                    }
+        if ($reflection === null) {
+            return false;
+        }
+
+        while ($parent = $reflection->getParentClass()) {
+            $reflection = $parent;
+            $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+            foreach ($properties as $property) {
+                if ($property->getName() === $propertyName) {
+                    return true;
                 }
             }
         }

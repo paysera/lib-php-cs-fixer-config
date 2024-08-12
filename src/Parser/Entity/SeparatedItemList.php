@@ -47,18 +47,4 @@ class SeparatedItemList extends ComplexItemList implements ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_SEPARATOR_AFTER_CONTENTS);
     }
-
-    public function areSeparatorsSplitIntoSeveralLines(): bool
-    {
-        foreach ($this->typedItemList as $typedItem) {
-            if (
-                $typedItem->getType() === TypedItem::TYPE_SEPARATOR
-                && $typedItem->getItem()->isSplitIntoSeveralLines()
-            ) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

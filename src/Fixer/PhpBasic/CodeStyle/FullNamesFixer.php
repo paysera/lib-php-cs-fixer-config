@@ -120,7 +120,6 @@ PHP,
             ) {
                 $namespaceName = preg_replace('#_#', '', $namespaceName);
                 $tokens[$key] = new Token([$token->getId(), '$' . lcfirst($namespaceName)]);
-//                $token->setContent('$' . lcfirst($namespaceName));
             }
         }
     }
@@ -136,7 +135,6 @@ PHP,
             }
         }
         $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $replacement]);
-//        $tokens[$docBlockIndex]->setContent($replacement);
     }
 
     private function isVariableTruncated(string $variableContent, string $namespaceName): bool

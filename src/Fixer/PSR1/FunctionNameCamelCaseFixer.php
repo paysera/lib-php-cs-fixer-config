@@ -71,7 +71,6 @@ PHP,
         foreach ($tokens as $key => $token) {
             if (in_array($token->getContent(), $invalidFunctionNames, true)) {
                 $tokens[$key] = new Token([$token->getId(), $this->fixFunctionName($token->getContent())]);
-//                $token->setContent($this->fixFunctionName($token->getContent()));
             }
         }
     }

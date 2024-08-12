@@ -69,7 +69,6 @@ PHP,
 
             if (in_array($token->getContent(), $invalidConstantNames, true)) {
                 $tokens[$key] = new Token([$token->getId(), strtoupper($token->getContent())]);
-//                $token->setContent(strtoupper($token->getContent()));
             }
         }
     }

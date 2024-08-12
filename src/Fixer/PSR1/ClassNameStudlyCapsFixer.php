@@ -65,7 +65,6 @@ PHP,
 
             if (in_array($token->getContent(), $invalidClassNames, true)) {
                 $tokens[$key] = new Token([$token->getId(), $this->fixClassName($token->getContent())]);
-//                $token->setContent($this->fixClassName($token->getContent()));
             }
         }
     }
