@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -13,22 +14,21 @@ use SplFileInfo;
 
 final class VoidResultFixer extends AbstractFixer
 {
-    const CONVENTION = 'PhpBasic convention 3.17.5: We always return something or return nothing';
+    public const CONVENTION = 'PhpBasic convention 3.17.5: We always return something or return nothing';
 
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-          <<<TEXT
+            <<<'TEXT'
 We always return something or return nothing. If method does not return anything (“returns” void),
 we do not return null, false or any other value in that case.
 
 If method must return some value, we always specify what to return, even when returning null.
 
-TEXT
-            ,
+TEXT,
             [
                 new CodeSample(
-                  <<<'PHP'
+                    <<<'PHP'
 <?php
     class Sample
     {
@@ -41,37 +41,35 @@ TEXT
         }
     }
 
-PHP
+PHP,
                 ),
             ],
-          null,
-          null,
-          null,
-          'Paysera recommendation.'
+            null,
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_void_result';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_FUNCTION);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
             if (
                 $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
@@ -88,11 +86,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $curlyBraceStartIndex
-     */
-    private function validateReturnTypes(Tokens $tokens, $curlyBraceStartIndex)
+    private function validateReturnTypes(Tokens $tokens, int $curlyBraceStartIndex)
     {
         $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
 
@@ -130,22 +124,18 @@ PHP
             foreach (array_reverse($voidReturn) as $return) {
                 $this->insertComment(
                     $tokens,
-                    $return + 1
+                    $return + 1,
                 );
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     */
-    private function insertComment(Tokens $tokens, $insertIndex)
+    private function insertComment(Tokens $tokens, int $insertIndex)
     {
         $comment = '// TODO: ' . self::CONVENTION;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-              ++$insertIndex => [new Token([T_WHITESPACE, ' ']), new Token([T_COMMENT, $comment])],
+                ++$insertIndex => [new Token([T_WHITESPACE, ' ']), new Token([T_COMMENT, $comment])],
             ]);
         }
     }

@@ -1,37 +1,33 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PhpBasic\Feature;
 
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\TypeHintingArgumentsFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use PhpCsFixer\FixerFactory;
 use SplFileInfo;
 
 final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
-     * @param string $expected
-     * @param null|string $input
-     *
      * @dataProvider provideCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $this->doTest($expected, $input);
     }
 
     /**
-     * @param string $expected
-     * @param SplFileInfo $file
-     *
      * @dataProvider provideFileCases
      */
-    public function testFixFiles($expected, SplFileInfo $file)
+    public function testFixFiles(string $expected, SplFileInfo $file)
     {
         $this->doTest($expected, null, $file);
     }
 
-    public function provideCases()
+    public function provideCases(): array
     {
         return [
             [
@@ -247,7 +243,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
+    public function createFixerFactory(): FixerFactory
     {
         $fixerFactory = parent::createFixerFactory();
         $fixerFactory->registerCustomFixers([
@@ -256,7 +252,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
         return $fixerFactory;
     }
 
-    public function getFixerName()
+    public function getFixerName(): string
     {
         return 'Paysera/php_basic_feature_type_hinting_arguments';
     }

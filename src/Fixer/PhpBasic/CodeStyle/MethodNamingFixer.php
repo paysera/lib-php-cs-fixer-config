@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -6,6 +7,7 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
@@ -13,13 +15,14 @@ use SplFileInfo;
 
 final class MethodNamingFixer extends AbstractFixer
 {
-    const BOOL_FUNCTION_COMMENT = 'Question-type functions always return boolean (https://bit.ly/psg-methods)';
+    public const BOOL_FUNCTION_COMMENT = 'Question-type functions always return boolean (https://bit.ly/psg-methods)';
 
-    private $boolFunctionPrefixes;
+    private array $boolFunctionPrefixes;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->boolFunctionPrefixes = [
             'is',
             'are',
@@ -29,9 +32,10 @@ final class MethodNamingFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
-        return new FixerDefinition(<<<TEXT
+        return new FixerDefinition(
+            <<<TEXT
 We use verbs for methods that perform action and/or return something,
 questions only for methods which return boolean.
 
@@ -42,10 +46,10 @@ for other getters, set* for setters, add* for adders, remove* for removers.
 
 We always make correct English phrase from method names,
 this is more important that naming method to \'is\' + propertyName.
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -60,59 +64,60 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_method_naming';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
-            $visibilityTokenIndex = $tokens->getPrevNonWhitespace($functionTokenIndex);
-            if (
-                $token->isGivenKind(T_STRING)
-                && $tokens[$key + 1]->equals('(')
-                && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-                && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            ) {
-                $functionName = $tokens[$key]->getContent();
-                $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
-                $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+            $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
-                $returnType = null;
-                if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
-                    $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
-                    $returnType = $tokens[$typeIndex]->getContent();
-                    $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
+            if ($functionTokenIndex && $visibilityTokenIndex) {
+                if (
+                    $token->isGivenKind(T_STRING)
+                    && $tokens[$key + 1]->equals('(')
+                    && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
+                    && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+                ) {
+                    $functionName = $tokens[$key]->getContent();
+                    $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
+                    $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+
+                    $returnType = null;
+                    if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
+                        $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                        $returnType = $tokens[$typeIndex]->getContent();
+                        $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
+                    }
+
+                    if (!$tokens[$nextIndex]->equals('{')) {
+                        continue;
+                    }
+
+                    $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
                 }
-
-                if (!$tokens[$nextIndex]->equals('{')) {
-                    continue;
-                }
-
-                $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
             }
         }
     }
@@ -129,7 +134,7 @@ PHP
 
         $shouldReturnBool = preg_match(
             '#^(?:' . implode('|', $this->boolFunctionPrefixes) . ')[A-Z]#',
-            $functionName
+            $functionName,
         );
 
         if (!$shouldReturnBool) {
@@ -151,7 +156,7 @@ PHP
         }
     }
 
-    private function hasFunctionReturnClause(Tokens $tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
+    private function hasFunctionReturnClause(Tokens $tokens, int $curlyBraceStartIndex, int $curlyBraceEndIndex): bool
     {
         for ($i = $curlyBraceStartIndex; $i < $curlyBraceEndIndex; $i++) {
             if ($tokens[$i]->isGivenKind(T_RETURN)) {
@@ -166,10 +171,12 @@ PHP
     {
         $comment = '// TODO: ' . self::BOOL_FUNCTION_COMMENT;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, $comment]),
-            ]]);
+            $tokens->insertSlices([
+                ($insertIndex + 1) => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, $comment]),
+                ],
+            ]);
         }
     }
 }

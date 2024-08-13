@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\SyntaxParser\Entity;
@@ -8,39 +9,35 @@ class ImportedClasses
     /**
      * @var string|null
      */
-    private $currentNamespace;
+    private ?string $currentNamespace;
 
-    private $classMap;
-    private $lowercasedUsage;
+    private array $classMap;
+    private array $lowercasedUsage;
 
     public function __construct()
     {
         $this->classMap = [];
         $this->lowercasedUsage = [];
+        $this->currentNamespace = null;
     }
 
     public function registerImport(string $importedAs, string $className): self
     {
         $this->classMap[$importedAs] = ltrim($className, '\\');
         $this->lowercasedUsage[mb_strtolower($importedAs)] = $importedAs;
+
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getCurrentNamespace()
+    public function getCurrentNamespace(): ?string
     {
         return $this->currentNamespace;
     }
 
-    /**
-     * @param string|null $currentNamespace
-     * @return $this
-     */
-    public function setCurrentNamespace($currentNamespace): self
+    public function setCurrentNamespace(?string $currentNamespace): self
     {
         $this->currentNamespace = $currentNamespace;
+
         return $this;
     }
 
@@ -49,11 +46,7 @@ class ImportedClasses
         return isset($this->lowercasedUsage[mb_strtolower($importAs)]);
     }
 
-    /**
-     * @param string $importedAs
-     * @return string|null
-     */
-    public function getFullClassName(string $importedAs)
+    public function getFullClassName(string $importedAs): ?string
     {
         $normalizedImportedAs = $this->lowercasedUsage[mb_strtolower($importedAs)] ?? null;
         if ($normalizedImportedAs === null) {
@@ -63,13 +56,10 @@ class ImportedClasses
         return $this->classMap[$normalizedImportedAs];
     }
 
-    /**
-     * @param string $fullClassName
-     * @return string|null
-     */
-    public function getImportedAs(string $fullClassName)
+    public function getImportedAs(string $fullClassName): ?string
     {
         $key = array_search(ltrim($fullClassName, '\\'), $this->classMap, true);
+
         return $key === false ? null : $key;
     }
 }

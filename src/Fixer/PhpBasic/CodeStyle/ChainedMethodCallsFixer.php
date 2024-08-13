@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -7,19 +8,21 @@ use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ChainedMethodCallsFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'When making chain method calls, we put semicolon on it’s own separate line,
             chained method calls are indented and comes in it’s own line.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
     class Sample
     {
@@ -31,23 +34,23 @@ final class ChainedMethodCallsFixer extends AbstractFixer implements Whitespaces
         }
     }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_chained_method_calls';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_OBJECT_OPERATOR);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
             if (!$tokens[$key]->isGivenKind(T_OBJECT_OPERATOR)) {
@@ -58,7 +61,7 @@ PHP
             $indent = $this->checkForMethodSplits(
                 $tokens,
                 $key,
-                $semicolonIndex
+                $semicolonIndex,
             );
 
             if ($indent !== null) {
@@ -67,14 +70,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @param string $indent
-     * @return int
-     */
-    private function validateMethodSplits(Tokens $tokens, $startIndex, $endIndex, $indent)
+    private function validateMethodSplits(Tokens $tokens, int $startIndex, int $endIndex, string $indent): int
     {
         for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->equals('(')) {
@@ -90,22 +86,25 @@ PHP
         }
 
         if (!$tokens[$i - 1]->isWhitespace() && strpos($tokens[$i - 2]->getContent(), "\n") === false) {
-            $tokens->insertSlices([$i => [new Token([
-                T_WHITESPACE,
-                preg_replace('/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/', '', $indent, 1),
-            ])]]);
+            $tokens->insertSlices([
+                $i => [
+                    new Token([
+                        T_WHITESPACE,
+                        preg_replace(
+                            '/' . preg_quote($this->whitespacesConfig->getIndent(), '/') . '/',
+                            '',
+                            $indent,
+                            1,
+                        ),
+                    ]),
+                ],
+            ]);
         }
 
         return $i;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return string|null
-     */
-    private function checkForMethodSplits(Tokens $tokens, $startIndex, $endIndex)
+    private function checkForMethodSplits(Tokens $tokens, int $startIndex, int $endIndex): ?string
     {
         for ($i = $startIndex; $i < $endIndex; $i++) {
             if ($tokens[$i]->equals('(')) {
@@ -120,6 +119,7 @@ PHP
                 return $tokens[$i - 1]->getContent();
             }
         }
+
         return null;
     }
 }

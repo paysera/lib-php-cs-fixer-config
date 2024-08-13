@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -7,39 +8,42 @@ use Paysera\PhpCsFixerConfig\Util\Inflector;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class DirectoryAndNamespaceFixer extends AbstractFixer
 {
-    const DIRECTORY_INTERFACE = 'Interface';
-    const SINGULAR_CONVENTION = 'PhpBasic convention 2.7.1: We use singular for namespaces';
-    const INTERFACE_CONVENTION = 'PhpBasic convention 2.7.2: We do not make directories just for interfaces';
-    const ABSTRACTION_CONVENTION = 'PhpBasic convention 2.7.3: We use abstractions for namespaces';
+    public const DIRECTORY_INTERFACE = 'Interface';
+    public const SINGULAR_CONVENTION = 'PhpBasic convention 2.7.1: We use singular for namespaces';
+    public const INTERFACE_CONVENTION = 'PhpBasic convention 2.7.2: We do not make directories just for interfaces';
+    public const ABSTRACTION_CONVENTION = 'PhpBasic convention 2.7.3: We use abstractions for namespaces';
 
-    private $exclusions;
-    private $serviceNames;
-    private $inflector;
+    private array $exclusions;
+    private array $serviceNames;
+    private Inflector $inflector;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->exclusions = [
             'Tests',
             'Data',
             'Sonata',
             'XLS',
         ];
+
         $this->serviceNames = [
             'Manager',
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We use singular for namespaces: Service, Bundle, Entity, Controller etc.
 Exception: if English word does not have singular form.
 
@@ -48,10 +52,10 @@ We put them together with services by related functionality (no ServiceInterface
 
 We use abstractions for namespaces, not service names.
 For example, UserMerge or UserMerging, not UserMergeManager.
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 namespace Some\Invalid\Namespaces\Namings;
 
@@ -59,39 +63,37 @@ namespace Evp\Bundle\UserBundle\ServiceInterface\MergeProviderInterface;
 
 namespace Evp\Bundle\UserBundle\UserManager;
 
-PHP
+PHP,
                 ),
             ],
-            null,
-            null,
             null,
             'Paysera recommendation.'
         );
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run after `BlankLineAfterNamespaceFixer`
         return -25;
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_directory_and_namespace';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_NAMESPACE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_NAMESPACE)) {
@@ -100,11 +102,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $index
-     */
-    private function validateNamespace(Tokens $tokens, $index)
+    private function validateNamespace(Tokens $tokens, int $index)
     {
         $semicolonIndex = $tokens->getNextTokenOfKind($index, [';']);
 
@@ -135,21 +133,17 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $namespaceName
-     * @param string $convention
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $namespaceName, $convention)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $namespaceName, string $convention)
     {
         $comment = '// TODO: "' . $namespaceName . '" - ' . $convention;
         $commentIndex = $tokens->getNextNonWhitespace($insertIndex);
         if ($commentIndex === null || !$tokens[$commentIndex]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, $comment]),
-            ]]);
+            $tokens->insertSlices([
+                ($insertIndex + 1) => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, $comment]),
+                ],
+            ]);
         }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -6,23 +7,26 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class PropertyNamingFixer extends AbstractFixer
 {
-    const CONVENTION = 'PhpBasic convention 2.5.4: We do not use verbs or questions for property names';
+    public const CONVENTION = 'PhpBasic convention 2.5.4: We do not use verbs or questions for property names';
 
-    private $invalidPropertyVerbs;
-    private $invalidPropertyPrefixes;
-    private $invalidPropertySuffixes;
+    private array $invalidPropertyVerbs;
+    private array $invalidPropertyPrefixes;
+    private array $invalidPropertySuffixes;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->invalidPropertyVerbs = [
             'check',
+            'Check',
         ];
         $this->invalidPropertyPrefixes = [
             'is',
@@ -37,12 +41,13 @@ final class PropertyNamingFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'We use nouns or adjectives for property names, not verbs or questions.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -52,33 +57,31 @@ class Sample
     protected $check;
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_property_naming';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if ($tokens[$key]->isGivenKind(T_VARIABLE)) {
@@ -97,11 +100,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     */
-    private function validatePropertyName(Tokens $tokens, $key)
+    private function validatePropertyName(Tokens $tokens, int $key)
     {
         $propertyName = $tokens[$key]->getContent();
         $insertIndex = $tokens->getNextTokenOfKind($key, [';']);
@@ -114,19 +113,16 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $propertyName
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $propertyName)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $propertyName)
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . self::CONVENTION;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
-            $tokens->insertSlices([$insertIndex + 1 => [
-                new Token([T_WHITESPACE, ' ']),
-                new Token([T_COMMENT, $comment]),
-            ]]);
+            $tokens->insertSlices([
+                ($insertIndex + 1) => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_COMMENT, $comment]),
+                ],
+            ]);
         }
     }
 }

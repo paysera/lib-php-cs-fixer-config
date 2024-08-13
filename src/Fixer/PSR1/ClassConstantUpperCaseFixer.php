@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
@@ -6,17 +7,20 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
+use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ClassConstantUpperCaseFixer extends AbstractFixer
 {
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'Ensures that constant names are all uppercase with underscores.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php 
 class invalid_className 
 {
@@ -24,32 +28,30 @@ class invalid_className
     const classconstant = 2;
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/psr_1_class_constant_upper_case';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $invalidConstantNames = [];
         foreach ($tokens as $key => $token) {
@@ -66,22 +68,18 @@ PHP
             }
 
             if (in_array($token->getContent(), $invalidConstantNames, true)) {
-                $token->setContent(strtoupper($token->getContent()));
+                $tokens[$key] = new Token([$token->getId(), strtoupper($token->getContent())]);
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return null|string
-     */
-    private function getConstantName(Tokens $tokens, $key)
+    private function getConstantName(Tokens $tokens, int $key): ?string
     {
         $constantTokenKey = $tokens->getPrevNonWhitespace($key);
         if ($tokens[$constantTokenKey]->isGivenKind(T_CONST)) {
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 }

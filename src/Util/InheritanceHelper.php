@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Util;
@@ -10,16 +11,15 @@ use ReflectionProperty;
 
 class InheritanceHelper
 {
-    /**
-     * @param string $methodName
-     * @param Tokens $tokens
-     * @return bool
-     */
-    public function isMethodFromInterface($methodName, Tokens $tokens)
+    public function isMethodFromInterface(string $methodName, Tokens $tokens): bool
     {
         try {
             $reflection = $this->getReflection($tokens);
         } catch (ReflectionException $exception) {
+            return false;
+        }
+
+        if ($reflection === null) {
             return false;
         }
 
@@ -35,22 +35,19 @@ class InheritanceHelper
         return false;
     }
 
-    /**
-     * @param string $propertyName
-     * @param Tokens $tokens
-     * @return bool
-     */
-    public function isPropertyInherited($propertyName, Tokens $tokens)
+    public function isPropertyInherited(string $propertyName, Tokens $tokens): bool
     {
         try {
             $reflection = $this->getReflection($tokens);
         } catch (ReflectionException $exception) {
             return false;
         }
-        $parents = [];
+
+        if ($reflection === null) {
+            return false;
+        }
 
         while ($parent = $reflection->getParentClass()) {
-            $parents[] = $parent->getName();
             $reflection = $parent;
             $properties = $parent->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
             foreach ($properties as $property) {
@@ -63,7 +60,12 @@ class InheritanceHelper
         return false;
     }
 
-    private function getReflection(Tokens $tokens)
+    /**
+     * @param Tokens $tokens
+     * @return ReflectionClass|null
+     * @throws ReflectionException
+     */
+    private function getReflection(Tokens $tokens): ?ReflectionClass
     {
         $fqcn = null;
 
@@ -85,7 +87,7 @@ class InheritanceHelper
         }
 
         if ($fqcn === null) {
-            return false;
+            return null;
         }
 
         return new ReflectionClass($fqcn);

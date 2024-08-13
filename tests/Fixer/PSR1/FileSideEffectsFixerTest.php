@@ -1,25 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Tests\Fixer\PSR1;
 
 use Paysera\PhpCsFixerConfig\Fixer\PSR1\FileSideEffectsFixer;
 use Paysera\PhpCsFixerConfig\Tests\AbstractPayseraFixerTestCase;
+use PhpCsFixer\FixerFactory;
 
 final class FileSideEffectsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
-     * @param string $expected
-     * @param null|string $input
-     *
      * @dataProvider provideFixCases
      */
-    public function testFix($expected, $input = null)
+    public function testFix(string $expected, string $input = null)
     {
         $this->doTest($expected, $input);
     }
 
-    public function provideFixCases()
+    public function provideFixCases(): array
     {
         return [
             [
@@ -90,7 +89,7 @@ final class FileSideEffectsFixerTest extends AbstractPayseraFixerTestCase
         ];
     }
 
-    public function createFixerFactory()
+    public function createFixerFactory(): FixerFactory
     {
         $fixerFactory = parent::createFixerFactory();
         $fixerFactory->registerCustomFixers([
@@ -99,7 +98,7 @@ final class FileSideEffectsFixerTest extends AbstractPayseraFixerTestCase
         return $fixerFactory;
     }
 
-    public function getFixerName()
+    public function getFixerName(): string
     {
         return 'Paysera/psr_1_file_side_effects';
     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Basic;
@@ -6,21 +7,23 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Basic;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class GlobalsFixer extends AbstractFixer
 {
-    const GLOBALS_VARIABLE = '$GLOBALS';
-    const CONVENTION = 'PhpBasic convention 1.2: We do not use global variables, constants and functions.';
+    public const GLOBALS_VARIABLE = '$GLOBALS';
+    public const CONVENTION = 'PhpBasic convention 1.2: We do not use global variables, constants and functions.';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'Checks for global variables, constants and functions.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
     function globalFunction(){
         return 0;
@@ -42,39 +45,37 @@ final class GlobalsFixer extends AbstractFixer
         }
     }
 
-PHP
+PHP,
                 ),
             ],
-            null,
-            null,
             null,
             'Paysera recommendation.'
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_basic_globals';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Must run after SingleClassPerFileFixer
         return -1;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound(Token::getClassyTokenKinds());
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
             if (
@@ -103,30 +104,21 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $endIndex
-     * @return bool
-     */
-    private function isGlobalFound(Tokens $tokens, $endIndex)
+    private function isGlobalFound(Tokens $tokens, $endIndex): bool
     {
         for ($i = 0; $i < $endIndex; $i++) {
             if ($tokens[$i]->isGivenKind(Token::getClassyTokenKinds())) {
                 return true;
             }
         }
+
         return false;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param int $tokenIndex
-     */
     private function addGlobalUsageWarning(Tokens $tokens, $key, $tokenIndex)
     {
         $tokens->insertSlices([
-            $tokenIndex + 1 => [
+            ($tokenIndex + 1) => [
                 new Token([T_WHITESPACE, ' ']),
                 new Token([
                     T_COMMENT,

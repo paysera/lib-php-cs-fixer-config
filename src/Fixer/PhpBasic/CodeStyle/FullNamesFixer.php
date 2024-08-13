@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
@@ -6,21 +7,21 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
+use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class FullNamesFixer extends AbstractFixer
 {
-    const MINIMUM_NAMESPACE_CHARACTER_LENGTH = 4;
+    public const MINIMUM_NAMESPACE_CHARACTER_LENGTH = 4;
 
-    /**
-     * @var array
-     */
-    private $scalarTypes;
+    private array $scalarTypes;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->scalarTypes = [
             'array',
             'string',
@@ -31,16 +32,16 @@ final class FullNamesFixer extends AbstractFixer
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
 We use full names, not abbreviations: $entityManager instead of $em, $exception instead of $e.
 Risky for possible local variable duplicate renaming.
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -50,32 +51,30 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_code_style_full_names';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_VARIABLE);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $invalidVariableNames = [];
         // First cycle for collecting Invalid Variable Names
@@ -120,17 +119,12 @@ PHP
                 && !$tokens[$previousTokenIndex]->equals([T_OBJECT_OPERATOR])
             ) {
                 $namespaceName = preg_replace('#_#', '', $namespaceName);
-                $token->setContent('$' . lcfirst($namespaceName));
+                $tokens[$key] = new Token([$token->getId(), '$' . lcfirst($namespaceName)]);
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $docBlockIndex
-     * @param array $invalidVariableNames
-     */
-    private function fixDocBlockVariableNames(Tokens $tokens, $docBlockIndex, $invalidVariableNames)
+    private function fixDocBlockVariableNames(Tokens $tokens, int $docBlockIndex, array $invalidVariableNames)
     {
         $docBlockContent = $tokens[$docBlockIndex]->getContent();
         $replacement = $docBlockContent;
@@ -140,15 +134,10 @@ PHP
                 $replacement = preg_replace($pattern, $key . ' $' . lcfirst($key), $replacement);
             }
         }
-        $tokens[$docBlockIndex]->setContent($replacement);
+        $tokens[$docBlockIndex] = new Token([$tokens[$docBlockIndex]->getId(), $replacement]);
     }
 
-    /**
-     * @param string $variableContent
-     * @param string $namespaceName
-     * @return bool
-     */
-    private function isVariableTruncated($variableContent, $namespaceName)
+    private function isVariableTruncated(string $variableContent, string $namespaceName): bool
     {
         preg_match_all('/[A-Z]/', $namespaceName, $matches);
         if (isset($matches[0])) {
@@ -159,15 +148,11 @@ PHP
                 return true;
             }
         }
+
         return false;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return null|string
-     */
-    private function getNamespaceName(Tokens $tokens, $key)
+    private function getNamespaceName(Tokens $tokens, int $key): ?string
     {
         $namespaceIndex = $tokens->getPrevMeaningfulToken($key);
         $nextTokenIndex = $tokens->getNextMeaningfulToken($key);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,15 +7,16 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class CheckingExplicitlyFixer extends AbstractFixer
 {
-    const STRLEN = 'strlen';
+    public const STRLEN = 'strlen';
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             <<<'TEXT'
@@ -29,10 +31,10 @@ has nothing to do with what we are trying to check here, even if it gives us nee
 For example, we use count($array) > 0 to check if array is not empty and not !empty($array),
 as we do not want to check whether $array is 0, false, \'\' or even not defined at all
 (in which case IDE would possibly hide some warnings that could help noticing possible bugs).
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -46,32 +48,30 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_checking_explicitly';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    public function applyFix(SplFileInfo $file, Tokens $tokens)
+    public function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             if ($token->isGivenKind(T_STRING) && $token->getContent() === self::STRLEN) {
@@ -102,8 +102,8 @@ PHP
             return;
         }
 
-        $tokens->overrideAt($zeroIndex, new Token([T_CONSTANT_ENCAPSED_STRING, "''"]));
-        $tokens->overrideAt($greaterIndex, new Token([T_IS_NOT_IDENTICAL, '!==']));
+        $tokens[$zeroIndex] = new Token([T_CONSTANT_ENCAPSED_STRING, "''"]);
+        $tokens[$greaterIndex] = new Token([T_IS_NOT_IDENTICAL, '!==']);
         $tokens->clearRange($key, $key);
     }
 
@@ -118,7 +118,7 @@ PHP
         }
     }
 
-    private function tryFixNotEmptyToCount(Tokens $tokens, $key)
+    private function tryFixNotEmptyToCount(Tokens $tokens, $key): bool
     {
         $notOperatorIndex = $tokens->getPrevMeaningfulToken($key);
         $negation = false;
@@ -140,15 +140,17 @@ PHP
         } else {
             $tokens->insertSlices([++$parenthesesEndIndex => [new Token([T_IS_IDENTICAL, '==='])]]);
         }
-        $tokens->insertSlices([++$parenthesesEndIndex => [
-            new Token([T_WHITESPACE, ' ']),
-            new Token([T_LNUMBER, '0']),
-        ]]);
+        $tokens->insertSlices([
+            ++$parenthesesEndIndex => [
+                new Token([T_WHITESPACE, ' ']),
+                new Token([T_LNUMBER, '0']),
+            ],
+        ]);
 
         return true;
     }
 
-    private function tryFixEmptyToIsset(Tokens $tokens, $key)
+    private function tryFixEmptyToIsset(Tokens $tokens, $key): bool
     {
         $emptyBraceStart = $tokens->getNextMeaningfulToken($key);
         $emptyBraceEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $emptyBraceStart);
@@ -177,6 +179,7 @@ PHP
             } else {
                 $tokens->insertSlices([$notOperatorIndex + 1 => [new Token('!')]]);
             }
+
             return true;
         }
 

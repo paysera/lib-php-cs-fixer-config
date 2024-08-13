@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser;
@@ -12,7 +13,7 @@ use RuntimeException;
 
 class Parser
 {
-    private $groupSeparatorHelper;
+    private GroupSeparatorHelper $groupSeparatorHelper;
 
     public function __construct(GroupSeparatorHelper $groupSeparatorHelper)
     {
@@ -57,12 +58,14 @@ class Parser
      *
      * @param ItemInterface $prefixItem
      * @param string $endTokenValue
-     * @param string|null $abortOnToken if this token found before end token, abort item grouping
+     * @param null|string $abortOnToken
      * @return ItemInterface|null
-     * @throws RuntimeException
      */
-    private function groupItems(ItemInterface $prefixItem, string $endTokenValue, $abortOnToken = null)
-    {
+    private function groupItems(
+        ItemInterface $prefixItem,
+        string $endTokenValue,
+        string $abortOnToken = null
+    ): ?ItemInterface {
         $contents = [];
 
         $token = $prefixItem->lastToken()->nextToken();
@@ -72,6 +75,7 @@ class Parser
                 if (count($contents) > 0) {
                     return $this->buildConstructItem($prefixItem, $contents, $token);
                 }
+
                 return new SimpleItemList([$prefixItem, $token]);
             } elseif ($abortOnToken !== null && $token->getContent() === $abortOnToken) {
                 return null;
@@ -86,16 +90,12 @@ class Parser
                 }
             } elseif ($token->getContent() === '(') {
                 $item = $this->groupItems($token, ')');
-
             } elseif ($token->getContent() === '[') {
                 $item = $this->groupItems($token, ']');
-
             } elseif ($token->getContent() === '{') {
                 $item = $this->groupItems($token, '}');
-
             } elseif ($token->isGivenKind(T_RETURN) && $endTokenValue !== ';') {
                 $item = $this->groupItems($token, ';');
-
             } elseif ($token->getContent() === '=' && $endTokenValue !== ';') {
                 $item = $this->groupItems($token, ';', ')');
             }
@@ -108,14 +108,16 @@ class Parser
             }
 
             $token = $token->nextToken();
-
         } while ($token !== null);
 
         throw new RuntimeException(sprintf('Cannot find end token "%s"', $endTokenValue));
     }
 
-    private function buildConstructItem(ItemInterface $prefixItem, array $contents, ItemInterface $postfixItem)
-    {
+    private function buildConstructItem(
+        ItemInterface $prefixItem,
+        array $contents,
+        ItemInterface $postfixItem
+    ): ComplexItemList {
         $contentList = new SimpleItemList($contents);
         $contentList->setReplaceCallback(function () {
             // we need replacing for internal calls, here we'll just get replaced item returned from method call
@@ -132,7 +134,7 @@ class Parser
     }
 
     /**
-     * Regoups internal content items into logical groups by operators and separators depending on precedence order
+     * Regroups internal content items into logical groups by operators and separators depending on precedence order
      *
      * @param SimpleItemList $itemList
      * @param bool $wrapIntoComplex
@@ -142,7 +144,7 @@ class Parser
     {
         $separators = explode(
             ' ',
-            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ?? ? : || && | ^ & == != === !== <> <=> < <= > >= << >> + - . * / % instanceof ** ->'
+            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ?? ? : || && | ^ & == != === !== <> <=> < <= > >= << >> + - . * / % instanceof ** ->',
         );
         foreach ($separators as $separator) {
             $replacedItem = $this->groupSeparatorHelper->regroupListBySeparator($itemList->getItemList(), $separator);
@@ -161,6 +163,7 @@ class Parser
             }
 
             $itemList->replaceWith($replacedItem);
+
             return $replacedItem;
         }
 
@@ -194,6 +197,7 @@ class Parser
         $postfixItem = new EmptyToken();
         $item->lastToken()->insertAfter($postfixItem);
         $wrappedItem->addPostfixItem($postfixItem);
+
         return $wrappedItem;
     }
 
@@ -234,6 +238,7 @@ class Parser
         if ($postfixWhitespace !== null) {
             $regroupedItem->addPostfixWhitespaceItem($postfixWhitespace);
         }
+
         return $regroupedItem;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
@@ -6,49 +7,50 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PSR1;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
+use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class FunctionNameCamelCaseFixer extends AbstractFixer
 {
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'Ensures function names are defined using camel case.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php 
 class Sample 
 {
     private function invalid_function_name(){}
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/psr_1_function_name_camel_case';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         return true;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isTokenKindFound(T_STRING);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $invalidFunctionNames = [];
         foreach ($tokens as $key => $token) {
@@ -66,32 +68,24 @@ PHP
         }
 
         // Second foreach loop to check if there are functions used before their declaration
-        foreach ($tokens as $token) {
+        foreach ($tokens as $key => $token) {
             if (in_array($token->getContent(), $invalidFunctionNames, true)) {
-                $token->setContent($this->fixFunctionName($token->getContent()));
+                $tokens[$key] = new Token([$token->getId(), $this->fixFunctionName($token->getContent())]);
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @return null|string
-     */
-    private function getFunctionName(Tokens $tokens, $key)
+    private function getFunctionName(Tokens $tokens, int $key): ?string
     {
         $constantTokenKey = $tokens->getPrevNonWhitespace($key);
         if ($tokens[$constantTokenKey]->isGivenKind([T_FUNCTION])) {
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 
-    /**
-     * @param string $functionName
-     * @return string
-     */
-    private function fixFunctionName($functionName)
+    private function fixFunctionName(string $functionName): string
     {
         $string = $functionName;
         $string = preg_replace('/[^a-z0-9]+/i', ' ', $string);
@@ -99,14 +93,11 @@ PHP
 
         $string = ucwords($string);
         $string = strtr($string, [' ' => '']);
+
         return lcfirst($string);
     }
 
-    /**
-     * @param string $string
-     * @return bool
-     */
-    private function isFunctionNameValid($string)
+    private function isFunctionNameValid(string $string): bool
     {
         return
             preg_match('#^__[^_]#', $string) !== 0

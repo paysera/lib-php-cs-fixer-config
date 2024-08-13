@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
@@ -6,35 +7,35 @@ namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use SplFileInfo;
 
 final class ConditionResultsFixer extends AbstractFixer
 {
-    const TRUE = 'true';
-    const FALSE = 'false';
+    public const TRUE = 'true';
+    public const FALSE = 'false';
 
-    /**
-     * @var array
-     */
-    private $strictValues;
+    private array $strictValues;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->strictValues = [
             'true',
             'false',
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
             'If condition result is boolean, we do not use condition at all.',
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -50,23 +51,23 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
-            ]
+            ],
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_condition_results';
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_IF, T_RETURN, T_VARIABLE]);
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
             // Validate long if statement
@@ -87,12 +88,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param bool $assignCondition
-     */
-    private function validateShortIfStatement(Tokens $tokens, $key, $assignCondition)
+    private function validateShortIfStatement(Tokens $tokens, int $key, bool $assignCondition)
     {
         if (!$tokens[$key + 1]->isWhitespace()) {
             return;
@@ -131,7 +127,7 @@ PHP
                         $ifStatementConditionTokens,
                         $tokens[$firstBoolIndex]->getContent(),
                         $semicolonIndex,
-                        $assignCondition
+                        $assignCondition,
                     );
                 }
             }
@@ -139,12 +135,7 @@ PHP
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param bool $assignCondition
-     */
-    private function validateLongIfStatement(Tokens $tokens, $key, $assignCondition)
+    private function validateLongIfStatement(Tokens $tokens, int $key, bool $assignCondition)
     {
         $parenthesesStartIndex = $tokens->getNextMeaningfulToken($key);
         if (!$tokens[$parenthesesStartIndex]->equals('(')) {
@@ -153,7 +144,7 @@ PHP
 
         $parenthesesEndIndex = $tokens->findBlockEnd(
             Tokens::BLOCK_TYPE_PARENTHESIS_BRACE,
-            $parenthesesStartIndex
+            $parenthesesStartIndex,
         );
 
         $curlyBraceStartIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
@@ -186,7 +177,7 @@ PHP
                 $ifStatementConditionTokens,
                 $firstReturnStatement['BoolCondition'],
                 $secondReturnStatement['SemicolonIndex'],
-                $assignCondition
+                $assignCondition,
             );
         } elseif ($tokens[$elseIndex]->isGivenKind(T_ELSE)) {
             $elseCurlyBraceStartIndex = $tokens->getNextMeaningfulToken($elseIndex);
@@ -211,26 +202,26 @@ PHP
                 $ifStatementConditionTokens,
                 $firstReturnStatement['BoolCondition'],
                 $elseCurlyBraceEndIndex,
-                $assignCondition
+                $assignCondition,
             );
         }
     }
 
     /**
+     * @param Token[] $ifStatementConditionTokens
      * @param Tokens $tokens
      * @param int $key
-     * @param Token[] $ifStatementConditionTokens
      * @param string $returnCondition
      * @param int $endIndex
      * @param bool $assignCondition
      */
     private function fixIfStatement(
         Tokens $tokens,
-        $key,
-        $ifStatementConditionTokens,
-        $returnCondition,
-        $endIndex,
-        $assignCondition
+        int $key,
+        array $ifStatementConditionTokens,
+        string $returnCondition,
+        int $endIndex,
+        bool $assignCondition
     ) {
         $insertionIndex = $endIndex;
 
@@ -245,12 +236,14 @@ PHP
             $tokens->insertSlices([++$insertionIndex => [new Token([T_WHITESPACE, ' '])]]);
             $overrideIndex = $insertionIndex;
         } else {
-            $tokens->insertSlices([$insertionIndex + 1 => [
-                new Token('!'),
-                new Token('('),
-                new Token([T_WHITESPACE, ' ']),
-                new Token(')'),
-            ]]);
+            $tokens->insertSlices([
+                ($insertionIndex + 1) => [
+                    new Token('!'),
+                    new Token('('),
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token(')'),
+                ],
+            ]);
             $overrideIndex = $insertionIndex + 3;
             $insertionIndex += 4;
         }
@@ -259,18 +252,13 @@ PHP
         $tokens->overrideRange(
             $overrideIndex,
             $overrideIndex,
-            $ifStatementConditionTokens
+            $ifStatementConditionTokens,
         );
 
         $tokens->clearRange($key, $endIndex);
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @return array
-     */
-    private function checkReturnBoolCondition(Tokens $tokens, $startIndex)
+    private function checkReturnBoolCondition(Tokens $tokens, int $startIndex): ?array
     {
         $returnIndex = $tokens->getNextMeaningfulToken($startIndex);
         if (!$tokens[$returnIndex]->isGivenKind(T_RETURN)) {
@@ -289,10 +277,11 @@ PHP
 
         $returnStatement['BoolCondition'] = $tokens[$boolIndex]->getContent();
         $returnStatement['SemicolonIndex'] = $semicolonIndex;
+
         return $returnStatement;
     }
 
-    private function isStrictValue(Token $token)
+    private function isStrictValue(Token $token): bool
     {
         return in_array($token->getContent(), $this->strictValues, true);
     }

@@ -1,14 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature;
 
 use PhpCsFixer\AbstractFixer;
+use PhpCsFixer\Fixer\ConfigurableFixerTrait;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
-use PhpCsFixer\FixerConfiguration\FixerConfigurationResolverRootless;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
+use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 use ReflectionClass;
@@ -17,29 +20,30 @@ use Exception;
 
 final class VisibilityPropertiesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
-    const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
-    const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
-    const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
-    const VISIBILITY_CONVENTION = 'PhpBasic convention 3.14: We must define as properties';
-    const THIS = '$this';
+    use ConfigurableFixerTrait {
+        configure as public configureConfigurableFixerTrait;
+    }
+    public const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
+    public const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
+    public const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
+    public const VISIBILITY_CONVENTION = 'PhpBasic convention 3.14: We must define as properties';
+    public const THIS = '$this';
 
-    /**
-     * @var array
-     */
-    private $excludedParents;
+    private array $excludedParents;
 
     public function __construct()
     {
         parent::__construct();
+
         $this->excludedParents = [
             'Constraint',
         ];
     }
 
-    public function getDefinition()
+    public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<TEXT
+            <<<'TEXT'
 We don’t use public and dynamic properties. All used properties must be defined.
 
 We prefer private over protected as it constraints the scope - it’s easier to refactor,
@@ -47,10 +51,10 @@ find usages, plan possible changes in code. Also IDE can warn about unused metho
 
 We use protected when we intend some property or method to be overwritten if necessary.
 
-TEXT
-            ,
+TEXT,
             [
-                new CodeSample(<<<'PHP'
+                new CodeSample(
+                    <<<'PHP'
 <?php
 class Sample
 {
@@ -79,41 +83,39 @@ class Sample
     }
 }
 
-PHP
+PHP,
                 ),
             ],
             null,
-            null,
-            null,
-            'Paysera recommendation.'
+            'Paysera recommendation.',
         );
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'Paysera/php_basic_feature_visibility_properties';
     }
 
-    public function isRisky()
+    public function isRisky(): bool
     {
         // Paysera Recommendation
         return true;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         // Should run before `OrderedClassElementsFixer` and after `NamespacesAndUseStatementsFixer`
         return 60;
     }
 
-    public function isCandidate(Tokens $tokens)
+    public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_PUBLIC, T_PRIVATE, T_PROTECTED, T_VARIABLE, T_STRING]);
     }
 
-    public function configure(array $configuration = null)
+    public function configure(array $configuration = null): void
     {
-        parent::configure($configuration);
+        $this->configureConfigurableFixerTrait($configuration);
 
         if ($this->configuration['excluded_parents'] === true) {
             return;
@@ -123,22 +125,21 @@ PHP
         }
     }
 
-    protected function createConfigurationDefinition()
+    protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
-        $options = new FixerOptionBuilder(
-            'excluded_parents',
-            'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties'
-        );
-
-        $options = $options
-            ->setAllowedTypes(['array', 'bool'])
-            ->getOption()
+        return
+            new FixerConfigurationResolver([
+            (new FixerOptionBuilder(
+                'excluded_parents',
+                'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
+            ))
+                ->setAllowedTypes(['array', 'bool'])
+                ->getOption(),
+            ])
         ;
-
-        return new FixerConfigurationResolverRootless('excluded_parents', [$options], $this->getName());
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens)
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $propertyExclusion = false;
         $propertyVariables = [];
@@ -170,7 +171,7 @@ PHP
                         && in_array(
                             $tokens[$classNameToken]->getContent(),
                             $this->excludedParents,
-                            true
+                            true,
                         )
                         && $tokens[$classNameToken + 1]->isWhitespace()
                     ) {
@@ -196,7 +197,7 @@ PHP
                         $tokens,
                         $tokens->getNextTokenOfKind($key, [';']),
                         $tokens[$key]->getContent(),
-                        self::DYNAMIC_PROPERTIES_CONVENTION
+                        self::DYNAMIC_PROPERTIES_CONVENTION,
                     );
                 }
             }
@@ -215,25 +216,18 @@ PHP
                     $key,
                     $propertyVariables,
                     $token->getContent(),
-                    $classNamespace
+                    $classNamespace,
                 );
             }
         }
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param array $propertyVariables
-     * @param string $propertyName
-     * @param string $classNamespace
-     */
     private function validateNotDefinedProperties(
         Tokens $tokens,
-        $key,
-        $propertyVariables,
-        $propertyName,
-        $classNamespace
+        int $key,
+        array $propertyVariables,
+        string $propertyName,
+        string $classNamespace
     ) {
         $variable = '$' . $propertyName;
         if (
@@ -244,12 +238,7 @@ PHP
         }
     }
 
-    /**
-     * @param string $variableName
-     * @param string $classNamespace
-     * @return bool
-     */
-    private function isPropertyInAnotherClass($variableName, $classNamespace)
+    private function isPropertyInAnotherClass(string $variableName, ?string $classNamespace): bool
     {
         if (isset($classNamespace)) {
             try {
@@ -267,13 +256,7 @@ PHP
         return false;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param bool $propertyExclusion
-     * @return string|null
-     */
-    private function getPropertyVariable(Tokens $tokens, $key, $propertyExclusion)
+    private function getPropertyVariable(Tokens $tokens, int $key, bool $propertyExclusion): ?string
     {
         $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
         $previousPreviousTokenIndex = $tokens->getPrevMeaningfulToken($previousTokenIndex);
@@ -303,33 +286,24 @@ PHP
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PROTECTED_PROPERTIES_CONVENTION);
             }
+
             return $tokens[$key]->getContent();
         }
+
         return null;
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $key
-     * @param string $convention
-     */
-    private function insertVariablePropertyWarning(Tokens $tokens, $key, $convention)
+    private function insertVariablePropertyWarning(Tokens $tokens, int $key, string $convention)
     {
         $this->insertComment(
             $tokens,
             $tokens->getNextTokenOfKind($key, [';']),
             $tokens[$key]->getContent(),
-            $convention
+            $convention,
         );
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int $insertIndex
-     * @param string $propertyName
-     * @param string $convention
-     */
-    private function insertComment(Tokens $tokens, $insertIndex, $propertyName, $convention)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $propertyName, string $convention)
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . $convention;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {

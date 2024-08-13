@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
@@ -7,11 +8,12 @@ use Generator;
 
 class SeparatedItemList extends ComplexItemList implements ItemInterface
 {
-    private $separator;
+    private string $separator;
 
     public function __construct(string $separator)
     {
         parent::__construct();
+
         $this->separator = $separator;
     }
 
@@ -23,9 +25,9 @@ class SeparatedItemList extends ComplexItemList implements ItemInterface
     /**
      * @param array|ItemInterface[] $items
      * @param string $type
-     * @return $this
+     * @return SeparatedItemList
      */
-    public function addSeparatorGroup(array $items, string $type = TypedItem::TYPE_SEPARATOR)
+    public function addSeparatorGroup(array $items, string $type = TypedItem::TYPE_SEPARATOR): self
     {
         $groupedItem = count($items) === 1 ? $items[0] : new SimpleItemList($items);
         $this->addItemAtEnd($groupedItem, $type);
@@ -41,25 +43,8 @@ class SeparatedItemList extends ComplexItemList implements ItemInterface
         return $this->getItemsOfType(TypedItem::TYPE_SEPARATOR);
     }
 
-    /**
-     * @return ItemInterface|null
-     */
-    public function getSeparatorAfterContents()
+    public function getSeparatorAfterContents(): ?ItemInterface
     {
         return $this->getFirstItemOfType(TypedItem::TYPE_SEPARATOR_AFTER_CONTENTS);
-    }
-
-    public function areSeparatorsSplitIntoSeveralLines()
-    {
-        foreach ($this->typedItemList as $typedItem) {
-            if (
-                $typedItem->getType() === TypedItem::TYPE_SEPARATOR
-                && $typedItem->getItem()->isSplitIntoSeveralLines()
-            ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

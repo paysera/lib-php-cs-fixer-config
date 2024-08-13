@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Paysera\PhpCsFixerConfig\Parser\Entity;
@@ -7,7 +8,7 @@ use RuntimeException;
 
 class SimpleItemList implements ItemInterface
 {
-    private $itemList;
+    private array $itemList;
 
     /**
      * @var callable
@@ -35,7 +36,7 @@ class SimpleItemList implements ItemInterface
     /**
      * @return array|ItemInterface[]
      */
-    public function getItemList()
+    public function getItemList(): array
     {
         return $this->itemList;
     }
@@ -79,7 +80,7 @@ class SimpleItemList implements ItemInterface
         );
     }
 
-    public function getContent()
+    public function getContent(): string
     {
         return array_reduce($this->itemList, function ($result, ItemInterface $item) {
             return $result . $item->getContent();
