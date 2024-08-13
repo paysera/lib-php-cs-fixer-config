@@ -11,6 +11,26 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.0.0
+
+### Changed
+
+- friendsofphp/php-cs-fixer major update (3.60.0)
+- download-phar.sh now downloading v3.60.0/php-cs-fixer.phar
+- configuration files renamed from .php_cs, .php_cs_risky, .php_cs_safe to php-cs-fixer.php, php-cs-fixer-risky.php, php-cs-fixer-safe.php
+- Token::setContent() was deprecated in the library. Call of this function was replaced on `new Token()`
+- Php-cs-fixers names were changed
+- All Paysera fixers were refactored due the changes and deprecations in php-cs-fixer library
+- All Paysera tests were refactored due the changes and deprecations in php-cs-fixer library
+- Code style fixes
+
+### TODO
+- More refactoring needed
+- Remove usage of internal classes of php-cs-fixer
+- Refactor parsers
+- Fix code styles
+
+
 ## 2.5.2
 ### Added
 
