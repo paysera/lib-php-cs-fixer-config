@@ -12,25 +12,25 @@ use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 use Paysera\PhpCsFixerConfig\Parser\Parser;
 use Paysera\PhpCsFixerConfig\Parser\Entity\SeparatedItemList;
-use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
+use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 
-final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
+final class SplittingInSeveralLinesFixer implements WhitespacesAwareFixerInterface
 {
     private Parser $parser;
     private ContextualTokenBuilder $contextualTokenBuilder;
+    private WhitespacesFixerConfig $whitespacesConfig;
 
     public function __construct()
     {
-        parent::__construct();
-
         $this->parser = new Parser(new GroupSeparatorHelper());
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
+        $this->whitespacesConfig = new WhitespacesFixerConfig('    ', "\n");
     }
 
     public function getDefinition(): FixerDefinitionInterface
@@ -95,7 +95,22 @@ PHP,
         return true;
     }
 
-    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
+    public function isRisky(): bool
+    {
+        return false;
+    }
+
+    public function supports(SplFileInfo $file): bool
+    {
+        return true;
+    }
+
+    public function setWhitespacesConfig(WhitespacesFixerConfig $config): void
+    {
+        $this->whitespacesConfig = $config;
+    }
+
+    public function fix(SplFileInfo $file, Tokens $tokens): void
     {
         $startEndTokens = [
             '=' => ';',
@@ -110,10 +125,12 @@ PHP,
         do {
             foreach ($startEndTokens as $startValue => $endValue) {
                 if ($token->getContent() === $startValue) {
-                    $groupedItem = $this->parser->parseUntil($token, $endValue);
-                    $this->fixWhitespaceForItem($groupedItem);
+                    if ($token->getContent() === '(' && $token->getNextToken()->getContent() !== 'function') { // closure situation
+                        $groupedItem = $this->parser->parseUntil($token, $endValue);
+                        $this->fixWhitespaceForItem($groupedItem);
 
-                    $token = $groupedItem->lastToken();
+                        $token = $groupedItem->lastToken();
+                    }
                 }
             }
 
@@ -123,7 +140,7 @@ PHP,
         $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
 
-    private function fixWhitespaceForItem(ItemInterface $groupedItem)
+    private function fixWhitespaceForItem(ItemInterface $groupedItem): void
     {
         $standardIndent = $this->whitespacesConfig->getIndent();
 
@@ -159,7 +176,7 @@ PHP,
         }
     }
 
-    private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content)
+    private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content): void
     {
         $prefixWhitespaceItem = $itemList->getFirstPrefixWhitespaceItem();
 
@@ -202,7 +219,7 @@ PHP,
         }
     }
 
-    private function ensureContentForPostfixWhitespace(ComplexItemList $itemList, string $content)
+    private function ensureContentForPostfixWhitespace(ComplexItemList $itemList, string $content): void
     {
         $postfixWhitespaceItem = $itemList->getFirstPostfixWhitespaceItem();
 
@@ -238,7 +255,7 @@ PHP,
         }
     }
 
-    private function fixSeparators(SeparatedItemList $itemList, string $indent)
+    private function fixSeparators(SeparatedItemList $itemList, string $indent): void
     {
         $separator = $itemList->getSeparator();
 
@@ -275,7 +292,7 @@ PHP,
         );
     }
 
-    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace)
+    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace): void
     {
         $firstToken = $item->firstToken();
         if ($firstToken->isWhitespace()) {
@@ -295,7 +312,7 @@ PHP,
         }
     }
 
-    private function replaceWithIfNeeded(ContextualToken $token, string $replacement = null)
+    private function replaceWithIfNeeded(ContextualToken $token, string $replacement = null): void
     {
         if ($replacement === null) {
             $token->previousToken()->setNextContextualToken($token->getNextToken());
@@ -313,9 +330,9 @@ PHP,
     private function hasExtraLinesWithCorrectEnding(string $current, string $replacement): bool
     {
         return (
-            substr($replacement, 0, 1) === "\n"
-            && substr($current, 0, 1) === "\n"
-            && substr($current, -strlen($replacement)) === $replacement
+            str_starts_with($replacement, "\n")
+            && str_starts_with($current, "\n")
+            && str_ends_with($current, $replacement)
         );
     }
 }
