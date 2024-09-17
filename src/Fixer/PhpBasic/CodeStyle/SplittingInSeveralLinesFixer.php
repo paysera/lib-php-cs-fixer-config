@@ -330,9 +330,9 @@ PHP,
     private function hasExtraLinesWithCorrectEnding(string $current, string $replacement): bool
     {
         return (
-            str_starts_with($replacement, "\n")
-            && str_starts_with($current, "\n")
-            && str_ends_with($current, $replacement)
+            substr($replacement, 0, 1) === "\n"
+            && substr($current, 0, 1) === "\n"
+            && substr($current, -strlen($replacement)) === $replacement
         );
     }
 }
