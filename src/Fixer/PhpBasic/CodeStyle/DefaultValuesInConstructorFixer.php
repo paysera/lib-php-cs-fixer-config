@@ -54,6 +54,12 @@ PHP,
         return 'Paysera/php_basic_code_style_default_values_in_constructor';
     }
 
+    public function getPriority(): int
+    {
+        // Should run after `VisibilityPropertiesFixer`
+        return 61;
+    }
+
     public function isCandidate(Tokens $tokens): bool
     {
         return $tokens->isAnyTokenKindsFound([T_CLASS]);
@@ -88,6 +94,7 @@ PHP,
                 $token->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
                 && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_STATIC)
                 && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_FUNCTION)
+                && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_READONLY)
             ) {
                 $propertyNameIndex = $tokens->getNextNonWhitespace($key);
                 $endOfPropertyDeclarationSemicolon = $tokens->getNextTokenOfKind($key, [';']);

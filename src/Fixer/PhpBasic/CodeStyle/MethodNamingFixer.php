@@ -94,36 +94,41 @@ PHP,
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
-            if ($functionTokenIndex && $visibilityTokenIndex) {
-                if (
-                    $token->isGivenKind(T_STRING)
-                    && $tokens[$key + 1]->equals('(')
-                    && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
-                    && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                ) {
-                    $functionName = $tokens[$key]->getContent();
-                    $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
-                    $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
+            if (
+                $functionTokenIndex
+                && $visibilityTokenIndex
+                && $token->isGivenKind(T_STRING)
+                && $tokens[$key + 1]->equals('(')
+                && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
+                && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
+            ) {
+                $functionName = $tokens[$key]->getContent();
+                $parenthesesEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $key + 1);
+                $nextIndex = $tokens->getNextMeaningfulToken($parenthesesEndIndex);
 
-                    $returnType = null;
-                    if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
-                        $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
-                        $returnType = $tokens[$typeIndex]->getContent();
-                        $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
-                    }
-
-                    if (!$tokens[$nextIndex]->equals('{')) {
-                        continue;
-                    }
-
-                    $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
+                $returnType = null;
+                if ($tokens[$nextIndex]->isGivenKind(CT::T_TYPE_COLON)) {
+                    $typeIndex = $tokens->getNextMeaningfulToken($nextIndex);
+                    $returnType = $tokens[$typeIndex]->getContent();
+                    $nextIndex = $tokens->getNextMeaningfulToken($typeIndex);
                 }
+
+                if (!$tokens[$nextIndex]->equals('{')) {
+                    continue;
+                }
+
+                $this->fixMethod($tokens, $functionName, $visibilityTokenIndex, $nextIndex, $returnType);
             }
         }
     }
 
-    private function fixMethod(Tokens $tokens, $functionName, $visibilityTokenIndex, $curlyBraceStartIndex, $returnType)
-    {
+    private function fixMethod(
+        Tokens $tokens,
+        $functionName,
+        $visibilityTokenIndex,
+        $curlyBraceStartIndex,
+        $returnType,
+    ): void {
         $index = $tokens->getPrevNonWhitespace($visibilityTokenIndex);
         $docBlockIndex = null;
         if ($tokens[$index]->isGivenKind(T_DOC_COMMENT)) {
@@ -133,7 +138,7 @@ PHP,
         }
 
         $shouldReturnBool = preg_match(
-            '#^(?:' . implode('|', $this->boolFunctionPrefixes) . ')[A-Z]#',
+            '#^(' . implode('|', $this->boolFunctionPrefixes) . ')[A-Z]#',
             $functionName,
         );
 
@@ -167,7 +172,7 @@ PHP,
         return false;
     }
 
-    private function insertComment(Tokens $tokens, int $insertIndex)
+    private function insertComment(Tokens $tokens, int $insertIndex): void
     {
         $comment = '// TODO: ' . self::BOOL_FUNCTION_COMMENT;
         if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {

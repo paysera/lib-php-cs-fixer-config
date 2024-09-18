@@ -12,25 +12,25 @@ use Paysera\PhpCsFixerConfig\Parser\GroupSeparatorHelper;
 use Paysera\PhpCsFixerConfig\Parser\Entity\ItemInterface;
 use Paysera\PhpCsFixerConfig\Parser\Parser;
 use Paysera\PhpCsFixerConfig\Parser\Entity\SeparatedItemList;
+use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Fixer\WhitespacesAwareFixerInterface;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\FixerDefinitionInterface;
 use PhpCsFixer\Tokenizer\Tokens;
-use PhpCsFixer\WhitespacesFixerConfig;
 use SplFileInfo;
 
-final class SplittingInSeveralLinesFixer implements WhitespacesAwareFixerInterface
+final class SplittingInSeveralLinesFixer extends AbstractFixer implements WhitespacesAwareFixerInterface
 {
     private Parser $parser;
     private ContextualTokenBuilder $contextualTokenBuilder;
-    private WhitespacesFixerConfig $whitespacesConfig;
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->parser = new Parser(new GroupSeparatorHelper());
         $this->contextualTokenBuilder = new ContextualTokenBuilder();
-        $this->whitespacesConfig = new WhitespacesFixerConfig('    ', "\n");
     }
 
     public function getDefinition(): FixerDefinitionInterface
@@ -95,22 +95,7 @@ PHP,
         return true;
     }
 
-    public function isRisky(): bool
-    {
-        return false;
-    }
-
-    public function supports(SplFileInfo $file): bool
-    {
-        return true;
-    }
-
-    public function setWhitespacesConfig(WhitespacesFixerConfig $config): void
-    {
-        $this->whitespacesConfig = $config;
-    }
-
-    public function fix(SplFileInfo $file, Tokens $tokens): void
+    protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         $startEndTokens = [
             '=' => ';',
@@ -125,12 +110,29 @@ PHP,
         do {
             foreach ($startEndTokens as $startValue => $endValue) {
                 if ($token->getContent() === $startValue) {
-                    if ($token->getContent() === '(' && $token->getNextToken()->getContent() !== 'function') { // closure situation
-                        $groupedItem = $this->parser->parseUntil($token, $endValue);
-                        $this->fixWhitespaceForItem($groupedItem);
+                    // closure situation
+                    if ($token->getContent() === '(') {
+                        if ($token->nextNonWhitespaceToken()->getContent() === 'function') {
+                            continue;
+                        }
 
-                        $token = $groupedItem->lastToken();
+                        if (
+                            $token
+                                ->previousNonWhitespaceToken()
+                                ->previousNonWhitespaceToken()
+                                ->getContent() === 'function'
+                        ) {
+                            $groupedItem = $this->parser->parseUntil($token, $endValue);
+                            $token = $groupedItem->lastToken();
+
+                            continue;
+                        }
                     }
+
+                    $groupedItem = $this->parser->parseUntil($token, $endValue);
+                    $this->fixWhitespaceForItem($groupedItem);
+
+                    $token = $groupedItem->lastToken();
                 }
             }
 
