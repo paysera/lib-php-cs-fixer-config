@@ -17,10 +17,9 @@ final class MethodNamingFixer extends AbstractFixer
 {
     public const BOOL_FUNCTION_COMMENT = 'Question-type functions always return boolean (https://bit.ly/psg-methods)';
 
-    private array $boolFunctionPrefixes;
-
-    public function __construct()
-    {
+    public function __construct(
+        private array $boolFunctionPrefixes = [],
+    ) {
         parent::__construct();
 
         $this->boolFunctionPrefixes = [
