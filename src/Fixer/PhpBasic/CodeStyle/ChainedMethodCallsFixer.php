@@ -57,7 +57,7 @@ PHP,
                 continue;
             }
 
-            $semicolonIndex = $tokens->getNextTokenOfKind($key, [';']);
+            $semicolonIndex = $tokens->getNextTokenOfKind($key, [';', '{']);
             $indent = $this->checkForMethodSplits(
                 $tokens,
                 $key,
@@ -79,7 +79,9 @@ PHP,
 
             if (
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
-                && $tokens[$i - 1]->equals(')')
+//                && $tokens[$i - 1]->equals(')')
+                && !$tokens[$i - 1]->isGivenKind(T_VARIABLE)
+                && !$tokens[$i - 1]->isGivenKind(T_WHITESPACE)
             ) {
                 $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent])]]);
             }
