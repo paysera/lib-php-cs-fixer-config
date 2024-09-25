@@ -213,7 +213,7 @@ PHP,
                 return true;
             }
 
-            for ($i=0; $i<2; $i++) {
+            for ($i = 0; $i < 2; $i++) {
                 $nextMeaningfulToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
 
                 if ($tokens[$nextMeaningfulToken]->isGivenKind(T_FUNCTION)) {
