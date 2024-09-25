@@ -79,7 +79,6 @@ PHP,
 
             if (
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
-//                && $tokens[$i - 1]->equals(')')
                 && !$tokens[$i - 1]->isGivenKind(T_VARIABLE)
                 && !$tokens[$i - 1]->isGivenKind(T_WHITESPACE)
             ) {
