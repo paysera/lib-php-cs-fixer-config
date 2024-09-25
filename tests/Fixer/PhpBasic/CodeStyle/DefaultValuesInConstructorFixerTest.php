@@ -81,6 +81,66 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
             ],
             [
                 '<?php
+                class Sample
+                {
+                    private $defaultArray;
+                    private $defaultInteger;
+                    private readonly string $defaultVariable;
+                
+                    public function __construct()
+                    {
+                        $this->defaultArray = [];
+                        $this->defaultInteger = 1;
+                    }
+                
+                    public function doSomething()
+                    {
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    private $defaultArray = [];
+                    private $defaultInteger = 1;
+                    private readonly string $defaultVariable;
+                
+                    public function doSomething()
+                    {
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    private $defaultArray;
+                    private $defaultInteger;
+                    private static string $defaultVariable = "";
+                
+                    public function __construct()
+                    {
+                        $this->defaultArray = [];
+                        $this->defaultInteger = 1;
+                    }
+                
+                    public function doSomething()
+                    {
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    private $defaultArray = [];
+                    private $defaultInteger = 1;
+                    private static string $defaultVariable = "";
+                
+                    public function doSomething()
+                    {
+                    }
+                }',
+            ],
+            [
+                '<?php
                 class Sample extends ParentClass
                 {
                     private $defaultArray;

@@ -70,7 +70,6 @@ PHP,
         $parentConstructNeeded = false;
         $isConstructorPresent = false;
         $propertiesWithDefaultValues = [];
-        $endOfPropertyDeclarationSemicolon = 0;
 
         foreach ($tokens as $key => $token) {
             if ($this->isConstructor($key, $tokens, $token)) {
@@ -89,6 +88,7 @@ PHP,
             if ($extends !== false) {
                 $parentConstructNeeded = true;
             }
+
             $subsequentDeclarativeToken = $tokens->getNextMeaningfulToken($key);
             if (
                 $token->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
@@ -145,13 +145,13 @@ PHP,
                 && !$isConstructorPresent
                 && count($propertiesWithDefaultValues) > 0
             ) {
-                $endOfDeclarationNewLine = $tokens[$endOfPropertyDeclarationSemicolon + 1];
+                $endOfDeclarationNewLine = $tokens[$key + 1];
 
                 $closingCurlyBrace = $tokens->getNextTokenOfKind($key, ['}']);
                 $indentation = $tokens[$closingCurlyBrace - 1]->getContent();
                 $index = $this->insertConstructTokensAndReturnOpeningBraceIndex(
                     $tokens,
-                    $endOfPropertyDeclarationSemicolon + 1,
+                    $key + 1,
                     $indentation,
                 );
                 $tokens->insertSlices([
@@ -176,7 +176,7 @@ PHP,
         Tokens $tokens,
         int $index,
         string $indentation,
-        array $propertiesWithDefaultValues
+        array $propertiesWithDefaultValues,
     ): void {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
             $tokens->insertSlices([
@@ -206,18 +206,23 @@ PHP,
 
     private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token): bool
     {
-        $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
-        $subsequentToken = $nextMeaningfulToken ? $tokens->getNextNonWhitespace($nextMeaningfulToken) : null;
+        if ($token->equals(';')) {
+            $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
 
-        return (
-            $token->equals(';')
-            && $tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            && !$tokens[$subsequentToken]->isGivenKind(T_VARIABLE)
-            || (
-                $token->equals(';')
-                && !$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            )
-        );
+            if (!$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])) {
+                return true;
+            }
+
+            for ($i=0; $i<2; $i++) {
+                $nextMeaningfulToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
+
+                if ($tokens[$nextMeaningfulToken]->isGivenKind(T_FUNCTION)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function isConstructor(int $key, Tokens $tokens, Token $token): bool
