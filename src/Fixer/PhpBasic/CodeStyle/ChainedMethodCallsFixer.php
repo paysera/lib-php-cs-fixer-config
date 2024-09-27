@@ -86,19 +86,19 @@ PHP,
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
                 && $tokens[$i - 1]->equals(')')
             ) {
-                if(strpos($tokens[$startIndex-2]->getContent(), "\n") !== false) {
-                    // $indent = $indent . $this->whitespacesConfig->getIndent();
-                }
-                // $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent . $this->whitespacesConfig->getIndent()])]]);
                 $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent])]]);
             }
         }
 
-        if ($tokens[$i]->isWhitespace() && $tokens[$i-1]->isWhitespace()) {
+        if ($tokens[$i]->isWhitespace() && !str_contains($tokens[$i - 2]->getContent(), "\n")) {
             $tokens->clearAt($i);
         }
 
-        if (!$tokens[$i - 1]->isWhitespace() && strpos($tokens[$i - 2]->getContent(), "\n") === false) {
+        if (
+            !$tokens[$i - 1]->isWhitespace()
+            && !str_contains($tokens[$i - 2]->getContent(), "\n")
+            && !str_contains($tokens[$i]->getContent(), "\n")
+        ) {
             $tokens->insertSlices([
                 $i => [
                     new Token([

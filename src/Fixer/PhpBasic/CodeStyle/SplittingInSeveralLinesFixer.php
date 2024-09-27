@@ -117,8 +117,7 @@ PHP,
                         }
 
                         if (
-                            $token
-                                ->previousNonWhitespaceToken()
+                            $token->previousNonWhitespaceToken()
                                 ->previousNonWhitespaceToken()
                                 ->getContent() === 'function'
                         ) {
