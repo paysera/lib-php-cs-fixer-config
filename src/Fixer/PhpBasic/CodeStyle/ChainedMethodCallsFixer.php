@@ -57,15 +57,15 @@ PHP,
                 continue;
             }
 
-            $semicolonIndex = $tokens->getNextTokenOfKind($key, [';', '{']);
+            $endIndex = $tokens->getNextTokenOfKind($key, [';', '{']);
             $indent = $this->checkForMethodSplits(
                 $tokens,
                 $key,
-                $semicolonIndex,
+                $endIndex,
             );
 
             if ($indent !== null) {
-                $key = $this->validateMethodSplits($tokens, $key, $semicolonIndex, $indent);
+                $key = $this->validateMethodSplits($tokens, $key, $endIndex, $indent);
             }
         }
     }
@@ -79,11 +79,14 @@ PHP,
 
             if (
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
-                && !$tokens[$i - 1]->isGivenKind(T_VARIABLE)
-                && !$tokens[$i - 1]->isGivenKind(T_WHITESPACE)
+                && $tokens[$i - 1]->equals(')')
             ) {
                 $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent])]]);
             }
+        }
+
+        if ($tokens[$i]->isWhitespace()) {
+            $tokens->clearAt($i);
         }
 
         if (!$tokens[$i - 1]->isWhitespace() && strpos($tokens[$i - 2]->getContent(), "\n") === false) {

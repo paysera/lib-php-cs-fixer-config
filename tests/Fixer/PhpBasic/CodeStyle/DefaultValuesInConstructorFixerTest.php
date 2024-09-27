@@ -115,7 +115,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 {
                     private $defaultArray;
                     private $defaultInteger;
-                    private static string $defaultVariable = "";
+                    private static string $defaultVariable = \'\';
                 
                     public function __construct()
                     {
@@ -132,7 +132,7 @@ final class DefaultValuesInConstructorFixerTest extends AbstractPayseraFixerTest
                 {
                     private $defaultArray = [];
                     private $defaultInteger = 1;
-                    private static string $defaultVariable = "";
+                    private static string $defaultVariable = \'\';
                 
                     public function doSomething()
                     {

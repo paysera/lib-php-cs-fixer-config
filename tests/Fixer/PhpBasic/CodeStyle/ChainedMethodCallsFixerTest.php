@@ -167,6 +167,60 @@ final class ChainedMethodCallsFixerTest extends AbstractPayseraFixerTestCase
                     }
                 }'
             ],
+            [
+                '<?php
+                class Sample
+                {
+                    private function methodA()
+                    {
+                        if ($this->methodB()
+                            ->methodC()
+                            ->methodD())
+                        {
+                            return true;
+                        }
+                        
+                        return false;
+                    }
+                    
+                    private function methodB()
+                    {
+                    }
+                    
+                    private function methodC()
+                    {
+                    }
+                    
+                    private function methodD()
+                    {
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    private function methodA()
+                    {
+                        if ($this->methodB()->methodC()
+                            ->methodD()) {
+                            return true;
+                        }
+                        
+                        return false;
+                    }
+                    
+                    private function methodB()
+                    {
+                    }
+                    
+                    private function methodC()
+                    {
+                    }
+                    
+                    private function methodD()
+                    {
+                    }
+                }',
+            ]
         ];
     }
 
