@@ -50,6 +50,11 @@ PHP,
         return $tokens->isTokenKindFound(T_OBJECT_OPERATOR);
     }
 
+    public function getPriority(): int
+    {
+        return 10;
+    }
+
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
@@ -81,11 +86,15 @@ PHP,
                 $tokens[$i]->isGivenKind(T_OBJECT_OPERATOR)
                 && $tokens[$i - 1]->equals(')')
             ) {
+                if(strpos($tokens[$startIndex-2]->getContent(), "\n") !== false) {
+                    // $indent = $indent . $this->whitespacesConfig->getIndent();
+                }
+                // $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent . $this->whitespacesConfig->getIndent()])]]);
                 $tokens->insertSlices([$i => [new Token([T_WHITESPACE, $indent])]]);
             }
         }
 
-        if ($tokens[$i]->isWhitespace()) {
+        if ($tokens[$i]->isWhitespace() && $tokens[$i-1]->isWhitespace()) {
             $tokens->clearAt($i);
         }
 
@@ -114,6 +123,7 @@ PHP,
             if ($tokens[$i]->equals('(')) {
                 $blockEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
                 $i = $blockEndIndex;
+                continue;
             }
 
             if (
