@@ -31,18 +31,11 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
 
         $this->inheritanceHelper = new InheritanceHelper();
         $this->unavailableTypeHints = [
-            'array',
             'void',
             'self',
             '$this',
             'mixed',
             'callable',
-            'bool',
-            'boolean',
-            'float',
-            'int',
-            'integer',
-            'string',
             'resource',
         ];
     }
@@ -191,11 +184,12 @@ PHP,
                         $argumentTypesNotNullable[] = str_replace('?', '', $argumentType);
                     }
 
+                    $nullableFound = false;
                     $nullFound = in_array('null', $argumentTypes, true);
                     if (!$nullFound) {
                         foreach ($argumentTypes as $argumentType) {
                             if (str_contains($argumentType, '?')) {
-                                $nullFound = true;
+                                $nullableFound = true;
                                 break;
                             }
                         }
@@ -203,9 +197,13 @@ PHP,
 
                     if (
                         !array_intersect($argumentTypesNotNullable, $this->unavailableTypeHints)
-                        && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
+                        && (
+                            ($argumentTypeCount === 2 && $nullFound)
+                            || ($argumentTypeCount === 1 && !$nullFound)
+                        )
+                        || ($argumentTypeCount == 2 && $nullableFound)
                     ) {
-                        $argumentType = trim(implode('', array_diff($argumentTypesNotNullable, ['null'])));
+                        $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
                         $tokens->insertSlices([
                             $i => [
                                 new Token([T_STRING, $argumentType]),
