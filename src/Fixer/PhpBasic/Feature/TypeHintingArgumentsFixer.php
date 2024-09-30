@@ -204,13 +204,15 @@ PHP,
                         || ($argumentTypeCount == 2 && $nullableFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
-                        $tokens->insertSlices([
-                            $i => [
-                                new Token([T_STRING, $argumentType]),
-                                new Token([T_WHITESPACE, ' ']),
-                            ],
-                        ]);
-                        $currentParenthesesEndIndex += 2;
+                        if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
+                            $tokens->insertSlices([
+                                $i => [
+                                    new Token([T_STRING, $argumentType]),
+                                    new Token([T_WHITESPACE, ' ']),
+                                ],
+                            ]);
+                            $currentParenthesesEndIndex += 2;
+                        }
                     }
 
                     if ($nullFound) {
