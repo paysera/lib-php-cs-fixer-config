@@ -95,6 +95,10 @@ PHP,
         }
         $index = $key + 2;
         while (!$tokens[$index]->equals(';')) {
+            if (!isset($tokens[$index + 1])) {
+                return;
+            }
+
             if (!$tokens[$index + 1]->equals('?') && !$tokens[$index]->equals('?')) {
                 $ifStatementConditionTokens[] = $tokens[$index];
             }

@@ -158,8 +158,8 @@ PHP,
         Tokens $tokens,
         int $docBlockIndex,
         int $parenthesesStartIndex,
-        int $parenthesesEndIndex
-    ) {
+        int $parenthesesEndIndex,
+    ): void {
         $currentParenthesesEndIndex = $parenthesesEndIndex;
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex; $i--) {
@@ -185,12 +185,27 @@ PHP,
 
                     $argumentTypes = $annotation->getTypes();
                     $argumentTypeCount = count($argumentTypes);
+
+                    $argumentTypesNotNullable = [];
+                    foreach ($argumentTypes as $argumentType) {
+                        $argumentTypesNotNullable[] = str_replace('?', '', $argumentType);
+                    }
+
                     $nullFound = in_array('null', $argumentTypes, true);
+                    if (!$nullFound) {
+                        foreach ($argumentTypes as $argumentType) {
+                            if (str_contains($argumentType, '?')) {
+                                $nullFound = true;
+                                break;
+                            }
+                        }
+                    }
+
                     if (
-                        !array_intersect($argumentTypes, $this->unavailableTypeHints)
+                        !array_intersect($argumentTypesNotNullable, $this->unavailableTypeHints)
                         && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
                     ) {
-                        $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
+                        $argumentType = trim(implode('', array_diff($argumentTypesNotNullable, ['null'])));
                         $tokens->insertSlices([
                             $i => [
                                 new Token([T_STRING, $argumentType]),
