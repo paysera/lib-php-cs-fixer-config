@@ -204,7 +204,10 @@ PHP,
                         || ($argumentTypeCount == 2 && $nullableFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
-                        if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
+                        if (
+                            $tokens[$i]->isGivenKind(T_VARIABLE)
+                            && !$tokens[$previousTokenIndex]->isGivenKind(10005)
+                        ) {
                             $tokens->insertSlices([
                                 $i => [
                                     new Token([T_STRING, $argumentType]),
