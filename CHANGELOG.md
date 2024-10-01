@@ -14,7 +14,6 @@ New fixers could be added with minor releases, this would require changes in con
 ## 3.0.1
 
 ### Changed
-- Minimum PHP version has been changed to 8.1.
 - friendsofphp/php-cs-fixer` minor update to version 3.64.0
 - Dependencies update (phpunit)
 - Modified the `download-phar.sh` script to download the latest PHAR file.
