@@ -91,7 +91,7 @@ PHP,
             }
             $subsequentDeclarativeToken = $tokens->getNextMeaningfulToken($key);
 
-            // PHP 7.4 support
+            // @TODO: PHP 7.4 support, drop condition when there will be no PHP 7.4 support.
             $tokenKinds = [T_STATIC, T_FUNCTION];
             if (defined('T_READONLY')) {
                 $tokenKinds[] = T_READONLY;
