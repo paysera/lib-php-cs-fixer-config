@@ -3,7 +3,7 @@
     "description": "PHP CS Fixer config for Paysera conventions",
     "type": "library",
     "require": {
-        "php": "^8.1",
+        "php": "^7.4 || ^8.1",
         "doctrine/inflector": "^1.0 || ^2.0"
     },
     "require-dev": {

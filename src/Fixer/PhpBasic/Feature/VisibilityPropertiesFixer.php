@@ -229,7 +229,7 @@ PHP,
         int $key,
         array $propertyVariables,
         string $propertyName,
-        string $classNamespace,
+        string $classNamespace
     ): void {
         $variable = '$' . $propertyName;
         if (
