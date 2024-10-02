@@ -326,19 +326,16 @@ PHP,
      */
     private function getVisibilityToken(array $previousTokens): ?Token
     {
-        $visibilityToken = null;
-
         foreach ($previousTokens as $previousToken) {
             if ($previousToken->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE, 10028, 10029, 10030])) {
-                $visibilityToken = $previousToken;
-                break;
+                return $previousToken;
             }
 
             if ($previousToken->isGivenKind(T_FUNCTION)) {
-                break;
+                return null;
             }
         }
 
-        return $visibilityToken;
+        return null;
     }
 }

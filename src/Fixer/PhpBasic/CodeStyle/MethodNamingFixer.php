@@ -19,7 +19,8 @@ final class MethodNamingFixer extends AbstractFixer
 
     private array $boolFunctionPrefixes;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $this->boolFunctionPrefixes = [
@@ -93,10 +94,12 @@ PHP,
             $functionTokenIndex = $tokens->getPrevNonWhitespace($key);
             $visibilityTokenIndex = $functionTokenIndex ? $tokens->getPrevNonWhitespace($functionTokenIndex) : null;
 
+            if ($functionTokenIndex === null || $visibilityTokenIndex === null) {
+                continue;
+            }
+
             if (
-                $functionTokenIndex
-                && $visibilityTokenIndex
-                && $token->isGivenKind(T_STRING)
+                $token->isGivenKind(T_STRING)
                 && $tokens[$key + 1]->equals('(')
                 && $tokens[$functionTokenIndex]->isGivenKind(T_FUNCTION)
                 && $tokens[$visibilityTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
