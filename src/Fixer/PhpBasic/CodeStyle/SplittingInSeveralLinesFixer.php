@@ -328,7 +328,7 @@ PHP,
     {
         if ($token->getContent() === '(') {
             if ($token->nextNonWhitespaceToken()->getContent() === 'function') {
-                return null;
+                return $token;
             }
 
             if (
