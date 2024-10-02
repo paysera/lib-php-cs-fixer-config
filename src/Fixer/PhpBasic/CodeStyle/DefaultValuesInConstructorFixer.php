@@ -90,11 +90,16 @@ PHP,
             }
 
             $subsequentDeclarativeToken = $tokens->getNextMeaningfulToken($key);
+
+            // @TODO: PHP 7.4 support, drop condition when there will be no PHP 7.4 support.
+            $tokenKinds = [T_STATIC, T_FUNCTION];
+            if (defined('T_READONLY')) {
+                $tokenKinds[] = T_READONLY;
+            }
+
             if (
                 $token->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-                && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_STATIC)
-                && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_FUNCTION)
-                && !$tokens[$subsequentDeclarativeToken]->isGivenKind(T_READONLY)
+                && !$tokens[$subsequentDeclarativeToken]->isGivenKind($tokenKinds)
             ) {
                 $propertyNameIndex = $tokens->getNextNonWhitespace($key);
                 $endOfPropertyDeclarationSemicolon = $tokens->getNextTokenOfKind($key, [';']);

@@ -67,7 +67,7 @@ final class IgnorableFixerDecorator implements
     {
         $ignoreNotice = self::IGNORE_ANNOTATION . ' ' . $this->getName();
         $contents = $tokens->generateCode();
-        if (str_contains($contents, $ignoreNotice)) {
+        if (strpos($contents, $ignoreNotice) !== false) {
             return;
         }
 

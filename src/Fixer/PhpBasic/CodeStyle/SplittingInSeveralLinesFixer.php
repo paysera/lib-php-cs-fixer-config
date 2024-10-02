@@ -110,28 +110,15 @@ PHP,
         do {
             foreach ($startEndTokens as $startValue => $endValue) {
                 if ($token->getContent() === $startValue) {
-                    // closure situation
-                    if ($token->getContent() === '(') {
-                        if ($token->nextNonWhitespaceToken()->getContent() === 'function') {
-                            continue;
-                        }
+                    $processResult = $this->processForClosureAndFunctionParameters($token, $endValue);
+                    $token = $processResult ?? $token;
 
-                        if (
-                            $token->previousNonWhitespaceToken()
-                                ->previousNonWhitespaceToken()
-                                ->getContent() === 'function'
-                        ) {
-                            $groupedItem = $this->parser->parseUntil($token, $endValue);
-                            $token = $groupedItem->lastToken();
+                    if ($processResult === null) {
+                        $groupedItem = $this->parser->parseUntil($token, $endValue);
+                        $this->fixWhitespaceForItem($groupedItem);
 
-                            continue;
-                        }
+                        $token = $groupedItem->lastToken();
                     }
-
-                    $groupedItem = $this->parser->parseUntil($token, $endValue);
-                    $this->fixWhitespaceForItem($groupedItem);
-
-                    $token = $groupedItem->lastToken();
                 }
             }
 
@@ -331,9 +318,29 @@ PHP,
     private function hasExtraLinesWithCorrectEnding(string $current, string $replacement): bool
     {
         return (
-            str_starts_with($replacement, "\n")
-            && str_starts_with($current, "\n")
-            && str_ends_with($current, $replacement)
+            substr($replacement, 0, 1) === "\n"
+            && substr($current, 0, 1) === "\n"
+            && substr($current, -strlen($replacement)) === $replacement
         );
+    }
+
+    private function processForClosureAndFunctionParameters(ContextualToken $token, string $endValue): ?ContextualToken
+    {
+        if ($token->getContent() === '(') {
+            if ($token->nextNonWhitespaceToken()->getContent() === 'function') {
+                return $token;
+            }
+
+            if (
+                $token
+                    ->previousNonWhitespaceToken()
+                    ->previousNonWhitespaceToken()
+                    ->getContent() === 'function'
+            ) {
+                return $this->parser->parseUntil($token, $endValue)->lastToken();
+            }
+        }
+
+        return null;
     }
 }

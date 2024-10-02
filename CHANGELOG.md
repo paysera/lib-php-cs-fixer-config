@@ -14,20 +14,12 @@ New fixers could be added with minor releases, this would require changes in con
 ## 3.0.1
 
 ### Changed
-- Minimum PHP version has been changed to 8.1.
-
 - friendsofphp/php-cs-fixer` minor update to version 3.64.0
-
 - Dependencies update (phpunit)
-
 - Modified the `download-phar.sh` script to download the latest PHAR file.
-
 - VisibilityPropertiesFixer has been changed to properly detect variables declared in the __constructor.Some other refactoring of fixer.
-
 - DefaultValuesInConstructorFixer priority changed to work wright with VisibilityPropertiesFixer.
-
 - SplittingInSeveralLinesFixer was refactored to handle situations with splitting lines in closures and functions parameters, including parameters in __constructor.
-
 
 ## 3.0.0
 
