@@ -321,7 +321,7 @@ PHP,
     }
 
     /**
-     * @param array<Token> $previousTokens
+     * @param Token[] $previousTokens
      * @return Token|null
      */
     private function getVisibilityToken(array $previousTokens): ?Token
