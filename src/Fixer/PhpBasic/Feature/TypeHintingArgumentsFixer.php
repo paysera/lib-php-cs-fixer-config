@@ -151,7 +151,7 @@ PHP,
         Tokens $tokens,
         int $docBlockIndex,
         int $parenthesesStartIndex,
-        int $parenthesesEndIndex,
+        int $parenthesesEndIndex
     ): void {
         $currentParenthesesEndIndex = $parenthesesEndIndex;
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
@@ -201,7 +201,7 @@ PHP,
                             ($argumentTypeCount === 2 && $nullFound)
                             || ($argumentTypeCount === 1 && !$nullFound)
                         )
-                        || ($argumentTypeCount == 2 && $nullableFound)
+                        || ($argumentTypeCount === 2 && $nullableFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
                         if (

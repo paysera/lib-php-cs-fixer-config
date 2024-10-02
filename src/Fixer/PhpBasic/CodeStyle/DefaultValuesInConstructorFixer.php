@@ -181,7 +181,7 @@ PHP,
         Tokens $tokens,
         int $index,
         string $indentation,
-        array $propertiesWithDefaultValues,
+        array $propertiesWithDefaultValues
     ): void {
         foreach ($propertiesWithDefaultValues as $name => $propertyTokens) {
             $tokens->insertSlices([
