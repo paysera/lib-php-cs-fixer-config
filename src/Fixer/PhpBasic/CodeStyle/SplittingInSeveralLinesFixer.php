@@ -110,10 +110,15 @@ PHP,
         do {
             foreach ($startEndTokens as $startValue => $endValue) {
                 if ($token->getContent() === $startValue) {
-                    $groupedItem = $this->parser->parseUntil($token, $endValue);
-                    $this->fixWhitespaceForItem($groupedItem);
+                    $processResult = $this->processForClosureAndFunctionParameters($token, $endValue);
+                    $token = $processResult ?? $token;
 
-                    $token = $groupedItem->lastToken();
+                    if ($processResult === null) {
+                        $groupedItem = $this->parser->parseUntil($token, $endValue);
+                        $this->fixWhitespaceForItem($groupedItem);
+
+                        $token = $groupedItem->lastToken();
+                    }
                 }
             }
 
@@ -123,7 +128,7 @@ PHP,
         $this->contextualTokenBuilder->overrideTokens($tokens, $firstToken);
     }
 
-    private function fixWhitespaceForItem(ItemInterface $groupedItem)
+    private function fixWhitespaceForItem(ItemInterface $groupedItem): void
     {
         $standardIndent = $this->whitespacesConfig->getIndent();
 
@@ -159,7 +164,7 @@ PHP,
         }
     }
 
-    private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content)
+    private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content): void
     {
         $prefixWhitespaceItem = $itemList->getFirstPrefixWhitespaceItem();
 
@@ -202,7 +207,7 @@ PHP,
         }
     }
 
-    private function ensureContentForPostfixWhitespace(ComplexItemList $itemList, string $content)
+    private function ensureContentForPostfixWhitespace(ComplexItemList $itemList, string $content): void
     {
         $postfixWhitespaceItem = $itemList->getFirstPostfixWhitespaceItem();
 
@@ -238,7 +243,7 @@ PHP,
         }
     }
 
-    private function fixSeparators(SeparatedItemList $itemList, string $indent)
+    private function fixSeparators(SeparatedItemList $itemList, string $indent): void
     {
         $separator = $itemList->getSeparator();
 
@@ -275,7 +280,7 @@ PHP,
         );
     }
 
-    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace)
+    private function fixWhitespaceBefore(ItemInterface $item, ?string $whitespaceBefore, bool $forceWhitespace): void
     {
         $firstToken = $item->firstToken();
         if ($firstToken->isWhitespace()) {
@@ -295,7 +300,7 @@ PHP,
         }
     }
 
-    private function replaceWithIfNeeded(ContextualToken $token, string $replacement = null)
+    private function replaceWithIfNeeded(ContextualToken $token, string $replacement = null): void
     {
         if ($replacement === null) {
             $token->previousToken()->setNextContextualToken($token->getNextToken());
@@ -317,5 +322,25 @@ PHP,
             && substr($current, 0, 1) === "\n"
             && substr($current, -strlen($replacement)) === $replacement
         );
+    }
+
+    private function processForClosureAndFunctionParameters(ContextualToken $token, string $endValue): ?ContextualToken
+    {
+        if ($token->getContent() === '(') {
+            if ($token->nextNonWhitespaceToken()->getContent() === 'function') {
+                return $token;
+            }
+
+            if (
+                $token
+                    ->previousNonWhitespaceToken()
+                    ->previousNonWhitespaceToken()
+                    ->getContent() === 'function'
+            ) {
+                return $this->parser->parseUntil($token, $endValue)->lastToken();
+            }
+        }
+
+        return null;
     }
 }

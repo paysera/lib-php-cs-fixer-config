@@ -52,7 +52,7 @@ You can look at `.travis.yml` file in this repository for integration with travi
 
 Run in project directory by command: `{your-bin-dir}/php-cs-fixer fix /path/to/code --verbose --dry-run --diff`
 
-Use `--config=.php-cs-fixer.php` flag for custom configuration.
+Use `--config=php-cs-fixer.php` flag for custom configuration.
 
 If `/path/to/code` is not defined `php-cs-fixer` will run files from default `src` directory excluding `Test` folders.
 

@@ -23,6 +23,7 @@ final class VisibilityPropertiesFixer extends AbstractFixer implements Whitespac
     use ConfigurableFixerTrait {
         configure as public configureConfigurableFixerTrait;
     }
+
     public const DYNAMIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We avoid dynamic properties';
     public const PUBLIC_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.1: We don’t use public properties';
     public const PROTECTED_PROPERTIES_CONVENTION = 'PhpBasic convention 3.14.2: We prefer use private over protected properties';
@@ -128,15 +129,16 @@ PHP,
     protected function createConfigurationDefinition(): FixerConfigurationResolver
     {
         return
-            new FixerConfigurationResolver([
-            (new FixerOptionBuilder(
-                'excluded_parents',
-                'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
-            ))
-                ->setAllowedTypes(['array', 'bool'])
-                ->getOption(),
-            ])
-        ;
+            new FixerConfigurationResolver(
+                [
+                    (new FixerOptionBuilder(
+                        'excluded_parents',
+                        'Allows to set Parent class names where in children Classes it is allowed to use public or protected properties',
+                    ))
+                        ->setAllowedTypes(['array', 'bool'])
+                        ->getOption(),
+                ],
+            );
     }
 
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
@@ -195,7 +197,7 @@ PHP,
                 ) {
                     $this->insertComment(
                         $tokens,
-                        $tokens->getNextTokenOfKind($key, [';']),
+                        $key,
                         $tokens[$key]->getContent(),
                         self::DYNAMIC_PROPERTIES_CONVENTION,
                     );
@@ -228,7 +230,7 @@ PHP,
         array $propertyVariables,
         string $propertyName,
         string $classNamespace
-    ) {
+    ): void {
         $variable = '$' . $propertyName;
         if (
             !in_array($variable, $propertyVariables, true)
@@ -258,30 +260,27 @@ PHP,
 
     private function getPropertyVariable(Tokens $tokens, int $key, bool $propertyExclusion): ?string
     {
-        $previousTokenIndex = $tokens->getPrevMeaningfulToken($key);
-        $previousPreviousTokenIndex = $tokens->getPrevMeaningfulToken($previousTokenIndex);
-        if (
-            $tokens[$previousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            || (
-                $tokens[$previousTokenIndex]->isGivenKind(T_STATIC)
-                && $tokens[$previousPreviousTokenIndex]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])
-            )
-        ) {
+        /** @var array<Token> $previousTokens */
+        $index = $key;
+
+        for ($i = 0; $i < 4; $i++) {
+            $previousTokenIndex = $tokens->getPrevMeaningfulToken($index);
+            $previousTokens[] = $tokens[$previousTokenIndex];
+            $index = $previousTokenIndex;
+        }
+
+        $visibilityToken = $this->getVisibilityToken($previousTokens);
+
+        if ($visibilityToken !== null) {
             if (
-                (
-                    $tokens[$previousTokenIndex]->isGivenKind(T_PUBLIC)
-                    || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PUBLIC)
-                )
+                $visibilityToken->isGivenKind([T_PUBLIC, 10028])
                 && !$propertyExclusion
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PUBLIC_PROPERTIES_CONVENTION);
             }
 
             if (
-                (
-                    $tokens[$previousTokenIndex]->isGivenKind(T_PROTECTED)
-                    || $tokens[$previousPreviousTokenIndex]->isGivenKind(T_PROTECTED)
-                )
+                $visibilityToken->isGivenKind([T_PROTECTED, 10029])
                 && !$propertyExclusion
             ) {
                 $this->insertVariablePropertyWarning($tokens, $key, self::PROTECTED_PROPERTIES_CONVENTION);
@@ -293,26 +292,50 @@ PHP,
         return null;
     }
 
-    private function insertVariablePropertyWarning(Tokens $tokens, int $key, string $convention)
+    private function insertVariablePropertyWarning(Tokens $tokens, int $key, string $convention): void
     {
         $this->insertComment(
             $tokens,
-            $tokens->getNextTokenOfKind($key, [';']),
+            $key,
             $tokens[$key]->getContent(),
             $convention,
         );
     }
 
-    private function insertComment(Tokens $tokens, int $insertIndex, string $propertyName, string $convention)
+    private function insertComment(Tokens $tokens, int $insertIndex, string $propertyName, string $convention): void
     {
         $comment = '// TODO: "' . $propertyName . '" - ' . $convention;
-        if (!$tokens[$tokens->getNextNonWhitespace($insertIndex)]->isGivenKind(T_COMMENT)) {
+
+        do {
+            $token = $tokens[$insertIndex++];
+        } while (!substr_count($token->getContent(), "\n"));
+
+        if (!$tokens[$tokens->getNextNonWhitespace($insertIndex - 3)]->isGivenKind(T_COMMENT)) {
             $tokens->insertSlices([
-                ++$insertIndex => [
+                $insertIndex - 1 => [
                     new Token([T_WHITESPACE, ' ']),
                     new Token([T_COMMENT, $comment]),
                 ],
             ]);
         }
+    }
+
+    /**
+     * @param Token[] $previousTokens
+     * @return Token|null
+     */
+    private function getVisibilityToken(array $previousTokens): ?Token
+    {
+        foreach ($previousTokens as $previousToken) {
+            if ($previousToken->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE, 10028, 10029, 10030])) {
+                return $previousToken;
+            }
+
+            if ($previousToken->isGivenKind(T_FUNCTION)) {
+                return null;
+            }
+        }
+
+        return null;
     }
 }
