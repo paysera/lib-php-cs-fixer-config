@@ -159,19 +159,14 @@ PHP,
             if (!$tokens[$i]->isGivenKind(T_VARIABLE)) {
                 continue;
             }
+
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
             if (!$tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
                 foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                     $variable = $tokens[$i]->getContent();
                     if (
-                        !preg_match(
-                            '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
-                            $annotation->getContent(),
-                        )
-                        || preg_match(
-                            '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
-                            $annotation->getContent(),
-                        )
+                        $this->isAnnotationWrongFormat($variable, $annotation->getContent())
+                        || $this->isAnnotationArray($variable, $annotation->getContent())
                     ) {
                         continue;
                     }
@@ -187,12 +182,7 @@ PHP,
                     $nullableFound = false;
                     $nullFound = in_array('null', $argumentTypes, true);
                     if (!$nullFound) {
-                        foreach ($argumentTypes as $argumentType) {
-                            if (str_contains($argumentType, '?')) {
-                                $nullableFound = true;
-                                break;
-                            }
-                        }
+                        $nullableFound = $this->isNullableFound($argumentTypes);
                     }
 
                     if (
@@ -219,43 +209,88 @@ PHP,
                     }
 
                     if ($nullFound) {
-                        /** @var Token[] $variables */
-                        $variables = (clone $tokens)->findGivenKind(
-                            T_VARIABLE,
+                        $this->processIfNullFound(
+                            $tokens,
                             $parenthesesStartIndex,
                             $currentParenthesesEndIndex,
+                            $variable
                         );
-                        $variablePosition = null;
-                        foreach ($variables as $key => $variableToken) {
-                            $expectedEqual = $tokens->getNextMeaningfulToken($key);
-                            $expectedNull = $tokens->getNextMeaningfulToken($expectedEqual);
-                            if (
-                                $tokens[$expectedEqual]->getContent() === '='
-                                && $tokens[$expectedNull]->getContent() === 'null'
-                            ) {
-                                continue;
-                            }
-
-                            if ($variableToken->getContent() === $variable) {
-                                $variablePosition = $key;
-                                break;
-                            }
-                        }
-
-                        if ($variablePosition !== null) {
-                            $tokens->insertSlices([
-                                ++$variablePosition => [
-                                    new Token([T_WHITESPACE, ' ']),
-                                    new Token('='),
-                                    new Token([T_WHITESPACE, ' ']),
-                                    new Token([T_STRING, 'null']),
-                                ],
-                            ]);
-                        }
                     }
                     break;
                 }
             }
         }
+    }
+
+    private function isAnnotationWrongFormat(string $variable, string $content): bool
+    {
+        return preg_match(
+                '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
+                $content,
+            ) !== 1;
+    }
+
+    private function isAnnotationArray(string $variable, string $content): bool
+    {
+        return preg_match(
+                '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
+                $content,
+            ) === 1;
+    }
+
+    private function processIfNullFound(
+        Tokens $tokens,
+        int $parenthesesStartIndex,
+        int $currentParenthesesEndIndex,
+        string $variable
+    ) {
+        /** @var Token[] $variables */
+        $variables = (clone $tokens)->findGivenKind(
+            T_VARIABLE,
+            $parenthesesStartIndex,
+            $currentParenthesesEndIndex,
+        );
+        $variablePosition = null;
+        foreach ($variables as $key => $variableToken) {
+            $expectedEqual = $tokens->getNextMeaningfulToken($key);
+            $expectedNull = $tokens->getNextMeaningfulToken($expectedEqual);
+            if (
+                $tokens[$expectedEqual]->getContent() === '='
+                && $tokens[$expectedNull]->getContent() === 'null'
+            ) {
+                continue;
+            }
+
+            if ($variableToken->getContent() === $variable) {
+                $variablePosition = $key;
+                break;
+            }
+        }
+
+        if ($variablePosition !== null) {
+            $tokens->insertSlices([
+                ++$variablePosition => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token('='),
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_STRING, 'null']),
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * @param string[] $argumentTypes
+     * @return bool
+     */
+    private function isNullableFound(array $argumentTypes): bool
+    {
+        foreach ($argumentTypes as $argumentType) {
+            if (str_contains($argumentType, '?')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

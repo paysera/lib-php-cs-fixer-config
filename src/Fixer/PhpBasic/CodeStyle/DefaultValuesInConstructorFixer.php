@@ -211,19 +211,21 @@ PHP,
 
     private function isEndOfPropertiesDeclaration(int $key, Tokens $tokens, Token $token): bool
     {
-        if ($token->equals(';')) {
-            $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
+        if (!$token->equals(';')) {
+            return false;
+        }
 
-            if (!$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])) {
+        $nextMeaningfulToken = $tokens->getNextMeaningfulToken($key);
+
+        if (!$tokens[$nextMeaningfulToken]->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE])) {
+            return true;
+        }
+
+        for ($i = 0; $i < 2; $i++) {
+            $nextMeaningfulToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
+
+            if ($tokens[$nextMeaningfulToken]->isGivenKind(T_FUNCTION)) {
                 return true;
-            }
-
-            for ($i = 0; $i < 2; $i++) {
-                $nextMeaningfulToken = $tokens->getNextNonWhitespace($nextMeaningfulToken);
-
-                if ($tokens[$nextMeaningfulToken]->isGivenKind(T_FUNCTION)) {
-                    return true;
-                }
             }
         }
 
