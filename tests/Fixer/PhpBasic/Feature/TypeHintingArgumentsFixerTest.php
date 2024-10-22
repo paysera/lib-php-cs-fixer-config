@@ -37,7 +37,7 @@ final class TypeHintingArgumentsFixerTest extends AbstractPayseraFixerTestCase
                     /**
                      * @param int|null $constraint
                      */
-                    public function validate($constraint = null)
+                    public function validate(int $constraint = null)
                     {
                         if ($constraint === null) {
                             return $constraint;

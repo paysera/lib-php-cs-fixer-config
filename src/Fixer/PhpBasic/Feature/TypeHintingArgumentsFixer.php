@@ -31,18 +31,11 @@ final class TypeHintingArgumentsFixer extends AbstractFixer implements Whitespac
 
         $this->inheritanceHelper = new InheritanceHelper();
         $this->unavailableTypeHints = [
-            'array',
             'void',
             'self',
             '$this',
             'mixed',
             'callable',
-            'bool',
-            'boolean',
-            'float',
-            'int',
-            'integer',
-            'string',
             'resource',
         ];
     }
@@ -159,85 +152,145 @@ PHP,
         int $docBlockIndex,
         int $parenthesesStartIndex,
         int $parenthesesEndIndex
-    ) {
+    ): void {
         $currentParenthesesEndIndex = $parenthesesEndIndex;
         $docBlock = new DocBlock($tokens[$docBlockIndex]->getContent());
         for ($i = $parenthesesEndIndex; $i > $parenthesesStartIndex; $i--) {
             if (!$tokens[$i]->isGivenKind(T_VARIABLE)) {
                 continue;
             }
+
             $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
             if (!$tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
                 foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
                     $variable = $tokens[$i]->getContent();
                     if (
-                        !preg_match(
-                            '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
-                            $annotation->getContent(),
-                        )
-                        || preg_match(
-                            '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
-                            $annotation->getContent(),
-                        )
+                        $this->isAnnotationWrongFormat($variable, $annotation->getContent())
+                        || $this->isAnnotationArray($variable, $annotation->getContent())
                     ) {
                         continue;
                     }
 
                     $argumentTypes = $annotation->getTypes();
                     $argumentTypeCount = count($argumentTypes);
+
+                    $argumentTypesNotNullable = [];
+                    foreach ($argumentTypes as $argumentType) {
+                        $argumentTypesNotNullable[] = str_replace('?', '', $argumentType);
+                    }
+
+                    $nullableFound = false;
                     $nullFound = in_array('null', $argumentTypes, true);
+                    if (!$nullFound) {
+                        $nullableFound = $this->isNullableFound($argumentTypes);
+                    }
+
                     if (
-                        !array_intersect($argumentTypes, $this->unavailableTypeHints)
-                        && (($argumentTypeCount === 2 && $nullFound) || ($argumentTypeCount === 1) && !$nullFound)
+                        !array_intersect($argumentTypesNotNullable, $this->unavailableTypeHints)
+                        && (
+                            ($argumentTypeCount === 2 && $nullFound)
+                            || ($argumentTypeCount === 1 && !$nullFound)
+                        )
+                        || ($argumentTypeCount === 2 && $nullableFound)
                     ) {
                         $argumentType = trim(implode('', array_diff($argumentTypes, ['null'])));
-                        $tokens->insertSlices([
-                            $i => [
-                                new Token([T_STRING, $argumentType]),
-                                new Token([T_WHITESPACE, ' ']),
-                            ],
-                        ]);
-                        $currentParenthesesEndIndex += 2;
+                        if (
+                            $tokens[$i]->isGivenKind(T_VARIABLE)
+                            && !$tokens[$previousTokenIndex]->isGivenKind(10005)
+                        ) {
+                            $tokens->insertSlices([
+                                $i => [
+                                    new Token([T_STRING, $argumentType]),
+                                    new Token([T_WHITESPACE, ' ']),
+                                ],
+                            ]);
+                            $currentParenthesesEndIndex += 2;
+                        }
                     }
 
                     if ($nullFound) {
-                        /** @var Token[] $variables */
-                        $variables = (clone $tokens)->findGivenKind(
-                            T_VARIABLE,
+                        $this->processIfNullFound(
+                            $tokens,
                             $parenthesesStartIndex,
                             $currentParenthesesEndIndex,
+                            $variable
                         );
-                        $variablePosition = null;
-                        foreach ($variables as $key => $variableToken) {
-                            $expectedEqual = $tokens->getNextMeaningfulToken($key);
-                            $expectedNull = $tokens->getNextMeaningfulToken($expectedEqual);
-                            if (
-                                $tokens[$expectedEqual]->getContent() === '='
-                                && $tokens[$expectedNull]->getContent() === 'null'
-                            ) {
-                                continue;
-                            }
-
-                            if ($variableToken->getContent() === $variable) {
-                                $variablePosition = $key;
-                                break;
-                            }
-                        }
-
-                        if ($variablePosition !== null) {
-                            $tokens->insertSlices([
-                                ++$variablePosition => [
-                                    new Token([T_WHITESPACE, ' ']),
-                                    new Token('='),
-                                    new Token([T_WHITESPACE, ' ']),
-                                    new Token([T_STRING, 'null']),
-                                ],
-                            ]);
-                        }
                     }
                     break;
                 }
             }
         }
+    }
+
+    private function isAnnotationWrongFormat(string $variable, string $content): bool
+    {
+        return preg_match(
+                '#^[^$]+@param\s([^$].*?[^\s])\s\\' . $variable . '#m',
+                $content,
+            ) !== 1;
+    }
+
+    private function isAnnotationArray(string $variable, string $content): bool
+    {
+        return preg_match(
+                '#^[^$]+@param\s(.*?\[\])\s\\' . $variable . '#m',
+                $content,
+            ) === 1;
+    }
+
+    private function processIfNullFound(
+        Tokens $tokens,
+        int $parenthesesStartIndex,
+        int $currentParenthesesEndIndex,
+        string $variable
+    ) {
+        /** @var Token[] $variables */
+        $variables = (clone $tokens)->findGivenKind(
+            T_VARIABLE,
+            $parenthesesStartIndex,
+            $currentParenthesesEndIndex,
+        );
+        $variablePosition = null;
+        foreach ($variables as $key => $variableToken) {
+            $expectedEqual = $tokens->getNextMeaningfulToken($key);
+            $expectedNull = $tokens->getNextMeaningfulToken($expectedEqual);
+            if (
+                $tokens[$expectedEqual]->getContent() === '='
+                && $tokens[$expectedNull]->getContent() === 'null'
+            ) {
+                continue;
+            }
+
+            if ($variableToken->getContent() === $variable) {
+                $variablePosition = $key;
+                break;
+            }
+        }
+
+        if ($variablePosition !== null) {
+            $tokens->insertSlices([
+                ++$variablePosition => [
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token('='),
+                    new Token([T_WHITESPACE, ' ']),
+                    new Token([T_STRING, 'null']),
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * @param string[] $argumentTypes
+     * @return bool
+     */
+    private function isNullableFound(array $argumentTypes): bool
+    {
+        foreach ($argumentTypes as $argumentType) {
+            if (str_contains($argumentType, '?')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

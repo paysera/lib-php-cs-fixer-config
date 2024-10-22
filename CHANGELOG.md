@@ -11,6 +11,16 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.0.2
+
+### Changed
+- ChainedMethodCallsFixer refactored for the proper whitespaces, new lines etc.
+- DefaultValuesInConstructorFixer refactored
+- ConditionResultsFixer fixed a bug when trying to get not existed token index+1
+- TypeHintingArgumentsFixer to work correctly with nullable (?type) and other arguments.
+- ChainedMethodCallsFixerTest - testcases added
+- DefaultValuesInConstructorFixerTest - testcases added
+
 ## 3.0.1
 
 ### Changed

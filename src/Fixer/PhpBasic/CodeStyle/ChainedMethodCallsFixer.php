@@ -50,6 +50,11 @@ PHP,
         return $tokens->isTokenKindFound(T_OBJECT_OPERATOR);
     }
 
+    public function getPriority(): int
+    {
+        return 10;
+    }
+
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         for ($key = 0; $key < $tokens->count(); $key++) {
@@ -57,15 +62,15 @@ PHP,
                 continue;
             }
 
-            $semicolonIndex = $tokens->getNextTokenOfKind($key, [';']);
+            $endIndex = $tokens->getNextTokenOfKind($key, [';', '{']);
             $indent = $this->checkForMethodSplits(
                 $tokens,
                 $key,
-                $semicolonIndex,
+                $endIndex,
             );
 
             if ($indent !== null) {
-                $key = $this->validateMethodSplits($tokens, $key, $semicolonIndex, $indent);
+                $key = $this->validateMethodSplits($tokens, $key, $endIndex, $indent);
             }
         }
     }
@@ -85,7 +90,15 @@ PHP,
             }
         }
 
-        if (!$tokens[$i - 1]->isWhitespace() && strpos($tokens[$i - 2]->getContent(), "\n") === false) {
+        if ($tokens[$i]->isWhitespace() && !str_contains($tokens[$i - 2]->getContent(), "\n")) {
+            $tokens->clearAt($i);
+        }
+
+        if (
+            !$tokens[$i - 1]->isWhitespace()
+            && !str_contains($tokens[$i - 2]->getContent(), "\n")
+            && !str_contains($tokens[$i]->getContent(), "\n")
+        ) {
             $tokens->insertSlices([
                 $i => [
                     new Token([
@@ -110,6 +123,7 @@ PHP,
             if ($tokens[$i]->equals('(')) {
                 $blockEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $i);
                 $i = $blockEndIndex;
+                continue;
             }
 
             if (
