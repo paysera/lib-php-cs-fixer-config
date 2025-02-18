@@ -12,107 +12,279 @@ final class StaticMethodsFixerTest extends AbstractPayseraFixerTestCase
 {
     /**
      * @dataProvider provideCases
+     * @dataProvider provideAttributeCases
      */
-    public function testFix(string $expected, string $input = null)
+    public function testFix(string $expected, ?string $input)
     {
         $this->doTest($expected, $input);
     }
 
-    public function provideCases(): array
+    public static function provideCases(): iterable
     {
-        return [
-            [
-                '<?php class Sample
+        yield 'Non static data provider' => [
+            'expected' =>
+                '<?php class MyTest
                 {
-                    public static function getStatusList()
+                    /**
+                     * @dataProvider testDataProvider
+                     */
+                    public function runTest(string $text): void 
                     {
-                        return [
-                            static::STATUS_NEW => static::STATUS_NEW,
-                            self::STATUS_FAILED_TO_INITIATE => self::STATUS_FAILED_TO_INITIATE,
-                            static::STATUS_ACTIVE => static::STATUS_ACTIVE,
-                            self::STATUS_DONE => self::STATUS_DONE,
-                        ];
+                        $this->assertSame(\'data\', $text);
                     }
-                }',
-            ],
-            [
-                '<?php class Sample
-                {
-                    public static function getStatusList()
+                
+                    public function testDataProvider(): array // TODO: "testDataProvider" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
                     {
-                        return self::TYPE_A;
-                    }
-                }',
-            ],
-            [
-                '<?php class Sample
-                {
-                    public static function getStatusList()
-                    {
-                        return self::$statusList;
-                    }
-                }',
-            ],
-            [
-                '<?php class Sample
-                {
-                    public static function someFunction() // TODO: "someFunction" - PhpBasic convention 3.11: Static function must return only "self" or "static" constants
-                    {
-                        return SomeClass::get("something");
-                    }
-                }',
-                '<?php class Sample
-                {
-                    public static function someFunction()
-                    {
-                        return SomeClass::get("something");
+                        return [[\'data\']];
                     }
                 }'
-            ],
-            [
-                '<?php class Sample
+            ,
+            'input' =>
+                '<?php class MyTest
                 {
-                    public static function create() // TODO: "create" - PhpBasic convention 3.11: Static function must return only "self" or "static" constants
+                    /**
+                     * @dataProvider testDataProvider
+                     */
+                    public function runTest(string $text): void 
                     {
-                        return new static();
+                        $this->assertSame(\'data\', $text);
                     }
-                }',
-                '<?php class Sample
-                {
-                    public static function create()
+                
+                    public function testDataProvider(): array
                     {
-                        return new static();
-                    }
-                }'
-            ],
-            [
-                '<?php class Sample
-                {
-                    private static function getMath() // TODO: "getMath" - PhpBasic convention 3.11: Static function must return only "self" or "static" constants
-                    {
-                        static $instance;
-                
-                        if ($instance === null) {
-                            $instance = new BcMath(self::DEFAULT_SCALE);
-                        }
-                
-                        return $instance;
-                    }
-                }',
-                '<?php class Sample
-                {
-                    private static function getMath()
-                    {
-                        static $instance;
-                
-                        if ($instance === null) {
-                            $instance = new BcMath(self::DEFAULT_SCALE);
-                        }
-                
-                        return $instance;
+                        return [[\'data\']];
                     }
                 }'
-            ],
+            ,
+        ];
+        yield 'Non static data provider with out provider naming' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    /**
+                     * @dataProvider getCases
+                     */
+                    public function runTest(string $text): void 
+                    {
+                        $this->assertSame(\'data\', $text);
+                    }
+                
+                    public function getCases(): array // TODO: "getCases" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' =>
+                '<?php class MyTest
+                {
+                    /**
+                     * @dataProvider getCases
+                     */
+                    public function runTest(string $text): void 
+                    {
+                        $this->assertSame(\'data\', $text);
+                    }
+                
+                    public function getCases(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+        ];
+
+        yield 'Static data provider' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    /**
+                     * @dataProvider testDataProvider
+                     */
+                    public function runTest(string $text): void 
+                    {
+                        $this->assertSame(\'data\', $text);
+                    }
+                
+                    public static function testDataProvider(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' => null,
+        ];
+
+        yield 'Not a data provider' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    public function runTest(string $text): void 
+                    {
+                        $this->assertSame(\'data\', $text);
+                    }
+                
+                    public static function testDataProvider(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' => null,
+        ];
+
+    }
+
+    public static function provideAttributeCases(): iterable
+    {
+        if (PHP_VERSION_ID < 80000) {
+            return;
+        }
+
+        yield 'Non static attribute data provider' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    #[DataProvider(\'getCases\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function getCases(): array // TODO: "getCases" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' =>
+                '<?php class MyTest
+                {
+                    #[DataProvider(\'getCases\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function getCases(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+        ];
+
+        yield 'Static attribute data provider' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    #[DataProvider(\'getCases\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public static function getCases(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' => null,
+        ];
+
+        yield 'Multiple attribute data providers' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    #[DataProvider(\'provider1\')]
+                    #[DataProvider(\'provider2\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function provider1(): array // TODO: "provider1" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                
+                    public function provider2(): array // TODO: "provider2" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' =>
+                '<?php class MyTest
+                {
+                    #[DataProvider(\'provider1\')]
+                    #[DataProvider(\'provider2\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function provider1(): array
+                    {
+                        return [[\'data\']];
+                    }
+                
+                    public function provider2(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+        ];
+
+        yield 'Mixed docblock and attribute data providers' => [
+            'expected' =>
+                '<?php class MyTest
+                {
+                    /**
+                     * @dataProvider docBlockProvider
+                     */
+                    #[DataProvider(\'attributeProvider\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function docBlockProvider(): array // TODO: "docBlockProvider" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                
+                    public function attributeProvider(): array // TODO: "attributeProvider" - PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
+            'input' =>
+                '<?php class MyTest
+                {
+                    /**
+                     * @dataProvider docBlockProvider
+                     */
+                    #[DataProvider(\'attributeProvider\')]
+                    public function test(): void 
+                    {
+                        $this->assertTrue(true);
+                    }
+                
+                    public function docBlockProvider(): array
+                    {
+                        return [[\'data\']];
+                    }
+                
+                    public function attributeProvider(): array
+                    {
+                        return [[\'data\']];
+                    }
+                }'
+            ,
         ];
     }
 

@@ -11,6 +11,11 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.0.3
+
+### Fixed
+- StaticMethodsFixer to align with PhpBasic convention "Static methods".
+
 ## 3.0.2
 
 ### Changed
