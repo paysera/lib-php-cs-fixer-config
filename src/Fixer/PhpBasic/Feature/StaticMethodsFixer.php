@@ -14,43 +14,28 @@ use SplFileInfo;
 
 final class StaticMethodsFixer extends AbstractFixer
 {
-    public const CONVENTION = 'PhpBasic convention 3.11: Static function must return only "self" or "static" constants';
-
-    private array $validTokens;
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->validTokens = [
-            T_COMMENT,
-            T_STATIC,
-            T_STRING,
-            T_DOUBLE_COLON,
-            T_RETURN,
-            T_DOUBLE_ARROW,
-            T_WHITESPACE,
-            T_VARIABLE,
-        ];
-    }
+    public const CONVENTION = 'PhpBasic convention: Static methods, https://github.com/paysera/php-style-guide?tab=readme-ov-file#static-methods';
 
     public function getDefinition(): FixerDefinitionInterface
     {
         return new FixerDefinition(
-            <<<'TEXT'
-We do use static methods only in these cases:
-* to create an entity for fluent interface, if PHP version in the project is lower than 5.4.
-    We use (new Entity())->set(\'a\') in 5.4 or above
-* to give available values for some field of an entity, used in validation.
-TEXT,
+            self::CONVENTION . ' .',
             [
                 new CodeSample(
                     <<<'PHP'
 <?php
-class Sample {
-    public static function someFunction()
+class MyTest {
+    /**
+     * @dataProvider getCases
+     */
+    public function test(): void
     {
-        return SomeClass::get("something");
+        $this->assertTrue(true);
+    }
+
+    public function getCases(): array
+    {
+        return [['data']];
     }
 }
 
@@ -87,55 +72,71 @@ PHP,
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         foreach ($tokens as $key => $token) {
-            $functionIndex = $tokens->getNextMeaningfulToken($key);
-            $functionNameIndex = $functionIndex ? $tokens->getNextMeaningfulToken($functionIndex) : null;
-
-            if (
-                $token->isGivenKind(T_STATIC)
-                && $tokens[$functionIndex]->isGivenKind(T_FUNCTION)
-                && $tokens[$functionNameIndex]->isGivenKind(T_STRING)
-            ) {
-                $curlyBraceStartIndex = $tokens->getNextTokenOfKind($key, ['{']);
-                $curlyBraceEndIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $curlyBraceStartIndex);
-                if (
-                    !$this->isStaticMethodValid($tokens, $curlyBraceStartIndex, $curlyBraceEndIndex)
-                    && !$tokens[$curlyBraceStartIndex - 2]->isGivenKind(T_COMMENT)
-                ) {
-                    $tokens->insertSlices([
-                        ($curlyBraceStartIndex - 1) => [
-                            new Token([T_WHITESPACE, ' ']),
-                            new Token([
-                                T_COMMENT,
-                                '// TODO: "' . $tokens[$functionNameIndex]->getContent() . '" - ' . self::CONVENTION,
-                            ]),
-                        ],
-                    ]);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int $startIndex
-     * @param int $endIndex
-     * @return bool
-     */
-    private function isStaticMethodValid(Tokens $tokens, $startIndex, $endIndex): bool
-    {
-        for ($i = $startIndex + 1; $i < $endIndex; $i++) {
-            if (
-                $tokens[$i]->isGivenKind($this->validTokens)
-                || $tokens[$i]->equalsAny([',', ';'])
-                || $tokens[$i]->getContent() === '['
-                || $tokens[$i]->getContent() === ']'
-            ) {
+            if (!$token->isGivenKind(T_FUNCTION)) {
                 continue;
             }
 
-            return false;
-        }
+            $functionNameIndex = $tokens->getNextMeaningfulToken($key);
+            if (!$functionNameIndex || !$tokens[$functionNameIndex]->isGivenKind(T_STRING)) {
+                continue;
+            }
 
-        return true;
+            $functionName = $tokens[$functionNameIndex]->getContent();
+
+            // Check if this method is referenced as a data provider
+            $isDataProvider = false;
+            for ($i = 0; $i < count($tokens); $i++) {
+                if ($tokens[$i]->isGivenKind(T_DOC_COMMENT)) {
+                    $docComment = $tokens[$i]->getContent();
+                    if (strpos($docComment, '@dataProvider ' . $functionName) !== false) {
+                        $isDataProvider = true;
+                        break;
+                    }
+                }
+
+                // Check for PHP 8 attributes if available
+                if (PHP_VERSION_ID >= 80000 && defined('T_ATTRIBUTE')) {
+                    if ($tokens[$i]->isGivenKind(T_ATTRIBUTE)) {
+                        $attributeEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_ATTRIBUTE, $i);
+                        $attributeContent = $tokens->generatePartialCode($i, $attributeEnd);
+
+                        // Match DataProvider('methodName') or DataProvider("methodName")
+                        if (preg_match('/DataProvider\([\'"]' . preg_quote($functionName, '/') . '[\'"]\)/', $attributeContent)) {
+                            $isDataProvider = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!$isDataProvider) {
+                continue;
+            }
+
+            // Check if method is static
+            $prevIndex = $tokens->getPrevMeaningfulToken($key);
+            if ($prevIndex && $tokens[$prevIndex]->isGivenKind(T_STATIC)) {
+                continue;
+            }
+
+            $nextTokenIndex = $tokens->getNextTokenOfKind($key, ['{']);
+            if ($nextTokenIndex === null) {
+                continue;
+            }
+
+            // Add comment if not already present
+            if (!$tokens[$nextTokenIndex - 2]->isGivenKind(T_COMMENT)) {
+                $tokens->insertSlices([
+                    ($nextTokenIndex - 1) => [
+                        new Token([T_WHITESPACE, ' ']),
+                        new Token([
+                            T_COMMENT,
+                            '// TODO: "' . $functionName . '" - ' . self::CONVENTION,
+                        ]),
+                    ],
+                ]);
+            }
+        }
     }
+
 }
