@@ -11,6 +11,19 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.1.0
+
+### Changed
+- `paysera-php-cs-fixer` is now php-cs-fixer `3.95.28` instead of `3.64.0`, which stops on PHP 8.4.
+  It runs on PHP 7.4 and on PHP 8.4.
+- `friendsofphp/php-cs-fixer` in `require-dev` is pinned to the same `3.95.28`, so the fixers are tested on the
+  version that `paysera-php-cs-fixer` runs.
+- Replaced the deprecated `visibility_required` rule with `modifier_keywords`, which php-cs-fixer has since 3.88.
+  In migration mode, rename the key in `enableMigrationMode()`. A project that runs its own older php-cs-fixer with
+  this config must update it or switch to `paysera-php-cs-fixer`.
+- Pass `--config` to `paysera-php-cs-fixer` every time: without a config, php-cs-fixer 3.95 writes a default
+  `.php-cs-fixer.dist.php` into the project and exits successfully instead of checking the code.
+
 ## 3.0.4
 
 ### Changed

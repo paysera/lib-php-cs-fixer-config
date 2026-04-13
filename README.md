@@ -14,6 +14,9 @@ Library helps to fix PHP code to conform [Paysera PHP style guide](https://githu
 
 No need to install php-cs-fixer itself as this library comes with binary version of the fixer.
 This avoids requiring its dependencies inside your project, which could clash with existing ones.
+Do not require `friendsofphp/php-cs-fixer` next to this library: `php-cs-fixer.php` includes `vendor/autoload.php`,
+so `paysera-php-cs-fixer` would mix that copy's classes with its own, which can crash when the versions differ
+(3.64.0 bundled next to 3.95 in `vendor` does).
 
 To avoid duplication with php-cs-fixer library, it's named `paysera-php-cs-fixer`.
 
@@ -28,7 +31,7 @@ For new projects you can just use all the rules as usual.
 
 For existing projects we recommend turning on the migration mode:
 1. Add call to `enableMigrationMode([])` to `PayseraConventionsConfig` instance in your `php-cs-fixer.php` file.
-2. Run `{your-bin-dir}/php-cs-fixer` - it will give error with initial rule configuration to pass into that method.
+2. Run `{your-bin-dir}/paysera-php-cs-fixer fix --config=php-cs-fixer.php --dry-run` - it will give error with initial rule configuration to pass into that method.
 Just copy-and-paste it to your `php-cs-fixer.php` file.
 3. Enable one of the rules, apply fixes in the project, review and test them.
 4. Repeat with each new rule.
@@ -50,9 +53,11 @@ You can look at `.travis.yml` file in this repository for integration with travi
 
 ## Usage
 
-Run in project directory by command: `{your-bin-dir}/php-cs-fixer fix /path/to/code --verbose --dry-run --diff`
+Run in project directory by command: `{your-bin-dir}/paysera-php-cs-fixer fix --config=php-cs-fixer.php /path/to/code --verbose --dry-run --diff`
 
-Use `--config=php-cs-fixer.php` flag for custom configuration.
+Always pass `--config` with one of the `php-cs-fixer*.php` files: php-cs-fixer finds only `.php-cs-fixer.php` and
+`.php-cs-fixer.dist.php` by itself, and without a config it writes a default `.php-cs-fixer.dist.php` into the project
+and exits successfully instead of checking the code.
 
 If `/path/to/code` is not defined `php-cs-fixer` will run files from default `src` directory excluding `Test` folders.
 
