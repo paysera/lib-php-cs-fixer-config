@@ -11,6 +11,13 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.1.0
+
+### Changed
+- Updated `friendsofphp/php-cs-fixer` from `3.64.0` to `^3.65` (resolved to `3.94.2`)
+- Updated `paysera-php-cs-fixer` PHAR binary to `3.94.2` with PHP 8.4 support
+- Replaced deprecated `visibility_required` rule with `modifier_keywords`
+
 ## 3.0.3
 
 ### Fixed
