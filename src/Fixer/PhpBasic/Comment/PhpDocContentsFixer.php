@@ -147,6 +147,10 @@ PHP,
             if ($tokens[$i]->isGivenKind(T_VARIABLE)) {
                 $parameter = [];
                 $previousTokenIndex = $tokens->getPrevMeaningfulToken($i);
+                // skip by-reference and variadic markers to reach the type declaration
+                while (in_array($tokens[$previousTokenIndex]->getContent(), ['&', '...'], true)) {
+                    $previousTokenIndex = $tokens->getPrevMeaningfulToken($previousTokenIndex);
+                }
                 if ($tokens[$previousTokenIndex]->isGivenKind(T_STRING)) {
                     $index = $previousTokenIndex;
                     while (
