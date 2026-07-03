@@ -47,6 +47,9 @@ final class PhpDocContentsFixer extends AbstractFixer implements WhitespacesAwar
 If we use phpdoc comment, it must contain all information about parameters,
 return type and exceptions that the method throws.
 
+Parameters with native type declarations do not need @param annotations,
+so they are not added.
+
 If method does not return anything, we skip @return comment.
 TEXT,
             [
@@ -235,15 +238,8 @@ PHP,
                 // Add missing parameter variable warning
                 $this->insertParamAnnotationWarning($tokens, $docBlockIndex, $matches[0], self::MISSING_VARIABLE);
             } elseif (!preg_match('#\\' . $parameter['Variable'] . '#', $tokens[$docBlockIndex]->getContent())) {
-                // Add missing parameter
-                if (isset($parameter['Typecast'])) {
-                    $this->insertParamAnnotation(
-                        $tokens,
-                        $docBlockIndex,
-                        $parameter['Typecast'],
-                        $parameter['Variable'],
-                    );
-                } else {
+                // Parameter with native type hint needs no phpdoc; otherwise mark it as missing typecast
+                if (!isset($parameter['Typecast'])) {
                     $this->insertParamAnnotation(
                         $tokens,
                         $docBlockIndex,

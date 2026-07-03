@@ -11,6 +11,13 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.0.4
+
+### Changed
+- PhpDocContentsFixer no longer adds `@param` annotations for parameters that already have a native type declaration,
+  following the [No PhpDoc on fully strictly typed methods](https://github.com/paysera/php-style-guide#no-phpdoc-on-fully-strictly-typed-methods)
+  convention.
+
 ## 3.0.3
 
 ### Fixed

@@ -26,10 +26,48 @@ final class PhpDocContentsFixerTest extends AbstractPayseraFixerTestCase
                 class Sample
                 {
                     /**
+                     * Persists given item.
+                     */
+                    public function save(string $name, ValueClass $value, int $priority = 0)
+                    {
+                        $this->manager->persist($name, $value, $priority);
+                    }
+                }',
+                null,
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
+                     * Processes given item.
+                     * @param $options @TODO: missing parameter typecast
+                     */
+                    public function process(string $name, $options)
+                    {
+                        $this->manager->handle($name, $options);
+                    }
+                }',
+                '<?php
+                class Sample
+                {
+                    /**
+                     * Processes given item.
+                     */
+                    public function process(string $name, $options)
+                    {
+                        $this->manager->handle($name, $options);
+                    }
+                }',
+            ],
+            [
+                '<?php
+                class Sample
+                {
+                    /**
                      * @param $arg1 @TODO: missing parameter typecast
                      * @param $arg2 @TODO: missing parameter typecast
                      * @param $arg3 @TODO: missing parameter typecast
-                     * @param array $arg4
                      * @throws \Exception
                      * @TODO: missing return statement
                      */
