@@ -317,7 +317,7 @@ class PayseraConventionsConfig extends Config
             'single_line_after_imports' => true,
             'switch_case_semicolon_to_colon' => true,
             'switch_case_space' => true,
-            'visibility_required' => true,
+            'modifier_keywords' => true,
 
             'binary_operator_spaces' => true,
             'class_attributes_separation' => [
