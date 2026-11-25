@@ -144,7 +144,7 @@ class Parser
     {
         $separators = explode(
             ' ',
-            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ?? ? : || && | ^ & == != === !== <> <=> < <= > >= << >> + - . * / % instanceof ** ->',
+            ', or xor and = += -= *= **= /= .= %= &= |= ^= <<= >>= ? : ?? || && | ^ & == != === !== <> <=> < <= > >= << >> + - . * / % instanceof ** ->',
         );
         foreach ($separators as $separator) {
             $replacedItem = $this->groupSeparatorHelper->regroupListBySeparator($itemList->getItemList(), $separator);

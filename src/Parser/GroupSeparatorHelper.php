@@ -33,13 +33,15 @@ class GroupSeparatorHelper
         $lastWhiteSpace = [];   // might also include comments
         $separatorGroup = [];
         $currentGroup = [];
+        $isInArrowFunctionBody = false;
         foreach ($itemList as $item) {
             if ($item instanceof ContextualToken && ($item->isWhitespace() || $item->isComment())) {
                 $lastWhiteSpace[] = $item;
                 continue;
             }
 
-            if ($item instanceof ContextualToken && $item->getContent() === $separator) {
+            $isInArrowFunctionBody = $this->continuesArrowFunctionBody($item, $isInArrowFunctionBody);
+            if (!$isInArrowFunctionBody && $item instanceof ContextualToken && $item->getContent() === $separator) {
                 if (count($lastWhiteSpace) > 0) {
                     $separatorGroup = array_merge($separatorGroup, $lastWhiteSpace);
                     $lastWhiteSpace = [];
@@ -98,5 +100,14 @@ class GroupSeparatorHelper
         }
 
         return $list;
+    }
+
+    private function continuesArrowFunctionBody(ItemInterface $item, bool $isInArrowFunctionBody): bool
+    {
+        if (!$item instanceof ContextualToken) {
+            return $isInArrowFunctionBody;
+        }
+
+        return $item->isGivenKind(T_FN) || ($isInArrowFunctionBody && $item->getContent() !== ',');
     }
 }

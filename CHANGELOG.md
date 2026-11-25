@@ -11,6 +11,16 @@ Semantic Versioning is maintained only for the following:
 The fixers themselves can change their behavior on any update.
 New fixers could be added with minor releases, this would require changes in configuration if migration mode is used.
 
+## 3.2.0
+
+### Fixed
+- `Paysera/php_basic_code_style_chained_method_calls` no longer moves a call that follows a multi-line closure argument
+  one indent level to the left. Such chains also no longer stop the fixer with "Cannot set empty content for id-based Token".
+- `Paysera/php_basic_code_style_splitting_in_several_lines` indents a chain inside an argument or an array value
+  from the line where the chain starts, not from the line of the opening bracket.
+- `Paysera/php_basic_code_style_splitting_in_several_lines` no longer splits `??` inside a ternary branch or inside
+  an arrow function, and no longer splits an arrow function before its return type.
+
 ## 3.1.0
 
 ### Changed

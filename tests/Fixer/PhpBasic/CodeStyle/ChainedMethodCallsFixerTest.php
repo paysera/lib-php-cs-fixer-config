@@ -220,7 +220,72 @@ final class ChainedMethodCallsFixerTest extends AbstractPayseraFixerTestCase
                     {
                     }
                 }',
-            ]
+            ],
+            'call after a multi-line closure argument keeps its indent' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $paymentManager
+            ->method(\'completePayment\')
+            ->with(self::callback(static function (Payment $payment) use (&$completedPaymentIds): bool {
+                $completedPaymentIds[] = $payment->getId();
+
+                return true;
+            }))
+            ->will(self::onConsecutiveCalls(...$completionResults))
+        ;
+    }
+}',
+                null,
+            ],
+            'closure as the last argument keeps the semicolon line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $poster
+            ->expects($this->once())
+            ->method(\'post\')
+            ->willReturnCallback(function (Transfer $transfer) {
+                return $transfer;
+            })
+        ;
+    }
+}',
+                null,
+            ],
+            'semicolon after a call that follows a closure argument moves to its own line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $paymentManager
+            ->method(\'completePayment\')
+            ->with(self::callback(static function (Payment $payment): bool {
+                return true;
+            }))
+            ->will(self::onConsecutiveCalls(...$completionResults))
+        ;
+    }
+}',
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $paymentManager
+            ->method(\'completePayment\')
+            ->with(self::callback(static function (Payment $payment): bool {
+                return true;
+            }))
+            ->will(self::onConsecutiveCalls(...$completionResults));
+    }
+}',
+            ],
         ];
     }
 

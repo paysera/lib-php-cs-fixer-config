@@ -62,7 +62,7 @@ PHP,
                 continue;
             }
 
-            $endIndex = $tokens->getNextTokenOfKind($key, [';', '{']);
+            $endIndex = $this->findStatementEnd($tokens, $key);
             $indent = $this->checkForMethodSplits(
                 $tokens,
                 $key,
@@ -115,6 +115,22 @@ PHP,
         }
 
         return $i;
+    }
+
+    private function findStatementEnd(Tokens $tokens, int $index): ?int
+    {
+        for ($i = $index; $i < $tokens->count(); $i++) {
+            if ($tokens[$i]->equalsAny([';', '{'])) {
+                return $i;
+            }
+
+            $blockType = Tokens::detectBlockType($tokens[$i]);
+            if ($blockType !== null && $blockType['isStart']) {
+                $i = $tokens->findBlockEnd($blockType['type'], $i);
+            }
+        }
+
+        return null;
     }
 
     private function checkForMethodSplits(Tokens $tokens, int $startIndex, int $endIndex): ?string
