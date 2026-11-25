@@ -148,10 +148,11 @@ PHP,
                 : $itemList->firstToken()->previousNonWhitespaceToken();
             $firstLineIndent = $tokenForIndent->getLineIndent();
 
-            $indent = "\n" . $firstLineIndent . $standardIndent;
-            $lastIndent = "\n" . $firstLineIndent;
-
             $skipPrefixHandling = $itemList instanceof SeparatedItemList && $itemList->getSeparator() === '->';
+
+            $contentIndent = $skipPrefixHandling ? $this->getFirstContentLineIndent($itemList) : $firstLineIndent;
+            $indent = "\n" . $contentIndent . $standardIndent;
+            $lastIndent = "\n" . $firstLineIndent;
 
             if (!$skipPrefixHandling) {
                 $this->ensureContentForPrefixWhitespace($itemList, $indent);
@@ -162,6 +163,11 @@ PHP,
                 $this->fixSeparators($itemList, $indent);
             }
         }
+    }
+
+    private function getFirstContentLineIndent(ComplexItemList $itemList): string
+    {
+        return $itemList->getContentItems()->current()->firstToken()->getLineIndent();
     }
 
     private function ensureContentForPrefixWhitespace(ComplexItemList $itemList, string $content): void

@@ -21,6 +21,7 @@ use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\MethodNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\PropertyNamingFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\CallingParentConstructorFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\ChainedMethodCallsFixer;
+use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\CodeStyle\OneLineChainedMethodCallsFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ComparingToBooleanFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\ComparingToNullFixer;
 use Paysera\PhpCsFixerConfig\Fixer\PhpBasic\Feature\DateTimeFixer;
@@ -74,6 +75,7 @@ class PayseraConventionsConfig extends Config
             new GlobalsFixer(),
             new SingleClassPerFileFixer(),
             new ChainedMethodCallsFixer(),
+            new OneLineChainedMethodCallsFixer(),
             new ClassNamingFixer(),
             new DirectoryAndNamespaceFixer(),
             new FullNamesFixer(),

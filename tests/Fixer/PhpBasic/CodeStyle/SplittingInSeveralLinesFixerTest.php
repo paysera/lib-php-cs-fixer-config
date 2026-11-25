@@ -804,6 +804,199 @@ final class SplittingInSeveralLinesFixerTest extends AbstractPayseraFixerTestCas
                 ];',
                 null,
             ],
+            'chain in an array value inside arguments keeps its indent' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $transactionManager->confirmTransaction(
+            $transaction,
+            [
+                $payment->getId() => TransactionPrice::create()
+                    ->setPaymentId($payment->getId())
+                    ->setPrice(new Money(\'10\', \'EUR\')),
+            ]
+        );
+    }
+}',
+                null,
+            ],
+            'chain as the only argument keeps its indent' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $this->entityManager->persist(
+            (new InactiveProfileClosure())
+                ->setStatus(InactiveProfileClosure::STATUS_CLOSING)
+                ->setUpdatedAt($now)
+        );
+    }
+}',
+                null,
+            ],
+            'chain in an array value keeps its indent' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $settlements = [
+            \'EUR\' => (new Settlement())
+                ->setDue(new Money(\'100.00\', \'EUR\'))
+                ->setPayout(new Money(\'59.80\', \'EUR\')),
+        ];
+    }
+}',
+                null,
+            ],
+            'chain in an argument is indented from the line it starts on' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $this->entityManager->persist(
+            (new InactiveProfileClosure())
+                ->setStatus(InactiveProfileClosure::STATUS_CLOSING)
+                ->setUpdatedAt($now)
+        );
+    }
+}',
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $this->entityManager->persist(
+            (new InactiveProfileClosure())
+            ->setStatus(InactiveProfileClosure::STATUS_CLOSING)
+            ->setUpdatedAt($now)
+        );
+    }
+}',
+            ],
+            'null coalescing inside a ternary branch stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $currencyAccount = $account === null
+            ? null
+            : $this->readUnderLock($account)[SettlementSplitter::SET_OFF_CURRENCY] ?? null
+        ;
+    }
+}',
+                null,
+            ],
+            'null coalescing inside an arrow function stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $entityManager->method(\'find\')->willReturnCallback(
+            static fn(string $className, int $paymentId): ?Payment => $storedPayments[$paymentId] ?? null
+        );
+    }
+}',
+                null,
+            ],
+            'arrow function return type stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $repository->method(\'postponeCompletion\')->with(
+            1,
+            self::callback(
+                static fn(DateTime $retryAt): bool => $retryAt > new DateTime(\'+9 minutes\')
+                    && $retryAt <= new DateTime(\'+10 minutes\')
+            )
+        );
+    }
+}',
+                null,
+            ],
+            'null coalescing inside an arrow function without a return type stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $entityManager->method(\'find\')->willReturnCallback(
+            static fn(string $className, int $paymentId) => $storedPayments[$paymentId] ?? null
+        );
+    }
+}',
+                null,
+            ],
+            'array items after an arrow function are still split' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $handlers = [
+            \'a\' => fn() => $a ?? null,
+            \'b\' => 2,
+            \'c\' => 3,
+        ];
+    }
+}',
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $handlers = [
+            \'a\' => fn() => $a ?? null,
+            \'b\' => 2, \'c\' => 3,
+        ];
+    }
+}',
+            ],
+            'method chain inside an arrow function body stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $manager->method(\'find\')->with(
+            self::callback(
+                static fn (ClientPartnerFilter $filter): bool => $filter->getCovenanteeId() === 7
+            )
+        );
+    }
+}',
+                null,
+            ],
+            'operators split over lines are still put at line starts' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        return
+            $transfer instanceof TransferInternal
+            && $transfer->isDone()
+        ;
+    }
+}',
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        return $transfer instanceof TransferInternal
+            && $transfer->isDone();
+    }
+}',
+            ],
         ];
     }
 
