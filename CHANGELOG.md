@@ -13,6 +13,14 @@ New fixers could be added with minor releases, this would require changes in con
 
 ## 3.2.0
 
+### Added
+- `Paysera/php_basic_code_style_one_line_chained_method_calls` splits a chain of two or more method calls written on one line,
+  following the [Chained method calls](https://github.com/paysera/php-style-guide#chained-method-calls) convention:
+  every call after a `)` goes on its own indented line, and the semicolon on a separate line.
+  It only changes a statement that is on one line of its own, and never code inside strings.
+  No rule set enables it. To use it, pass it to the rule set:
+  `setRecommendedRules(['Paysera/php_basic_code_style_one_line_chained_method_calls' => true])`.
+
 ### Fixed
 - `Paysera/php_basic_code_style_chained_method_calls` no longer moves a call that follows a multi-line closure argument
   one indent level to the left. Such chains also no longer stop the fixer with "Cannot set empty content for id-based Token".
