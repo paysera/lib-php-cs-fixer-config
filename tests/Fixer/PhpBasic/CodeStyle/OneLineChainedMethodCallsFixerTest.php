@@ -164,6 +164,27 @@ class Sample
     }
 }',
             ],
+            'namespaced class name before the chain' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        \\Paysera\\Factory::create()
+            ->setA(1)
+            ->setB(2)
+        ;
+    }
+}',
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        \\Paysera\\Factory::create()->setA(1)->setB(2);
+    }
+}',
+            ],
             'single call stays' => [
                 '<?php
 class Sample

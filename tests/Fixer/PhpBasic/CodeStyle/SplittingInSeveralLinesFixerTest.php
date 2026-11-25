@@ -960,6 +960,21 @@ class Sample
     }
 }',
             ],
+            'method chain inside an arrow function body stays on its line' => [
+                '<?php
+class Sample
+{
+    public function run()
+    {
+        $manager->method(\'find\')->with(
+            self::callback(
+                static fn (ClientPartnerFilter $filter): bool => $filter->getCovenanteeId() === 7
+            )
+        );
+    }
+}',
+                null,
+            ],
             'operators split over lines are still put at line starts' => [
                 '<?php
 class Sample
